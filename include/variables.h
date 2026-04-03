@@ -96,6 +96,7 @@ extern DisplayContext* gDisplayContext;
 extern Gfx* gMainGfxPos;
 extern u16 gMatrixListPos;
 extern s32 gCurrentDisplayContextIndex;
+extern DisplayContext D_80164000[2]; // port: double-buffered display contexts
 
 extern s16 gCurrentCamID;
 

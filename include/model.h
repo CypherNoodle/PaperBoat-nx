@@ -9,25 +9,34 @@ typedef union ModelNodePropertyData {
     void* p;
 } ModelNodePropertyData;
 
-// In memory this is a list of ModelNodeProperty, but due to the way it uses
-// the fields (storing into the "type" field) we decided to make a struct for this
+// Overlays 6 ModelNodeProperty entries. On 64-bit, each property is 16 bytes
+// (not 12), so padding must match sizeof(ModelNodePropertyData) - sizeof(f32).
 typedef struct ModelBoundingBox {
-    /* 0x00 */ s32 key; // MODEL_PROP_KEY_BOUNDING_BOX
-    /* 0x04 */ s32 halfSizeX;
-    /* 0x08 */ f32 minX;
-    /* 0x0C */ char unk_0C[0x04];
-    /* 0x10 */ s32 halfSizeY;
-    /* 0x14 */ f32 minY;
-    /* 0x18 */ char unk_18[0x04];
-    /* 0x1C */ s32 halfSizeZ;
-    /* 0x20 */ f32 minZ;
-    /* 0x24 */ char unk_24[0x8];
-    /* 0x2C */ f32 maxX;
-    /* 0x30 */ char unk_30[0x8];
-    /* 0x38 */ f32 maxY;
-    /* 0x3C */ char unk_3C[0x8];
-    /* 0x44 */ f32 maxZ;
-} ModelBoundingBox; // size = 0x48?
+    /* prop[0] */ s32 key; // MODEL_PROP_KEY_BOUNDING_BOX
+    /* prop[0] */ s32 halfSizeX;
+    /* prop[0] */ f32 minX;
+                  char _pad0[sizeof(ModelNodePropertyData) - sizeof(f32)];
+    /* prop[1] */ s32 _key1;
+    /* prop[1] */ s32 halfSizeY;
+    /* prop[1] */ f32 minY;
+                  char _pad1[sizeof(ModelNodePropertyData) - sizeof(f32)];
+    /* prop[2] */ s32 _key2;
+    /* prop[2] */ s32 halfSizeZ;
+    /* prop[2] */ f32 minZ;
+                  char _pad2[sizeof(ModelNodePropertyData) - sizeof(f32)];
+    /* prop[3] */ s32 _key3;
+    /* prop[3] */ s32 _type3;
+    /* prop[3] */ f32 maxX;
+                  char _pad3[sizeof(ModelNodePropertyData) - sizeof(f32)];
+    /* prop[4] */ s32 _key4;
+    /* prop[4] */ s32 _type4;
+    /* prop[4] */ f32 maxY;
+                  char _pad4[sizeof(ModelNodePropertyData) - sizeof(f32)];
+    /* prop[5] */ s32 _key5;
+    /* prop[5] */ s32 _type5;
+    /* prop[5] */ f32 maxZ;
+                  char _pad5[sizeof(ModelNodePropertyData) - sizeof(f32)];
+} ModelBoundingBox; // size = 6 * sizeof(ModelNodeProperty)
 
 typedef struct ModelNodeProperty {
     /* 0x0 */ s32 key;
@@ -123,7 +132,8 @@ typedef struct TextureHandle {
     /* 0x38 */ PAL_PTR palette;
     /* 0x3C */ IMG_PTR auxRaster;
     /* 0x40 */ PAL_PTR auxPalette;
-} TextureHandle; // size = 0x44
+    PAL_PTR combinedPalette; // CI4+CI4 merged 32-entry palette for Fast3D interpreter
+} TextureHandle;
 
 typedef struct ModelBlueprint {
     /* 0x0 */ s16 flags;
@@ -168,7 +178,7 @@ typedef enum ExtraTileTypes {
     EXTRA_TILE_4                    = 4, // only use-case may be a mistake? unused and mostly unimplemented
 } ExtraTileTypes;
 
-#define SHAPE_SIZE_LIMIT 0x8000
+#define SHAPE_SIZE_LIMIT 0x38000 // Increased for 64-bit native struct sizes
 
 typedef struct ShapeFileHeader {
     /* 0x00 */ ModelNode* root;
@@ -202,12 +212,12 @@ void update_model_animator(s32);
 void update_model_animator_with_transform(s32 animatorID, Mtx* mtx);
 void set_mdl_custom_gfx_set(Model*, s32, u32);
 ModelNodeProperty* get_model_property(ModelNode* node, ModelPropertyKeys key);
-void load_texture_variants(u32 romOffset, s32 textureID, s32 baseOffset, s32 size);
+void load_texture_variants(u8* srcData, s32 textureID, u8* baseData, s32 size);
 s32 step_model_animator(ModelAnimator* animator);
 AnimatorNode* get_animator_node_for_tree_index(ModelAnimator* animator, s32 treeIndex);
 AnimatorNode* get_animator_node_with_id(ModelAnimator* animator, s32 id);
 void animator_update_model_transforms(ModelAnimator* animator, Mtx* rootTransform);
-void render_animated_model(s32 animatorID, Mtx* rootTransform);
+void render_animated_model(s32 animatorID, Mtx* rootTransform, u32 interpolationTag);
 void animator_node_update_model_transform(ModelAnimator* animator, f32 (*flipMtx)[4], AnimatorNode* node,
                                           Mtx* rootTransform);
 void init_worker_list(void);
@@ -216,7 +226,7 @@ void reset_animator_list(void);
 void delete_model_animator_node(AnimatorNode* node);
 void delete_model_animator_nodes(ModelAnimator* animator);
 void delete_model_animator(ModelAnimator* animator);
-void render_animated_model_with_vertices(s32 animatorID, Mtx* rootTransform, s32 segment, void* baseAddr);
+void render_animated_model_with_vertices(s32 animatorID, Mtx* rootTransform, s32 segment, void* baseAddr, u32 interpolationTag);
 void appendGfx_animator(ModelAnimator* animator);
 ModelAnimator* set_animator_render_callback(s32 animModelID, void* callbackArg, void (*callbackFunc)(void*));
 void reload_mesh_animator_tree(ModelAnimator* animator);
@@ -227,6 +237,10 @@ void mdl_make_local_vertex_copy(s32 arg0, u16 treeIdx, s32);
 void play_model_animation_starting_from(s32 index, s16* animPos, s32 framesToSkip);
 
 void mdl_set_shroud_tint_params(u8 r, u8 g, u8 b, u8 a);
+
+// Port: OTR display list walking helpers
+s32 mdl_is_otr_expanded_opcode(u32 opcode);
+Vtx* mdl_resolve_otr_vtx(Gfx* gfx);
 
 #ifdef __cplusplus
 } // extern "C"
