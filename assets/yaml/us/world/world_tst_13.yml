@@ -1,0 +1,13 @@
+# tst_13 map overlay - shockwave floor effect
+# VRAM: 0x80240000, ROM: 0xB1D760
+
+:config:
+  virtual: [0x80240000, 0xB1D760]
+
+# Shockwave vertices (91 verts)
+shockwave.vtx:
+  { type: VTX, offset: 0xB1FA10, count: 91, symbol: tst_13_shockwave_vtx }
+
+# Shockwave display list
+shockwave.gfx:
+  { type: GFX, offset: 0xB1FFC0, size: 0x390, symbol: tst_13_shockwave_gfx }
