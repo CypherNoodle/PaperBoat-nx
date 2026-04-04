@@ -6,15 +6,10 @@ static f32 D_E0002788[10] = { 2.2f, 2.7f, 3.0f, 2.2f, 2.7f, 3.0f, 1.9f, 1.9f, 1.
 static f32 sPartScales[10] = { 1.4f, 1.3f, 1.2f, 1.3f, 1.4f, 1.3f, 1.6f, 1.6f, 1.6f, 1.6f };
 static f32 sPartYaws[10] = { 0.0f, 234.0f, 468.0f, 702.0f, 936.0f, 1260.0f, 1404.0f, 1638.0f, 1902.0f, 1976.0f };
 
-extern Gfx D_09000FA0_3273B0[];
-extern Gfx D_09001060_327470[];
-extern Gfx D_09001120_327530[];
-extern Gfx D_090011E0_3275F0[];
-extern Gfx D_090012A0_3276B0[];
-extern Gfx D_09001360_327770[];
-extern Gfx D_09001420_327830[];
 
-static Gfx* sDlists[7] = {
+#include "assets/effects.h"
+
+static const char* sDlists[7] = {
     D_09000FA0_3273B0, D_09001060_327470, D_09001120_327530, D_090011E0_3275F0, D_090012A0_3276B0, D_09001360_327770,
     D_09001420_327830
 };
@@ -114,6 +109,8 @@ void big_smoke_puff_render(EffectInstance* effect) {
     renderTask.appendGfxArg = effect;
     renderTask.dist = 0;
     renderTask.renderMode = RENDER_MODE_CLOUD_NO_ZCMP;
+    renderTask.interpolationName = "big_smoke_puff_render";
+    renderTask.interpolationTag = TAG_EFFECT(0, effect);
 
     retTask = queue_render_task(&renderTask);
     retTask->renderMode |= RENDER_TASK_FLAG_REFLECT_FLOOR;
@@ -138,7 +135,7 @@ void big_smoke_puff_appendGfx(void* effect) {
             s32 primAlpha = data->unk_02;
             f32 temp_f12;
             s32 envAlpha;
-            Gfx* dlist;
+            const char* dlist;
 
             if (primAlpha > 16) {
                 primAlpha = 16;

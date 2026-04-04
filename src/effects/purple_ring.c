@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000200_352EE0[];
-extern Gfx D_090004E8_3531C8[];
 
 void purple_ring_init(EffectInstance* effect);
 void purple_ring_update(EffectInstance* effect);

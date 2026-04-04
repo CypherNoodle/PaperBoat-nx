@@ -1,12 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000400_3D84C0[];
-extern Gfx D_090005E8_3D86A8[];
-extern Gfx D_09000628_3D86E8[];
 
-Gfx* D_E00DC640[] = { D_09000628_3D86E8, D_090005E8_3D86A8 };
-Gfx* D_E00DC648[] = { D_09000400_3D84C0, D_09000400_3D84C0 };
+const char* D_E00DC640[] = { D_09000628_3D86E8, D_090005E8_3D86A8 };
+const char* D_E00DC648[] = { D_09000400_3D84C0, D_09000400_3D84C0 };
 
 void huff_puff_breath_init(EffectInstance* effect);
 void huff_puff_breath_update(EffectInstance* effect);

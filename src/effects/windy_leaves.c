@@ -1,14 +1,12 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void windy_leaves_init(EffectInstance* effect);
 void windy_leaves_update(EffectInstance* effect);
 void windy_leaves_render(EffectInstance* effect);
 void windy_leaves_appendGfx(void* effect);
 
-extern Gfx D_09001180_33E790[];
-extern Gfx D_09001258_33E868[];
-extern Gfx D_09001280_33E890[];
 
 void windy_leaves_main(s32 type, f32 arg1, f32 arg2, f32 arg3) {
     EffectBlueprint bp;
@@ -229,7 +227,7 @@ void windy_leaves_render(EffectInstance* effect) {
 void windy_leaves_appendGfx(void* effect) {
     WindyLeavesFXData* part = ((EffectInstance*)effect)->data.windyLeaves;
     Matrix4f sp18, sp58, sp98;
-    Gfx* dlist;
+    const char* dlist;
     s32 i;
 
     dlist = D_09001280_33E890;

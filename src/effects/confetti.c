@@ -1,16 +1,14 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void confetti_init(EffectInstance* effect);
 void confetti_update(EffectInstance* effect);
 void confetti_render(EffectInstance* effect);
 void confetti_appendGfx(void* effect);
 
-extern Gfx D_090009E8_38C588[];
-extern Gfx D_09000A00_38C5A0[];
-extern Gfx D_09000940_38C4E0[];
 
-Gfx* D_E0088CC0[] = {
+const char* D_E0088CC0[] = {
     D_090009E8_38C588, D_090009E8_38C588, D_090009E8_38C588, D_09000A00_38C5A0,
     D_090009E8_38C588, D_090009E8_38C588, D_090009E8_38C588
 };
@@ -254,7 +252,7 @@ void confetti_appendGfx(void* effect) {
     s32 ulx = 0;
     s32 unk_28;
     s32 unk_2C;
-    Gfx* spA0;
+    const char* spA0;
     Gfx* savedGfxPos;
     s32 unk_24;
     Color_RGB8* color;

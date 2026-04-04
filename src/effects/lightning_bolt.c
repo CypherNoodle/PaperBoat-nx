@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 typedef struct LightningPreset {
     /* 0x00 */ u8 offset[12];
@@ -36,7 +37,6 @@ LightningPreset D_E00BCD38[] = {
 
 LightningPreset* D_E00BCE40[] = { D_E00BCC30, D_E00BCD38 };
 
-extern Gfx D_09001000_3BBEA0[];
 
 void lightning_bolt_init(EffectInstance* effect);
 void lightning_bolt_update(EffectInstance* effect);

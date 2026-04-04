@@ -1,19 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000218_398DD8[];
-extern Gfx D_09001518_39A0D8[];
-extern Mtx D_09004148_39CD08[];
-extern Gfx D_09006D48_39F908[];
-extern Gfx D_09006DA0_39F960[];
-extern Gfx D_09006E28_39F9E8[];
-extern Gfx D_09006F20_39FAE0[];
-extern Gfx D_09006FB0_39FB70[];
-extern Gfx D_09006FD8_39FB98[];
-extern Gfx D_09007030_39FBF0[];
-extern Gfx D_09007090_39FC50[];
-extern Gfx D_090070E8_39FCA8[];
-extern Gfx D_09007230_39FDF0[];
 
 void quizmo_stage_init(EffectInstance* effect);
 void quizmo_stage_update(EffectInstance* effect);
@@ -125,7 +113,8 @@ void quizmo_stage_appendGfx(void* effect) {
     gSPDisplayList(gMainGfxPos++, D_09007230_39FDF0);
 
     if (data->unk_3C != 255) {
-        gSPMatrix(gMainGfxPos++, &D_09004148_39CD08[2], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        Mtx* mtxData = (Mtx*)LOAD_ASSET(D_09004148_39CD08);
+        gSPMatrix(gMainGfxPos++, &mtxData[2], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 
         guRotateF(sp18, (data->rearWallRaiseAmt * 180) / 255 - 180, 1.0f, 0.0f, 0.0f);
         guMtxF2L(sp18, &gDisplayContext->matrixStack[gMatrixListPos]);
@@ -136,7 +125,7 @@ void quizmo_stage_appendGfx(void* effect) {
         gDPSetTileSize(gMainGfxPos++, G_TX_RENDERTILE, data->lightScrollAmt, 0, data->lightScrollAmt + 252, 60);
         gSPDisplayList(gMainGfxPos++, D_09006DA0_39F960);
         gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
-        gSPMatrix(gMainGfxPos++, &D_09004148_39CD08[0], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPMatrix(gMainGfxPos++, &mtxData[0], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 
         guRotateF(sp18, 90 - (data->leftWallRaiseAmt * 90) / 255, 0.0f, 0.0f, 1.0f);
         guMtxF2L(sp18, &gDisplayContext->matrixStack[gMatrixListPos]);
@@ -144,7 +133,7 @@ void quizmo_stage_appendGfx(void* effect) {
         gSPMatrix(gMainGfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++], G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
         gSPDisplayList(gMainGfxPos++, D_09006FB0_39FB70);
         gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
-        gSPMatrix(gMainGfxPos++, &D_09004148_39CD08[1], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPMatrix(gMainGfxPos++, &mtxData[1], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 
         guRotateF(sp18, (data->rightWallRaiseAmt * 90) / 255 - 90, 0.0f, 0.0f, 1.0f);
         guMtxF2L(sp18, &gDisplayContext->matrixStack[gMatrixListPos]);
@@ -157,7 +146,7 @@ void quizmo_stage_appendGfx(void* effect) {
         gSPDisplayList(gMainGfxPos++, D_09001518_39A0D8);
         gDPSetTileSize(gMainGfxPos++, G_TX_RENDERTILE, data->lightScrollAmt, 0, data->lightScrollAmt + 252, 60);
         gSPDisplayList(gMainGfxPos++, D_09006FD8_39FB98);
-        gSPMatrix(gMainGfxPos++, &D_09004148_39CD08[3], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPMatrix(gMainGfxPos++, &mtxData[3], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 
         guRotateF(sp18, 90 - (data->podiumRaiseAmt * 90) / 255, 1.0f, 0.0f, 0.0f);
         guMtxF2L(sp18, &gDisplayContext->matrixStack[gMatrixListPos]);

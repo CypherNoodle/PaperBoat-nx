@@ -1,19 +1,14 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void explosion_init(EffectInstance* effect);
 void explosion_update(EffectInstance* effect);
 void explosion_render(EffectInstance* effect);
 void explosion_appendGfx(void* effect);
 
-extern Gfx D_09000840_3447B0[];
-extern Gfx D_090008F0_344860[];
-extern Gfx D_09000910_344880[];
-extern Gfx D_09000978_3448E8[];
-extern Gfx D_090009D8_344948[];
-extern Gfx D_09000A38_3449A8[];
 
-Gfx* D_E00328B0[] = { D_09000978_3448E8, D_090009D8_344948, D_09000A38_3449A8 };
+const char* D_E00328B0[] = { D_09000978_3448E8, D_090009D8_344948, D_09000A38_3449A8 };
 
 void explosion_main(s32 type, f32 x, f32 y, f32 z) {
     EffectBlueprint bp;

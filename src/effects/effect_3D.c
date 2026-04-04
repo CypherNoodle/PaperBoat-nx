@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000240_37D3C0[];
-extern Gfx D_090002E8_37D468[];
 
 void effect_3D_init(EffectInstance* effect);
 void effect_3D_update(EffectInstance* effect);
@@ -206,6 +205,8 @@ void effect_3D_render(EffectInstance* effect) {
     renderTask.appendGfxArg = effect;
     renderTask.dist = 0;
     renderTask.renderMode = RENDER_MODE_CLOUD_NO_ZCMP;
+    renderTask.interpolationName = "effect_3D";
+    renderTask.interpolationTag = TAG_EFFECT(0, effect);
 
     retTask = queue_render_task(&renderTask);
     retTask->renderMode |= RENDER_TASK_FLAG_REFLECT_FLOOR;

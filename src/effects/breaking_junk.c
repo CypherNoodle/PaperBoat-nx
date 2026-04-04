@@ -6,15 +6,11 @@ void breaking_junk_update(EffectInstance* effect);
 void breaking_junk_render(EffectInstance* effect);
 void breaking_junk_appendGfx(void* effect);
 
-extern Gfx D_09000400_403FF0[];
-extern Gfx D_090005A8_404198[];
-extern Gfx D_090005C8_4041B8[];
-extern Gfx D_090005E8_4041D8[];
-extern Gfx D_09000608_4041F8[];
+#include "assets/effects.h"
 
-Gfx* D_E01187B0[] = { D_090005A8_404198, D_090005C8_4041B8, D_090005E8_4041D8, D_09000608_4041F8 };
+const char* D_E01187B0[] = { D_090005A8_404198, D_090005C8_4041B8, D_090005E8_4041D8, D_09000608_4041F8 };
 
-Gfx* D_E01187C0[] = { D_09000400_403FF0 };
+const char* D_E01187C0[] = { D_09000400_403FF0 };
 
 EffectInstance* breaking_junk_main(s32 arg0, f32 x, f32 y, f32 z, f32 scale, s32 time) {
     EffectBlueprint bp;

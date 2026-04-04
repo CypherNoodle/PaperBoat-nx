@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 typedef struct WaterBlockVtxData {
     /* 0x00 */ Vec3b pos;
@@ -51,11 +52,6 @@ WaterBlockVtxData D_E00B4CF0[] = {
     {{-22,  50,  22 },    61,   1021,   { 240, 240, 240 }},
 };
 
-extern Gfx D_09000300_3B6EF0[];
-extern Gfx D_090003B0_3B6FA0[];
-extern Gfx D_090004A0_3B7090[];
-extern Gfx D_090004D8_3B70C8[];
-extern Gfx D_09000538_3B7128[];
 
 void water_block_init(EffectInstance* effect);
 void water_block_update(EffectInstance* effect);

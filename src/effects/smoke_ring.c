@@ -1,9 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09002950_32B7F0[];
-extern Gfx D_09002B40_32B9E0[];
-extern Gfx D_09002B60_32BA00[];
 
 s8 D_E002E740[] = {
     0,  1, 2, 26,  3, 27,  4,  28,
@@ -124,7 +122,7 @@ void smoke_ring_appendGfx(void* effect) {
     s32 envAlpha = (part->unk_40 & 0x38) * 4;
     s32 spD8 = part->unk_40 & 0x40;
     s32 temp_a3;
-    Gfx* dlist;
+    const char* dlist;
     Matrix4f sp18;
     Matrix4f sp58;
     Matrix4f sp98;

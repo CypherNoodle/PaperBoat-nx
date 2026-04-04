@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000DC0_3762D0[];
-extern Gfx D_09000E60_376370[];
 
 void energy_shockwave_init(EffectInstance* effect);
 void energy_shockwave_update(EffectInstance* effect);

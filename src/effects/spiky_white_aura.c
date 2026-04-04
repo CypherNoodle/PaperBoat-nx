@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx* D_09000440_34EBB0[];
-extern Gfx* D_090004E8_34EC58[];
 
 // RGB values? unused
 u8 D_E00389F0[] = {

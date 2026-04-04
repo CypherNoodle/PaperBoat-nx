@@ -1,31 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001D40_351F60[];
-extern Gfx D_09001DE0_352000[];
-extern Gfx D_09001E50_352070[];
-extern Gfx D_09001E90_3520B0[];
-extern Gfx D_09001ED0_3520F0[];
-extern Gfx D_09001F10_352130[];
-extern Gfx D_09001F50_352170[];
-extern Gfx D_09001F90_3521B0[];
-extern Gfx D_09001FD0_3521F0[];
-extern Gfx D_09002010_352230[];
-extern Gfx D_09002050_352270[];
-extern Gfx D_09002090_3522B0[];
-extern Gfx D_090020D0_3522F0[];
-extern Gfx D_09002110_352330[];
-extern Gfx D_09002150_352370[];
-extern Gfx D_09002160_352380[];
-extern Gfx D_09002170_352390[];
-extern Gfx D_09002180_3523A0[];
-extern Gfx D_09002190_3523B0[];
-extern Gfx D_090021A8_3523C8[];
-extern Gfx D_090021C0_3523E0[];
-extern Gfx D_090021E0_352400[];
-extern Gfx D_09002200_352420[];
 
-Gfx* D_E003CCA0[] = {
+const char* D_E003CCA0[] = {
     D_09001E50_352070, D_09001E90_3520B0, D_09001ED0_3520F0, D_09001F10_352130,
     D_09001F50_352170, D_09001F90_3521B0, D_09001FD0_3521F0, D_09002010_352230,
     D_09002050_352270, D_09002090_3522B0, D_090020D0_3522F0, D_09002110_352330

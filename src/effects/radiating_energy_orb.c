@@ -1,18 +1,12 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001200_3A1F60[];
-extern Gfx D_090012A8_3A2008[];
-extern Gfx D_09001490_3A21F0[];
-extern Gfx D_090014B0_3A2210[];
-extern Gfx D_090014D0_3A2230[];
-extern Gfx D_090014F0_3A2250[];
-extern Gfx D_09001510_3A2270[];
 
-Gfx* D_E009EDF0[] = { D_09001490_3A21F0 };
-Gfx* D_E009EDF4[] = { D_090014B0_3A2210 };
-Gfx* D_E009EDF8[] = { D_090014D0_3A2230 };
-Gfx* D_E009EDFC[] = { D_090014F0_3A2250 };
+const char* D_E009EDF0[] = { D_09001490_3A21F0 };
+const char* D_E009EDF4[] = { D_090014B0_3A2210 };
+const char* D_E009EDF8[] = { D_090014D0_3A2230 };
+const char* D_E009EDFC[] = { D_090014F0_3A2250 };
 
 void radiating_energy_orb_init(EffectInstance* effect);
 void radiating_energy_orb_update(EffectInstance* effect);

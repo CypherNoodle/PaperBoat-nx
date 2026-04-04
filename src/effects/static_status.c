@@ -1,11 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000280_3E1550[];
-extern Gfx D_090003A0_3E1670[];
 
-Gfx* D_E00E6880[] = { D_090003A0_3E1670, D_090003A0_3E1670 };
-Gfx* D_E00E6888[] = { D_09000280_3E1550, D_09000280_3E1550 };
+const char* D_E00E6880[] = { D_090003A0_3E1670, D_090003A0_3E1670 };
+const char* D_E00E6888[] = { D_09000280_3E1550, D_09000280_3E1550 };
 
 // number of frames in animation for type 0 and type 1
 s32 StaticEffectFrameCount[] = { 24, 12 };

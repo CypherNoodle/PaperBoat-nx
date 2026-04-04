@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void firework_rocket_init(EffectInstance* effect);
 void firework_rocket_render(EffectInstance* effect);
@@ -11,11 +12,9 @@ typedef struct FireworkRocketUnk {
     /* 0x04 */ s32 num;
 } FireworkRocketUnk; // size = 0x8
 
-extern Gfx D_09000080_3E53D0[];
-extern Gfx D_09000158_3E54A8[];
 
-Gfx* D_E010ACC0[] = { D_09000158_3E54A8, D_09000158_3E54A8, D_09000158_3E54A8 };
-Gfx* D_E010ACCC[] = { D_09000080_3E53D0, D_09000080_3E53D0, D_09000080_3E53D0 };
+const char* D_E010ACC0[] = { D_09000158_3E54A8, D_09000158_3E54A8, D_09000158_3E54A8 };
+const char* D_E010ACCC[] = { D_09000080_3E53D0, D_09000080_3E53D0, D_09000080_3E53D0 };
 
 Vec3b D_E010ACD8[] = {
     {   36,    0,   93 }, {   54,  -40,   74 }, {   67,    0,   74 }, {   82,  -36,   45 }, {   89,    0,   45 },

@@ -1,12 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090003A0_396490[];
-extern Gfx D_090003E0_3964D0[];
-extern Gfx D_09000410_396500[];
-extern Gfx D_09000450_396540[];
 
-Gfx* D_E0098510[] = {
+const char* D_E0098510[] = {
     D_090003A0_396490, D_090003E0_3964D0, D_09000410_396500,
     D_090003A0_396490, D_090003E0_3964D0, D_09000410_396500
 };

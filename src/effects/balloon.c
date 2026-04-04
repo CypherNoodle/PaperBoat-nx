@@ -1,12 +1,8 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001280_3958F0[];
-extern Gfx D_09001358_3959C8[];
-extern Gfx D_09001430_395AA0[];
-extern Gfx D_09001508_395B78[];
-
-Gfx* D_E00963E0[] = { D_09001280_3958F0, D_09001358_3959C8, D_09001430_395AA0 };
+const char* D_E00963E0[] = { D_09001280_3958F0, D_09001358_3959C8, D_09001430_395AA0 };
 
 void balloon_init(EffectInstance* effect);
 void balloon_update(EffectInstance* effect);
@@ -78,6 +74,8 @@ void balloon_render(EffectInstance* effect) {
     renderTask.appendGfxArg = effect;
     renderTask.dist = 0;
     renderTask.renderMode = RENDER_MODE_SURFACE_OPA;
+    renderTask.interpolationName = "balloon_render";
+    renderTask.interpolationTag = TAG_EFFECT(0, effect);
 
     retTask = queue_render_task(&renderTask);
     retTask->renderMode |= RENDER_TASK_FLAG_REFLECT_FLOOR;

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 enum MiniHeartState {
     HEART_STATE_INIT        = 0,
@@ -13,8 +14,6 @@ enum MiniHeartState {
     HEART_STATE_DONE        = 7,
 };
 
-extern Gfx D_09000400_3D2980[];
-extern Gfx D_09000518_3D2A98[];
 
 u8 AnimScalePct[] = { 94, 92, 100, 105, 107, 105, 100 };
 

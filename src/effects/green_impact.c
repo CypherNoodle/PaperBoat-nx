@@ -1,10 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000540_365EF0[];
-extern Gfx D_090005A0_365F50[];
 
-Gfx* D_E0064A60[] = { D_090005A0_365F50, D_090005A0_365F50 };
+const char* D_E0064A60[] = { D_090005A0_365F50, D_090005A0_365F50 };
 
 void green_impact_init(EffectInstance* effect);
 void green_impact_update(EffectInstance* effect);
@@ -131,8 +130,8 @@ void green_impact_render(EffectInstance* effect) {
 
 void green_impact_appendGfx(void* effect) {
     GreenImpactFXData* part = ((EffectInstance*)effect)->data.greenImpact;
-    Gfx* dlist = D_E0064A60[part->unk_00];
-    Gfx* dlist2;
+    const char* dlist = D_E0064A60[part->unk_00];
+    const char* dlist2;
     s32 alpha;
     s32 primR;
     s32 primG;

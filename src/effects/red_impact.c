@@ -1,10 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000940_359CF0[];
-extern Gfx D_090009A0_359D50[];
 
-Gfx* D_E00D0B10[] = { D_090009A0_359D50, D_090009A0_359D50 };
+const char* D_E00D0B10[] = { D_090009A0_359D50, D_090009A0_359D50 };
 
 void red_impact_init(EffectInstance* effect);
 void red_impact_update(EffectInstance* effect);
@@ -142,8 +141,8 @@ void red_impact_render(EffectInstance* effect) {
 
 void red_impact_appendGfx(void* effect) {
     RedImpactFXData* part = ((EffectInstance*)effect)->data.redImpact;
-    Gfx* dlist = D_E00D0B10[part->unk_00];
-    Gfx* dlist2;
+    const char* dlist = D_E00D0B10[part->unk_00];
+    const char* dlist2;
     f32 temp_1C = part->unk_1C * 0.3;
     f32 temp_20 = part->unk_20 * 0.3;
     f32 temp_24 = part->unk_24 * 0.3;

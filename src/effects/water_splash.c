@@ -1,13 +1,10 @@
 #include "common.h"
 #include "nu/nusys.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000100_3BCB90[];
-extern Gfx D_09000268_3BCCF8[];
-extern Gfx D_09000288_3BCD18[];
-extern Gfx D_090002A8_3BCD38[];
 
-Gfx* D_E00BEAF0[] = {
+const char* D_E00BEAF0[] = {
     D_09000268_3BCCF8, D_09000288_3BCD18, D_09000268_3BCCF8, D_090002A8_3BCD38
 };
 

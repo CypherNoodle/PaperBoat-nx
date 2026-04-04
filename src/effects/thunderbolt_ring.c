@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000000_3B46A0[];
-extern Gfx D_090000C8_3B4768[];
 
 void thunderbolt_ring_init(EffectInstance* effect);
 void thunderbolt_ring_update(EffectInstance* effect);

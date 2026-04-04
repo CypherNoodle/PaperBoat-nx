@@ -1,21 +1,14 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001580_3E03E0[];
-extern Gfx D_09001670_3E04D0[];
-extern Gfx D_09001768_3E05C8[];
-extern Gfx D_09001818_3E0678[];
-extern Gfx D_09001A20_3E0880[];
-extern Gfx D_09001A40_3E08A0[];
-extern Gfx D_09001A60_3E08C0[];
-extern Gfx D_09001A80_3E08E0[];
 
-Gfx* D_E00E4D90[] = {
+const char* D_E00E4D90[] = {
     D_09001A20_3E0880, D_09001A40_3E08A0, D_09001A60_3E08C0,
     D_09001A60_3E08C0, D_09001A80_3E08E0, D_09001A80_3E08E0
 };
 
-Gfx* D_E00E4DA8[] = {
+const char* D_E00E4DA8[] = {
     D_09001580_3E03E0, D_09001670_3E04D0, D_09001768_3E05C8,
     D_09001768_3E05C8, D_09001818_3E0678, D_09001818_3E0678
 };

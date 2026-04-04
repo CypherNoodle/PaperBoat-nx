@@ -1,10 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000200_35C750[];
-extern Gfx D_090002C8_35C818[];
-extern Gfx D_09000390_35C8E0[];
-extern Gfx D_09000460_35C9B0[];
 
 void sweat_init(EffectInstance* effect);
 void sweat_update(EffectInstance* effect);

@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090004C0_343500[];
-extern Gfx D_090005E0_343620[];
 
 u8 D_E0030E90[] = {
     254, 172, 172,

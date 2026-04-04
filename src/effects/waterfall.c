@@ -1,7 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000200_3B7AD0[];
 
 void waterfall_init(EffectInstance* effect);
 void waterfall_update(EffectInstance* effect);

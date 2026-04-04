@@ -1,11 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001040_3583E0[];
-extern Gfx D_090010F8_358498[];
 
-Gfx* D_E0048A00[] = { D_090010F8_358498, D_090010F8_358498 };
-Gfx* D_E0048A08[] = { D_09001040_3583E0, D_09001040_3583E0 };
+const char* D_E0048A00[] = { D_090010F8_358498, D_090010F8_358498 };
+const char* D_E0048A08[] = { D_09001040_3583E0, D_09001040_3583E0 };
 
 void ring_blast_init(EffectInstance* effect);
 void ring_blast_update(EffectInstance* effect);
@@ -89,8 +88,8 @@ void ring_blast_appendGfx(void* effect) {
     s32 unk_20_s32 = data->unk_20;
     s32 envAlpha = (data->unk_20 - unk_20_s32) * 256.0f;
     s32 cond = (unk_20_s32 == 7);
-    Gfx* dlist = D_E0048A00[unk_00];
-    Gfx* dlist2 = D_E0048A08[unk_00];
+    const char* dlist = D_E0048A00[unk_00];
+    const char* dlist2 = D_E0048A08[unk_00];
     Matrix4f sp20;
     Matrix4f sp60;
 

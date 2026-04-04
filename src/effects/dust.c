@@ -1,11 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000CC0_33FCC0[];
-extern Gfx D_09000D68_33FD68[];
-extern Gfx D_09000E18_33FE18[];
-extern Gfx D_09000E38_33FE38[];
-extern Gfx D_09000E58_33FE58[];
 
 void dust_init(EffectInstance* effect);
 void dust_render(EffectInstance* effect);

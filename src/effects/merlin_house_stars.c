@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001000_3A6BE0[];
-extern Gfx D_09001418_3A6FF8[];
 
 void merlin_house_stars_init(EffectInstance* effect);
 void merlin_house_stars_update(EffectInstance* effect);

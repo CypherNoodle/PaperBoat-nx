@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001180_33E790[];
-extern Gfx D_09001230_33E840[];
 
 void drop_leaves_init(EffectInstance* effect);
 void drop_leaves_render(EffectInstance* effect);

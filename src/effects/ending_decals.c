@@ -1,25 +1,20 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001E40_36CD20[];
-extern Gfx D_09001EA8_36CD88[];
-extern Gfx D_09001F10_36CDF0[];
-extern Gfx D_09001F78_36CE58[];
-extern Gfx D_09002058_36CF38[];
-extern Gfx D_09002078_36CF58[];
 
-Gfx* D_E00685B0[] = {
+const char* D_E00685B0[] = {
     D_09001E40_36CD20, D_09001E40_36CD20, D_09002058_36CF38
 };
 
-Gfx* D_E00685BC[] = {
+const char* D_E00685BC[] = {
     D_09001E40_36CD20, D_09001E40_36CD20, D_09001E40_36CD20, D_09001E40_36CD20,
     D_09001E40_36CD20, D_09001EA8_36CD88, D_09001EA8_36CD88, D_09001F10_36CDF0,
     D_09001F10_36CDF0, D_09001F10_36CDF0, D_09001F10_36CDF0, D_09001F10_36CDF0,
     D_09001EA8_36CD88, D_09001EA8_36CD88
 };
 
-Gfx* D_E00685F4[] = {
+const char* D_E00685F4[] = {
     D_09001F78_36CE58, D_09001F78_36CE58, D_09002078_36CF58
 };
 
@@ -131,8 +126,8 @@ void ending_decals_render(EffectInstance* effect) {
 
 void ending_decals_appendGfx(void* effect) {
     EndingDecalsFXData* data = ((EffectInstance*)effect)->data.endingDecals;
-    Gfx* dlist1;
-    Gfx* dlist2;
+    const char* dlist1;
+    const char* dlist2;
     u32 unk_20;
     s32 alpha;
     f64 temp_f64;

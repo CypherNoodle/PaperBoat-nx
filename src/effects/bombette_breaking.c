@@ -7,15 +7,11 @@ void bombette_breaking_update(EffectInstance* effect);
 void bombette_breaking_render(EffectInstance* effect);
 void bombette_breaking_appendGfx(void* effect);
 
-extern Gfx D_090017D0_37F1A0[];
-extern Gfx D_090018C0_37F290[];
-extern Gfx D_09001C80_37F650[];
-extern Gfx D_09001CC8_37F698[];
-extern Gfx D_09001D00_37F6D0[];
+#include "assets/effects.h"
 
-Gfx* D_E0084E10[] = { D_090018C0_37F290, D_090018C0_37F290, D_090018C0_37F290 };
-Gfx* D_E0084E1C[] = { D_09001D00_37F6D0, D_09001CC8_37F698, D_09001C80_37F650 };
-Gfx* D_E0084E28[] = { D_090017D0_37F1A0, D_090017D0_37F1A0, D_090017D0_37F1A0 };
+const char* D_E0084E10[] = { D_090018C0_37F290, D_090018C0_37F290, D_090018C0_37F290 };
+const char* D_E0084E1C[] = { D_09001D00_37F6D0, D_09001CC8_37F698, D_09001C80_37F650 };
+const char* D_E0084E28[] = { D_090017D0_37F1A0, D_090017D0_37F1A0, D_090017D0_37F1A0 };
 
 void (*D_E0084E34)(u16, f32*, f32*, f32*, f32*, f32*, f32*) = get_model_center_and_size;
 Model* (*D_E0084E38)(s32) = get_model_from_list_index;
@@ -207,8 +203,8 @@ void bombette_breaking_appendGfx(void* effect) {
     BombetteBreakingFXData* data = ((EffectInstance*)effect)->data.bombetteBreaking;
     s32 timeLeft = data->timeLeft;
     u16 type = data->type;
-    Gfx* sp60 = D_E0084E10[type];
-    Gfx* sp64 = D_E0084E28[type];
+    const char* sp60 = D_E0084E10[type];
+    const char* sp64 = D_E0084E28[type];
     f32 unk_38 = data->unk_38;
     f32 unk_40 = data->unk_40;
     s32 mainAlpha = data->alpha;

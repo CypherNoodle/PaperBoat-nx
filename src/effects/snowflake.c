@@ -1,10 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 s32 D_E001C5E0 = 0;
 
-extern Gfx D_09000900_331800[];
-extern Gfx D_090009E8_3318E8[];
 
 void snowflake_init(EffectInstance* effect);
 void snowflake_update(EffectInstance* effect);
