@@ -1,8 +1,8 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
 extern Vtx D_0A000000_E91890[];
-extern Gfx Entity_MunchlesiaReset1_Render[];
 
 AnimScript Entity_MunchlesiaReset1_Animation = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

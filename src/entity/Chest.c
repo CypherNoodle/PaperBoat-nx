@@ -1,20 +1,13 @@
 #include "common.h"
 #include "vars_access.h"
 #include "effects.h"
-#include "ld_addrs.h"
 #include "entity.h"
+#include "ld_addrs.h"
 #include "sprite/player.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_model_Chest_ROM_END;
-extern Addr entity_model_Chest_ROM_START;
-#endif
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern EntityScript Entity_Chest_ScriptOpened;
-
-extern Gfx Entity_Chest_RenderBox[];
-extern Gfx Entity_Chest_RenderLid[];
-extern Mtx Entity_Chest_LidMtx;
 
 EvtScript Entity_Chest_AdjustCam_ISK = {
     Thread
@@ -103,15 +96,13 @@ void entity_Chest_setupGfx(s32 entityIndex) {
     ChestData* data = entity->dataBuf.chest;
     Matrix4f sp18;
     Matrix4f sp58;
-    Gfx* gfx;
 
     guRotateF(sp58, data->lidAngle, 1.0f, 0.0f, 0.0f);
-    guMtxL2F(sp18, ENTITY_ADDR(entity, Mtx*, &Entity_Chest_LidMtx));
+    guMtxL2F(sp18, (Mtx*) LOAD_ASSET(Entity_Chest_LidMtx));
     guMtxCatF(sp58, sp18, sp18);
     guMtxF2L(sp18, &gDisplayContext->matrixStack[gMatrixListPos]);
     gSPMatrix(gfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gfx = ENTITY_ADDR(entity, Gfx*, Entity_Chest_RenderLid);
-    gSPDisplayList(gfxPos++, gfx);
+    gSPDisplayList(gfxPos++, Entity_Chest_RenderLid);
     gSPPopMatrix(gfxPos++, G_MTX_MODELVIEW);
     gMainGfxPos = gfxPos;
 }

@@ -1,8 +1,8 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
 extern Vtx D_0A000000_E8A9E0[];
-extern Gfx Entity_MunchlesiaSpitOut_Render[];
 
 AnimScript Entity_MunchlesiaSpitOut_Animation = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

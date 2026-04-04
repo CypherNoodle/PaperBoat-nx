@@ -1,32 +1,12 @@
 #include "common.h"
 #include "effects.h"
 #include "vars_access.h"
-#include "ld_addrs.h"
 #include "animation_script.h"
 #include "entity.h"
+#include "ld_addrs.h"
 #include "model.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_model_HitFloatingYellowBlock_anim_ROM_END;
-extern Addr entity_model_HitFloatingYellowBlock_anim_ROM_START;
-extern Addr entity_model_HitFloatingYellowBlock_gfx_ROM_END;
-extern Addr entity_model_HitFloatingYellowBlock_gfx_ROM_START;
-extern Addr entity_model_HitRedBlock_anim_ROM_END;
-extern Addr entity_model_HitRedBlock_anim_ROM_START;
-extern Addr entity_model_HitRedBlock_gfx_ROM_END;
-extern Addr entity_model_HitRedBlock_gfx_ROM_START;
-extern Addr entity_model_HitYellowBlock_anim_ROM_END;
-extern Addr entity_model_HitYellowBlock_anim_ROM_START;
-extern Addr entity_model_HitYellowBlock_gfx_ROM_END;
-extern Addr entity_model_HitYellowBlock_gfx_ROM_START;
-extern Addr entity_model_RedBlock_ROM_END;
-extern Addr entity_model_RedBlock_ROM_START;
-extern Addr entity_model_YellowBlock_ROM_END;
-extern Addr entity_model_YellowBlock_ROM_START;
-#endif
-
-extern Gfx Entity_YellowBlock_Render[];
-extern Gfx Entity_RedBlock_Render[];
+#include "assets/entities.h"
+#include "Engine.h"
 extern AnimScript Entity_HitYellowBlock_AnimationHit;
 extern AnimScript Entity_HitYellowBlock_AnimationIdle;
 extern StaticAnimatorNode* Entity_HitYellowBlock_Mesh[];

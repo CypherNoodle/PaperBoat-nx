@@ -2,14 +2,15 @@
 #include "effects.h"
 #include "entity.h"
 #include "ld_addrs.h"
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern Gfx Entity_RenderNone[];
-extern Gfx* Entity_BombableRock_FragmentsRender[];
-extern Mtx Entity_BombableRock_FragmentMatrices[];
+extern void* Entity_BombableRock_FragmentsRender[];
 
 void entity_BombableRock_setupGfx(s32);
 
-void entity_BombableRock_init_fragments(Entity* entity, Gfx** dlists, Mtx* matrices) {
+void entity_BombableRock_init_fragments(Entity* entity, void** dlists, Mtx* matrices) {
     BombableRockData* data = entity->dataBuf.bombableRock;
     Matrix4f mtxFragment;
     Matrix4f mtxTrans;
@@ -18,14 +19,14 @@ void entity_BombableRock_init_fragments(Entity* entity, Gfx** dlists, Mtx* matri
     s32 moveAngle = 0;
     s32 lateralSpeed = 0;
 
-    data->fragmentsGfx = ENTITY_ADDR(entity, Gfx**, dlists);
+    data->fragmentsGfx = dlists;
     entity->renderSetupFunc = entity_BombableRock_setupGfx;
     entity->alpha = 255;
     entity->pos.y = data->inititalY;
     guTranslateF(mtxTrans, entity->pos.x, entity->pos.y, entity->pos.z);
 
     for (i = 0; i < 5; i++) {
-        guMtxL2F(mtxFragment, ENTITY_ADDR(entity, Mtx*, matrices++));
+        guMtxL2F(mtxFragment, matrices++);
         guMtxCatF(mtxTrans, mtxFragment, mtxFragment);
         data->fragmentPosX[i] = mtxFragment[3][0];
         data->fragmentPosY[i] = mtxFragment[3][1];
@@ -70,8 +71,16 @@ void entity_BombableRock_init_fragments(Entity* entity, Gfx** dlists, Mtx* matri
 }
 
 void entity_BombableRock_init(Entity* entity) {
+    Mtx matrices[5];
+
+    matrices[0] = *(Mtx*) LOAD_ASSET(Entity_BombableRock_FragmentMtx0);
+    matrices[1] = *(Mtx*) LOAD_ASSET(Entity_BombableRock_FragmentMtx1);
+    matrices[2] = *(Mtx*) LOAD_ASSET(Entity_BombableRock_FragmentMtx2);
+    matrices[3] = *(Mtx*) LOAD_ASSET(Entity_BombableRock_FragmentMtx3);
+    matrices[4] = *(Mtx*) LOAD_ASSET(Entity_BombableRock_FragmentMtx4);
+
     entity->dataBuf.bombableRock->inititalY = entity->pos.y;
-    entity_BombableRock_init_fragments(entity, Entity_BombableRock_FragmentsRender, Entity_BombableRock_FragmentMatrices);
+    entity_BombableRock_init_fragments(entity, Entity_BombableRock_FragmentsRender, matrices);
 }
 
 void entity_BombableRock_update_fragments(Entity* entity) {
@@ -195,7 +204,7 @@ void entity_BombableRock_setupGfx(s32 entityIndex) {
     Entity* entity = get_entity_by_index(entityIndex);
     BombableRockData* data = entity->dataBuf.bombableRock;
     Gfx* fragmentDlist;
-    Gfx** gfx = data->fragmentsGfx;
+    void** gfx = data->fragmentsGfx;
 
     x_inv = -entity->pos.x;
     y_inv = -entity->pos.y;
@@ -220,7 +229,7 @@ void entity_BombableRock_setupGfx(s32 entityIndex) {
         guMtxF2L(mtx, &gDisplayContext->matrixStack[gMatrixListPos]);
 
         gSPMatrix(gfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        fragmentDlist = ENTITY_ADDR(entity, Gfx*, *gfx++);
+        { void* _dl = *gfx++; fragmentDlist = LOAD_ASSET(_dl); }
         gSPDisplayList(gfxPos++, fragmentDlist);
         gSPPopMatrix(gfxPos++, G_MTX_MODELVIEW);
     }
