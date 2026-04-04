@@ -2,10 +2,8 @@
 #include "ld_addrs.h"
 #include "sprite.h"
 #include "imgfx.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr imgfx_data_ROM_START;
-#endif
+#include "port/Engine.h"
+#include "assets/imgfx.h"
 
 typedef union ImgFXIntVars {
     s32 raw[2][4];
@@ -194,28 +192,27 @@ extern Addr flip_card_2_header;
 extern Addr flip_card_3_header;
 extern Addr cymbal_crush_header;
 
-// all relative to imgfx_data_ROM_START
-u8* ImgFXAnimOffsets[] = {
-    [IMGFX_ANIM_SHOCK]                 shock_header,
-    [IMGFX_ANIM_SHIVER]                shiver_header,
-    [IMGFX_ANIM_VERTICAL_PIPE_CURL]    vertical_pipe_curl_header,
-    [IMGFX_ANIM_HORIZONTAL_PIPE_CURL]  horizontal_pipe_curl_header,
-    [IMGFX_ANIM_STARTLE]               startle_header,
-    [IMGFX_ANIM_FLUTTER_DOWN]          flutter_down_header,
-    [IMGFX_ANIM_UNFURL]                unfurl_header,
-    [IMGFX_ANIM_GET_IN_BED]            get_in_bed_header,
-    [IMGFX_ANIM_SPIRIT_CAPTURE]        spirit_capture_header,
-    [IMGFX_ANIM_UNUSED_1]              unused_1_header,
-    [IMGFX_ANIM_UNUSED_2]              unused_2_header,
-    [IMGFX_ANIM_UNUSED_3]              unused_3_header,
-    [IMGFX_ANIM_TUTANKOOPA_GATHER]     tutankoopa_gather_header,
-    [IMGFX_ANIM_TUTANKOOPA_SWIRL_2]    tutankoopa_swirl_2_header,
-    [IMGFX_ANIM_TUTANKOOPA_SWIRL_1]    tutankoopa_swirl_1_header,
-    [IMGFX_ANIM_SHUFFLE_CARDS]         shuffle_cards_header,
-    [IMGFX_ANIM_FLIP_CARD_1]           flip_card_1_header,
-    [IMGFX_ANIM_FLIP_CARD_2]           flip_card_2_header,
-    [IMGFX_ANIM_FLIP_CARD_3]           flip_card_3_header,
-    [IMGFX_ANIM_CYMBAL_CRUSH]          cymbal_crush_header,
+static const char* ImgFXAnimPaths[] = {
+    [IMGFX_ANIM_SHOCK]                 = IMGFX_ASSET_shock,
+    [IMGFX_ANIM_SHIVER]                = IMGFX_ASSET_shiver,
+    [IMGFX_ANIM_VERTICAL_PIPE_CURL]    = IMGFX_ASSET_vertical_pipe_curl,
+    [IMGFX_ANIM_HORIZONTAL_PIPE_CURL]  = IMGFX_ASSET_horizontal_pipe_curl,
+    [IMGFX_ANIM_STARTLE]               = IMGFX_ASSET_startle,
+    [IMGFX_ANIM_FLUTTER_DOWN]          = IMGFX_ASSET_flutter_down,
+    [IMGFX_ANIM_UNFURL]                = IMGFX_ASSET_unfurl,
+    [IMGFX_ANIM_GET_IN_BED]            = IMGFX_ASSET_get_in_bed,
+    [IMGFX_ANIM_SPIRIT_CAPTURE]        = IMGFX_ASSET_spirit_capture,
+    [IMGFX_ANIM_UNUSED_1]              = IMGFX_ASSET_unused_1,
+    [IMGFX_ANIM_UNUSED_2]              = IMGFX_ASSET_unused_2,
+    [IMGFX_ANIM_UNUSED_3]              = IMGFX_ASSET_unused_3,
+    [IMGFX_ANIM_TUTANKOOPA_GATHER]     = IMGFX_ASSET_tutankoopa_gather,
+    [IMGFX_ANIM_TUTANKOOPA_SWIRL_2]    = IMGFX_ASSET_tutankoopa_swirl_2,
+    [IMGFX_ANIM_TUTANKOOPA_SWIRL_1]    = IMGFX_ASSET_tutankoopa_swirl_1,
+    [IMGFX_ANIM_SHUFFLE_CARDS]         = IMGFX_ASSET_shuffle_cards,
+    [IMGFX_ANIM_FLIP_CARD_1]           = IMGFX_ASSET_flip_card_1,
+    [IMGFX_ANIM_FLIP_CARD_2]           = IMGFX_ASSET_flip_card_2,
+    [IMGFX_ANIM_FLIP_CARD_3]           = IMGFX_ASSET_flip_card_3,
+    [IMGFX_ANIM_CYMBAL_CRUSH]          = IMGFX_ASSET_cymbal_crush,
 };
 
 void imgfx_cache_instance_data(ImgFXState* state);
@@ -483,7 +480,7 @@ void imgfx_init_instance(ImgFXState* state) {
     }
 }
 
-void imgfx_update(u32 idx, ImgFXType type, s32 imgfxArg1, s32 imgfxArg2, s32 imgfxArg3, s32 imgfxArg4, s32 flags) {
+void imgfx_update(u32 idx, ImgFXType type, intptr_t imgfxArg1, s32 imgfxArg2, s32 imgfxArg3, s32 imgfxArg4, s32 flags) {
     ImgFXState* state = &(*ImgFXInstances)[idx];
     s32 oldFlags;
     u8 r, g, b, a;
@@ -1191,17 +1188,31 @@ void imgfx_mesh_make_grid(ImgFXState* state) {
 }
 
 ImgFXAnimHeader* imgfx_load_anim(ImgFXState* state) {
-    u8* romStart = (s32) ImgFXAnimOffsets[state->ints.anim.type] + imgfx_data_ROM_START;
+    u8* blobData = (u8*) LOAD_ASSET(ImgFXAnimPaths[state->ints.anim.type]);
     ImgFXAnimHeader* anim = &ImgFXAnimHeaders[state->arrayIdx];
 
-    if (state->curAnimOffset != romStart) {
-        u8* romEnd;
+    if (blobData == nullptr) {
+        return nullptr;
+    }
+
+    if (state->curAnimOffset != blobData) {
         s32 i;
 
-        state->curAnimOffset = romStart;
+        state->curAnimOffset = blobData;
 
-        dma_copy(state->curAnimOffset, state->curAnimOffset + sizeof(*anim), anim);
+        // Unpack header from blob (N64 binary layout, already byte-swapped by factory)
+        u32 n64KeyframesOffset = *(u32*)(blobData + 0x00);
+        anim->vtxCount         = *(u16*)(blobData + 0x08);
+        anim->gfxCount         = *(u16*)(blobData + 0x0A);
+        anim->keyframesCount   = *(u16*)(blobData + 0x0C);
+        anim->flags            = *(u16*)(blobData + 0x0E);
 
+        // Keyframe data starts at blob offset 0x10
+        anim->keyframesOffset = (ImgFXVtx*)(blobData + 0x10);
+        u32 keyframeDataSize = anim->keyframesCount * anim->vtxCount * sizeof(ImgFXVtx);
+        u8* gfxSrc = blobData + 0x10 + keyframeDataSize;
+
+        // Free old buffers
         if (state->vtxBufs[0] != nullptr) {
             imgfx_add_to_cache(state->vtxBufs[0], 1);
             state->vtxBufs[0] = nullptr;
@@ -1215,40 +1226,40 @@ ImgFXAnimHeader* imgfx_load_anim(ImgFXState* state) {
             state->gfxBufs[0] = nullptr;
         }
         if (state->gfxBufs[1] != nullptr) {
-            // imgfx_add_to_cache(state->gfxBufs[1], 1);
-            romEnd = (u8*) state->gfxBufs[1]; // required to match
             imgfx_add_to_cache(state->gfxBufs[1], 1);
             state->gfxBufs[1] = nullptr;
         }
+
+        // Allocate buffers
         state->vtxBufs[0] = heap_malloc(anim->vtxCount * sizeof(Vtx));
         state->vtxBufs[1] = heap_malloc(anim->vtxCount * sizeof(Vtx));
         state->gfxBufs[0] = heap_malloc(anim->gfxCount * sizeof(Gfx));
         state->gfxBufs[1] = heap_malloc(anim->gfxCount * sizeof(Gfx));
 
-        romStart = imgfx_data_ROM_START + (s32)anim->gfxOffset;
-        romEnd = romStart + anim->gfxCount * sizeof(Gfx);
-        dma_copy(romStart, romEnd, state->gfxBufs[0]);
-        dma_copy(romStart, romEnd, state->gfxBufs[1]);
+        // Expand N64 GFX commands (8 bytes each) into port Gfx (w0/w1 are uintptr_t)
+        for (i = 0; i < anim->gfxCount; i++) {
+            u32 w0 = ((u32*)(gfxSrc + i * 8))[0];
+            u32 w1 = ((u32*)(gfxSrc + i * 8))[1];
+            state->gfxBufs[0][i].words.w0 = w0;
+            state->gfxBufs[0][i].words.w1 = w1;
+            state->gfxBufs[1][i].words.w0 = w0;
+            state->gfxBufs[1][i].words.w1 = w1;
+        }
 
-        // Search through the state's displaylists for vertex commands
-        // and adjust their addresses to point into the vertex buffers
+        // Fix up vertex references in display lists
         for (i = 0; i < ARRAY_COUNT(state->gfxBufs); i++) {
             Gfx* gfxBuffer = state->gfxBufs[i];
             s32 j = 0;
             u32 cmd;
 
-            // Loop over the displaylist commands until we hit an ENDDL
             do {
-                u32 w0 = gfxBuffer[j++].words.w0;
+                u32 w0 = (u32)gfxBuffer[j++].words.w0;
                 cmd = w0 >> 0x18;
-
-                // If this command is a vertex command, adjust the vertex buffer address
                 if (cmd == G_VTX) {
-                    // ImgFXVtx structs are 0xC bytes while Vtx are 0x10, so we need a (4/3) scaling factor
-                    // to compute a new, equivalent Vtx[i] address for an existing ImgFXVtx[i] address.
-                    // Unfortunately, using sizeof here does not match.
-                    gfxBuffer[j-1].words.w1 = ((((s32) gfxBuffer[j-1].words.w1 - (s32) anim->keyframesOffset) / 3) * 4) +
-                                              (s32) state->vtxBufs[i];
+                    // ImgFXVtx structs are 0xC bytes while Vtx are 0x10, so (4/3) scaling factor
+                    u32 vtxSegAddr = (u32)gfxBuffer[j-1].words.w1;
+                    u32 byteOffset = vtxSegAddr - n64KeyframesOffset;
+                    gfxBuffer[j-1].words.w1 = (uintptr_t)state->vtxBufs[i] + (byteOffset / 3) * 4;
                 }
             } while (cmd != G_ENDDL);
         }
@@ -1305,14 +1316,10 @@ void imgfx_mesh_anim_update(ImgFXState* state) {
         }
     }
 
-    // find the current + next keyframe vertex data
-    curKeyframe = heap_malloc(header->vtxCount * sizeof(ImgFXVtx));
-    romStart = (u8*)((s32)imgfx_data_ROM_START + (s32) header->keyframesOffset + curKeyIdx * header->vtxCount * sizeof(ImgFXVtx));
-    dma_copy(romStart, romStart + header->vtxCount * sizeof(ImgFXVtx), curKeyframe);
+    // keyframesOffset is a direct pointer into the OTR blob (set by imgfx_load_anim)
+    curKeyframe = header->keyframesOffset + curKeyIdx * header->vtxCount;
     if (keyframeInterval > 1) {
-        nextKeyframe = heap_malloc(header->vtxCount * sizeof(*nextKeyframe));
-        romStart = (u8*)((s32)imgfx_data_ROM_START + (s32) header->keyframesOffset + nextKeyIdx * header->vtxCount * sizeof(ImgFXVtx));
-        dma_copy(romStart, romStart + header->vtxCount * sizeof(ImgFXVtx), nextKeyframe);
+        nextKeyframe = header->keyframesOffset + nextKeyIdx * header->vtxCount;
     }
 
     lerpAlpha = (f32) curSubframe / (f32) keyframeInterval;
@@ -1376,11 +1383,6 @@ void imgfx_mesh_anim_update(ImgFXState* state) {
 
     state->firstVtxIdx = 0;
     state->lastVtxIdx = header->vtxCount - 1;
-
-    heap_free(curKeyframe);
-    if (nextKeyframe != nullptr) {
-        heap_free(nextKeyframe);
-    }
 
     if (animStep == 0 || gGameStatusPtr->frameCounter % animStep != 0) {
         return;
@@ -1792,8 +1794,8 @@ void imgfx_appendGfx_mesh_strip(ImgFXState* state, Matrix4f mtx) {
         gDPSetCombineMode(gMainGfxPos++, G_CC_MODULATEIA, G_CC_MODULATEIA);
     }
     gDPSetTextureLUT(gMainGfxPos++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gMainGfxPos++, 0, ufs->palette);
-    gDPScrollTextureTile_4b(gMainGfxPos++, ufs->raster, G_IM_FMT_CI, ufs->width, ufs->height,
+    gDPLoadTLUT_pal16(gMainGfxPos++, 0, LOAD_ASSET(ufs->palette));
+    gDPScrollTextureTile_4b(gMainGfxPos++, LOAD_ASSET(ufs->raster), G_IM_FMT_CI, ufs->width, ufs->height,
                           0, 0, ufs->width - 1, ufs->height - 1, 0,
                           G_TX_WRAP, G_TX_WRAP, shifts, shiftt, G_TX_NOLOD, G_TX_NOLOD,
                           256, 256);
@@ -1806,7 +1808,8 @@ void imgfx_appendGfx_mesh_strip(ImgFXState* state, Matrix4f mtx) {
 
     state->floats.overlay.posX = (s32)(state->floats.overlay.posX + ufs->offsetX) % (ufs->width * 4);
     state->floats.overlay.posY = (s32)(state->floats.overlay.posY + ufs->offsetY) % (ufs->height * 4);
-    gSPDisplayList(gMainGfxPos++, ufs->displayList);
+    //TODO: no need for LOAD_ASSET here.
+    gSPDisplayList(gMainGfxPos++, (Gfx*) LOAD_ASSET(ufs->displayList));
     gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
 }
 
@@ -1875,15 +1878,15 @@ void imgfx_mesh_make_wavy(ImgFXState* state) {
         angle3 = state->floats.wavy.phase3 + (angleInc * 45) + (sign * 180);
 
         //TODO find better match
-        v1 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (s32)imgfx_vtxBuf);
+        v1 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (uintptr_t)imgfx_vtxBuf);
         vx = v1->v.ob[0];
         v1->v.ob[0] = (vx + (sin_deg(angle1) * state->ints.wavy.mag.x));
 
-        v2 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (s32)imgfx_vtxBuf);
+        v2 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (uintptr_t)imgfx_vtxBuf);
         vy = v2->v.ob[1];
         v2->v.ob[1] = (vy + (sin_deg(angle2) * state->ints.wavy.mag.y));
 
-        v3 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (s32)imgfx_vtxBuf);
+        v3 = (Vtx*)((state->firstVtxIdx + i) * sizeof(Vtx) + (uintptr_t)imgfx_vtxBuf);
         vz = v3->v.ob[2];
         v3->v.ob[2] = (vz + (sin_deg(angle3) * state->ints.wavy.mag.z));
 

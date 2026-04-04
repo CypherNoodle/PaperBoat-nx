@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects.h"
 #include "ld_addrs.h"
+#include "port/Engine.h"
 
 typedef s8 TlbEntry[0x1000];
 typedef TlbEntry TlbMappablePage[15];
@@ -98,10 +99,9 @@ void update_effects(void) {
                     if (sharedData->freeDelay != 0) {
                         sharedData->freeDelay--;
                     } else {
-                        if (sharedData->graphics != nullptr) {
-                            general_heap_free(sharedData->graphics);
-                            sharedData->graphics = nullptr;
-                        }
+                        // On port, graphics is always nullptr or (void*)1 sentinel.
+                        // Never heap-allocated, so never free.
+                        sharedData->graphics = nullptr;
                         sharedData->flags = 0;
                         osUnmapTLB(i);
                     }
@@ -118,19 +118,24 @@ void render_effects_scene(void) {
         EffectInstance* effectInstance = gEffectInstances[i];
 
         if (effectInstance != nullptr) {
+            FrameInterpolation_RecordOpenChild("effect_render", TAG_EFFECT(i, effectInstance));
             if (effectInstance->flags & FX_INSTANCE_FLAG_ENABLED) {
                 if (effectInstance->flags & FX_INSTANCE_FLAG_HAS_UPDATED) {
-                    if (gGameStatusPtr->context != CONTEXT_WORLD) {
-                        if (effectInstance->flags & FX_INSTANCE_FLAG_BATTLE) {
-                            effectInstance->shared->renderScene(effectInstance);
-                        }
-                    } else {
-                        if (!(effectInstance->flags & FX_INSTANCE_FLAG_BATTLE)) {
-                            effectInstance->shared->renderScene(effectInstance);
+                    void (*sceneFunc)(EffectInstance*) = effectInstance->shared->renderScene;
+                    if (sceneFunc != nullptr) {
+                        if (gGameStatusPtr->context != CONTEXT_WORLD) {
+                            if (effectInstance->flags & FX_INSTANCE_FLAG_BATTLE) {
+                                sceneFunc(effectInstance);
+                            }
+                        } else {
+                            if (!(effectInstance->flags & FX_INSTANCE_FLAG_BATTLE)) {
+                                sceneFunc(effectInstance);
+                            }
                         }
                     }
                 }
             }
+            FrameInterpolation_RecordCloseChild();
         }
     }
 }
@@ -156,7 +161,8 @@ void render_effects_UI(void) {
                     }
 
                     renderUI = effectInstance->shared->renderUI;
-                    if (renderUI != stub_effect_delegate) {
+                    if (renderUI != nullptr && renderUI != stub_effect_delegate) {
+                        FrameInterpolation_RecordOpenChild("effect_renderUI", TAG_EFFECT(i, effectInstance));
                         if (cond) {
                             Camera* camera = &gCameras[gCurrentCameraID];
 
@@ -182,6 +188,7 @@ void render_effects_UI(void) {
                         }
 
                         renderUI(effectInstance);
+                        FrameInterpolation_RecordCloseChild();
                     }
                 }
             }
@@ -324,15 +331,11 @@ s32 load_effect(s32 effectIndex) {
     // Map space for the effect
     osMapTLB(i, OS_PM_4K, effectEntry->dmaDest, (s32)(gEffectDataBuffer[i]) & 0xFFFFFF, -1, -1);
 
-    // Copy the effect into the newly mapped space
-    dma_copy(effectEntry->dmaStart, effectEntry->dmaEnd, effectEntry->dmaDest);
 
-    // If there's graphics data for the effect, allocate space and copy into the new space
+    // Effect graphics are loaded on-demand via OTR
+    // Set a sentinel so code knows graphics are available but not heap-allocated.
     if (effectEntry->graphicsDmaStart != nullptr) {
-        void* graphics = general_heap_malloc(effectEntry->graphicsDmaEnd - effectEntry->graphicsDmaStart);
-        sharedData->graphics = graphics;
-        ASSERT(graphics != nullptr);
-        dma_copy(effectEntry->graphicsDmaStart, effectEntry->graphicsDmaEnd, sharedData->graphics);
+        sharedData->graphics = (void*)1;  // sentinel: DLs loaded via OTR
     }
 
     // Initialize the newly loaded effect data

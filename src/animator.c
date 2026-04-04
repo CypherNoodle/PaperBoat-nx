@@ -1,6 +1,9 @@
 #include "model.h"
 #include "animation_script.h"
 #include "model.h"
+#include "port/Engine.h"
+#include <stdio.h>
+#include <string.h>
 
 typedef struct DisplayListBufferHandle {
     /* 0x0 */ s32 ttl;
@@ -519,7 +522,9 @@ void update_model_animator(s32 animatorID) {
         return;
     }
 
+    FrameInterpolation_RecordOpenChild("animator", TAG_ANIMATOR(animatorID, animator));
     animator_update_model_transforms(animator, nullptr);
+    FrameInterpolation_RecordCloseChild();
 
     for (i = 0; i < ARRAY_COUNT(D_801533C0); i++) {
         if (D_801533C0[i].ttl >= 0) {
@@ -896,7 +901,7 @@ void appendGfx_animator(ModelAnimator* animator) {
 
 void appendGfx_animator_node(ModelAnimator* animator, AnimatorNode* node, Matrix4f mtx) {
     DisplayListBufferHandle* bufferHandle;
-    u32 w0,w1;
+    uintptr_t w0, w1;
     s32 cmd;
     s32 i;
 
@@ -934,24 +939,30 @@ void appendGfx_animator_node(ModelAnimator* animator, AnimatorNode* node, Matrix
     gDPPipeSync(gMainGfxPos++);
 
     if (node->displayList != nullptr) {
+        Gfx* resolvedDL = (Gfx*) LOAD_ASSET(node->displayList);
         if (node->vertexStartOffset < 0) {
-            gSPDisplayList(gMainGfxPos++, node->displayList);
+            gSPDisplayList(gMainGfxPos++, resolvedDL);
         } else {
             Gfx* gfxPos;
             s32 vtxIdx, dlIdx;
             s32 j = 0;
             s32 k;
 
-            if ((node->displayList[0].words.w0 >> 0x18) != G_ENDDL) {
-                Gfx* gfxPtr = node->displayList;
+            if ((resolvedDL[0].words.w0 >> 0x18) != G_ENDDL) {
+                Gfx* gfxPtr = resolvedDL;
                 s32 endDL = G_ENDDL;
 
                 for(;; j++) {
                     w0 = gfxPtr->words.w0;
-                    gfxPtr++;
                     cmd = w0 >> 0x18;
                     if (cmd == endDL) {
                         break;
+                    }
+                    if (mdl_is_otr_expanded_opcode(cmd)) {
+                        gfxPtr += 2;
+                        j++;
+                    } else {
+                        gfxPtr++;
                     }
                 }
             }
@@ -972,15 +983,60 @@ void appendGfx_animator_node(ModelAnimator* animator, AnimatorNode* node, Matrix
             dlIdx = 0;
 
             do {
-                w0 = ((s32*)node->displayList)[dlIdx++];
-                w1 = ((s32*)node->displayList)[dlIdx++];
+                w0 = resolvedDL[dlIdx].words.w0;
+                w1 = resolvedDL[dlIdx].words.w1;
+                dlIdx++;
                 cmd = w0 >> 0x18;
                 if (cmd == G_ENDDL) {
                     break;
                 }
-                if (cmd == G_VTX) {
-                    s32 startIdx = _SHIFTR(w0,1,7);
-                    s32 vtxCount = _SHIFTR(w0,12,8);
+                if (cmd == G_VTX_OTR_HASH) {
+                    s32 startIdx = _SHIFTR(w0, 1, 7);
+                    s32 vtxCount = _SHIFTR(w0, 12, 8);
+                    Vtx* newBuffer;
+
+                    startIdx -= vtxCount;
+
+                    uint64_t hash = ((uint64_t)(u32)resolvedDL[dlIdx].words.w0 << 32)
+                                  | (u32)resolvedDL[dlIdx].words.w1;
+                    Vtx* vtxBase = (Vtx*)ResourceGetDataByCrc(hash);
+                    dlIdx++; // skip the hash entry
+
+                    if (node->fcData.vtxList == nullptr) {
+                        newBuffer = &vtxBase[node->vertexStartOffset + vtxIdx];
+                        gSPVertex(gfxPos++, newBuffer, vtxCount, startIdx);
+                    } else {
+                        // The DL hash points to VTX stubs for GFX factory.
+                        // For animated meshes we switch to the anim_pos (VEC3S) resource instead.
+                        Vec3s* posData = nullptr;
+                        const char* resName = ResourceGetNameByCrc(hash);
+                        if (resName != nullptr) {
+                            const char* lastSlash = strrchr(resName, '/');
+                            if (lastSlash != nullptr) {
+                                char animPosPath[256];
+                                s32 prefixLen = (s32)(lastSlash - resName);
+                                snprintf(animPosPath, sizeof(animPosPath),
+                                         "__OTR__%.*s/anim_pos", prefixLen, resName);
+                                posData = (Vec3s*)ResourceGetDataByName(animPosPath);
+                            }
+                        }
+                        if (posData == nullptr) {
+                            posData = (Vec3s*)vtxBase; // fallback
+                        }
+                        newBuffer = animator_copy_vertices_to_buffer(
+                            animator,
+                            node,
+                            (Vec3s*)((uintptr_t)posData + (node->vertexStartOffset + vtxIdx) * 0x6),
+                            vtxCount,
+                            startIdx,
+                            vtxIdx
+                        );
+                        gSPVertex(gfxPos++, newBuffer, vtxCount, startIdx);
+                    }
+                    vtxIdx += vtxCount;
+                } else if (cmd == G_VTX) {
+                    s32 startIdx = _SHIFTR(w0, 1, 7);
+                    s32 vtxCount = _SHIFTR(w0, 12, 8);
                     Vtx* newBuffer;
 
                     startIdx -= vtxCount;
@@ -1000,6 +1056,11 @@ void appendGfx_animator_node(ModelAnimator* animator, AnimatorNode* node, Matrix
                         gSPVertex(gfxPos++, newBuffer, vtxCount, startIdx);
                     }
                     vtxIdx += vtxCount;
+                } else if (mdl_is_otr_expanded_opcode(cmd)) {
+                    // Copy both entries of double-width OTR command as-is
+                    *gfxPos++ = resolvedDL[dlIdx - 1];
+                    *gfxPos++ = resolvedDL[dlIdx];
+                    dlIdx++;
                 } else {
                     Gfx* temp[1] = {gfxPos++}; // required to match
                     temp[0]->words.w0 = w0;
@@ -1239,7 +1300,7 @@ void reload_mesh_animator_node(StaticAnimatorNode* node, ModelAnimator* animator
 
         newNode = add_anim_node(animator, parentNodeID, bpPtr);
         newNode->vertexStartOffset = node->vertexStartOffset;
-        newNode->fcData.vtxList = node->vtxList;
+        newNode->fcData.vtxList = (Vtx*) LOAD_ASSET(node->vtxList);
 
         i = 0;
         while (gAnimTreeRoot[i] != node) {

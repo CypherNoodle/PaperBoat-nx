@@ -442,7 +442,7 @@ void filemenu_choose_name_handle_input(MenuPanel* menu) {
                     sfx_play_sound(SOUND_CREATE_FILE_CHANGE_CHARSET);
                     menu->state = FM_INPUT_CHARSET_B;
                     filemenu_set_selected(menu, menu->col, menu->row);
-                    set_window_update(WIN_FILES_INPUT_KEYBOARD, (s32)filemenu_update_change_layout);
+                    set_window_update(WIN_FILES_INPUT_KEYBOARD, (intptr_t)filemenu_update_change_layout);
                 }
                 break;
             case MSG_CHAR_MENU_USE_CHARSET_A:
@@ -450,7 +450,7 @@ void filemenu_choose_name_handle_input(MenuPanel* menu) {
                     sfx_play_sound(SOUND_CREATE_FILE_CHANGE_CHARSET);
                     menu->state = FM_INPUT_CHARSET_A;
                     filemenu_set_selected(menu, menu->col, menu->row);
-                    set_window_update(WIN_FILES_INPUT_KEYBOARD, (s32)filemenu_update_change_layout);
+                    set_window_update(WIN_FILES_INPUT_KEYBOARD, (intptr_t)filemenu_update_change_layout);
                 }
                 break;
             case MSG_CHAR_MENU_BACK:

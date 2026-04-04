@@ -88,6 +88,7 @@ void bgm_update_music_control(void) {
     s32 flags;
 
     for (i; i < ARRAY_COUNT(gMusicControlData); i++, music++) {
+        CALL_CANCELLABLE_CONTINUE_EVENT(MusicControlPreUpdate, music);
         switch (music->state) {
             case MUSIC_STATE_IDLE:
                 break;
@@ -181,6 +182,7 @@ void bgm_update_music_control(void) {
                 }
                 break;
         }
+        CALL_EVENT(MusicControlPostUpdate, music);
     }
     bgm_update_volume();
 }
@@ -194,6 +196,11 @@ s32 _bgm_set_song(s32 playerIndex, s32 songID, s32 variation, s32 fadeOutTime, s
     }
 
     music = &gMusicControlData[playerIndex];
+    s32 result = 1;
+
+    CALL_CANCELLABLE_EVENT_INV(MusicControlSetSong, music, &songID, &variation, &fadeOutTime, &volume, &result) {
+        return result;
+    }
 
     if (!gGameStatusPtr->musicEnabled) {
         snd_song_stop(music->songName);

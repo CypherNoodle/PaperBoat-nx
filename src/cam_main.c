@@ -115,6 +115,7 @@ void render_frame(s32 isSecondPass) {
         }
 
         gCurrentCamID = camID;
+        FrameInterpolation_RecordOpenChild("camera_render", TAG_CAMERA(camID, camera));
 
         if (camera->fpDoPreRender != nullptr) {
             camera->fpDoPreRender(camera);
@@ -248,6 +249,8 @@ void render_frame(s32 isSecondPass) {
         gDPSetColorImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                             osVirtualToPhysical(nuGfxCfb_ptr));
         gDPPipeSync(gMainGfxPos++);
+
+        FrameInterpolation_RecordCloseChild();
     }
 }
 

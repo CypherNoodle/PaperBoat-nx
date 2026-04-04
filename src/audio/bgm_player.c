@@ -967,7 +967,7 @@ void au_bgm_load_phrase(BGMPlayer* player, u32 cmd) {
                         track->firstVoice = linkedTrack->firstVoice;
                         track->lastVoice = linkedTrack->lastVoice;
 
-                        track->bgmReadPos = (track->bgmReadPos + (s32)player->phraseStartPos);
+                        track->bgmReadPos = (track->bgmReadPos + (intptr_t)player->phraseStartPos);
                         track->delayTime = 1;
 
                         track->linkedTrackID = linkedID;
@@ -985,7 +985,7 @@ void au_bgm_load_phrase(BGMPlayer* player, u32 cmd) {
                     curVoice += count;
                     track->lastVoice = curVoice;
 
-                    track->bgmReadPos = (track->bgmReadPos + (s32)player->phraseStartPos);
+                    track->bgmReadPos = (track->bgmReadPos + (intptr_t)player->phraseStartPos);
                     track->delayTime = 1;
                 }
             } else {

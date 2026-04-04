@@ -1,76 +1,7 @@
 #include "pause/pause_common.h"
 #include "message_ids.h"
-#include "include_asset.h"
-
-#include "pause/image_143BF0.png.h"
-#include "pause/image_143FF0.png.h"
-#include "pause/world_map.png.h"
-#include "pause/world_map.png.h"
-#include "pause/spirits_bg.png.h"
-#include "pause/orbs.png.h"
-#include "pause/map_location.png.h"
-#include "pause/map_path_marker.png.h"
-#include "pause/map_arrows.png.h"
-#include "pause/banner_hp.png.h"
-#include "pause/banner_fp.png.h"
-#include "pause/banner_bp.png.h"
-#include "pause/banner_boots.png.h"
-#include "pause/banner_hammer.png.h"
-#include "pause/banner_star_energy.png.h"
-#include "pause/available.png.h"
-#include "pause/prompt_check_abilities.png.h"
-#include "pause/stats_bar.png.h"
-
-INCLUDE_IMG("pause/image_1439F0.png", pause_image_1439F0_png);
-INCLUDE_IMG("pause/image_143BF0.png", pause_image_143BF0_png);
-INCLUDE_IMG("pause/image_143FF0.png", pause_image_143FF0_png);
-INCLUDE_IMG("pause/world_map.png", pause_world_map_png);
-INCLUDE_PAL("pause/world_map.pal", pause_world_map_pal);
-INCLUDE_IMG("pause/spirits_bg.png", pause_spirits_bg_png);
-INCLUDE_PAL("pause/spirits_bg.pal", pause_spirits_bg_pal);
-INCLUDE_IMG("pause/orbs.png", pause_orbs_png);
-INCLUDE_IMG("pause/map_location.png", pause_map_location_png);
-INCLUDE_IMG("pause/map_path_marker.png", pause_map_path_marker_png);
-INCLUDE_IMG("pause/map_arrows.png", pause_arrows_png);
-#if !VERSION_PAL
-INCLUDE_IMG("pause/banner_hp.png", pause_banner_hp_png);
-INCLUDE_PAL("pause/banner_hp.pal", pause_banner_hp_pal);
-INCLUDE_IMG("pause/banner_fp.png", pause_banner_fp_png);
-INCLUDE_PAL("pause/banner_fp.pal", pause_banner_fp_pal);
-INCLUDE_IMG("pause/banner_bp.png", pause_banner_bp_png);
-INCLUDE_PAL("pause/banner_bp.pal", pause_banner_bp_pal);
-INCLUDE_IMG("pause/banner_boots.png", pause_banner_boots_png);
-INCLUDE_PAL("pause/banner_boots.pal", pause_banner_boots_pal);
-INCLUDE_IMG("pause/banner_hammer.png", pause_banner_hammer_png);
-INCLUDE_PAL("pause/banner_hammer.pal", pause_banner_hammer_pal);
-INCLUDE_IMG("pause/banner_star_energy.png", pause_banner_star_energy_png);
-INCLUDE_PAL("pause/banner_star_energy.pal", pause_banner_star_energy_pal);
-INCLUDE_IMG("pause/available.png", pause_available_png);
-INCLUDE_PAL("pause/available.pal", pause_available_pal);
-INCLUDE_IMG("pause/prompt_check_abilities.png", pause_prompt_check_abilities_png);
-INCLUDE_PAL("pause/prompt_check_abilities.pal", pause_prompt_check_abilities_pal);
-#endif
-INCLUDE_IMG("pause/stats_bar.png", pause_stats_bar_png);
-INCLUDE_PAL("pause/stats_bar.pal", pause_stats_bar_pal);
-
-#if VERSION_PAL
-extern u8 pause_prompt_check_abilities_png[];
-extern u8 pause_available_png[];
-extern u8 pause_available_pal[];
-extern u8 pause_banner_star_energy_png[];
-extern u8 pause_prompt_check_abilities_pal[];
-extern u8 pause_banner_hammer_png[];
-extern u8 pause_banner_hammer_pal[];
-extern u8 pause_banner_boots_png[];
-extern u8 pause_banner_hp_pal[];
-extern u8 pause_banner_hp_png[];
-extern u8 pause_banner_fp_pal[];
-extern u8 pause_banner_fp_png[];
-extern u8 pause_banner_bp_pal[];
-extern u8 pause_banner_bp_png[];
-extern u8 pause_banner_boots_pal[];
-extern u8 pause_banner_star_energy_pal[];
-#endif
+// Asset paths defined in assets/misc/pause.h, loaded via OTR
+#include "assets/misc/pause.h"
 
 Gfx PauseGfxBannerHp[] = {
     gsDPPipeSync(),
@@ -491,10 +422,10 @@ s32 gPauseMessages[] = {
     [PAUSE_MSG_TUT_CMD_6]           MSG_MenuTip_BadgeTutorial_14,
     [PAUSE_MSG_TUT_CMD_7]           MSG_MenuTip_BadgeTutorial_15,
 #if !VERSION_PAL
-    [PAUSE_MSG_17]                  (s32) gPauseMsg_17,
-    [PAUSE_MSG_18]                  (s32) gPauseMsg_18,
-    [PAUSE_MSG_19]                  (s32) gPauseMsg_19,
-    [PAUSE_MSG_1A]                  (s32) gPauseMsg_1A,
+    [PAUSE_MSG_17]                  (intptr_t) gPauseMsg_17,
+    [PAUSE_MSG_18]                  (intptr_t) gPauseMsg_18,
+    [PAUSE_MSG_19]                  (intptr_t) gPauseMsg_19,
+    [PAUSE_MSG_1A]                  (intptr_t) gPauseMsg_1A,
 #endif
     [PAUSE_MSG_TAB_STATS]           MSG_MenuTip_StatsTab,
     [PAUSE_MSG_TAB_BADGES]          MSG_MenuTip_BadgesTab,
@@ -519,53 +450,53 @@ s32 gPauseMessages[] = {
     [PAUSE_MSG_TIP_SECRETS]         MSG_MenuTip_Secrets,
     [PAUSE_MSG_TIP_STAR_PIECES]     MSG_MenuTip_StarPieces,
     [PAUSE_MSG_TIP_TIME]            MSG_MenuTip_Time,
-    [PAUSE_MSG_LBL_COINS]           (s32) gPauseMsg_32,
-    [PAUSE_MSG_LBL_STAR_POINTS]     (s32) gPauseMsg_33,
-    [PAUSE_MSG_LBL_STAR_PIECES]     (s32) gPauseMsg_34,
-    [PAUSE_MSG_LBL_TIME]            (s32) gPauseMsg_35,
-    [PAUSE_MSG_LBL_HP]              (s32) gPauseMsg_36,
-    [PAUSE_MSG_LBL_FP]              (s32) gPauseMsg_37,
-    [PAUSE_MSG_LBL_BP]              (s32) gPauseMsg_38,
-    [PAUSE_MSG_SLASH]               (s32) gPauseMsg_39,
-    [PAUSE_MSG_DOT]                 (s32) gPauseMsg_3A,
+    [PAUSE_MSG_LBL_COINS]           (intptr_t) gPauseMsg_32,
+    [PAUSE_MSG_LBL_STAR_POINTS]     (intptr_t) gPauseMsg_33,
+    [PAUSE_MSG_LBL_STAR_PIECES]     (intptr_t) gPauseMsg_34,
+    [PAUSE_MSG_LBL_TIME]            (intptr_t) gPauseMsg_35,
+    [PAUSE_MSG_LBL_HP]              (intptr_t) gPauseMsg_36,
+    [PAUSE_MSG_LBL_FP]              (intptr_t) gPauseMsg_37,
+    [PAUSE_MSG_LBL_BP]              (intptr_t) gPauseMsg_38,
+    [PAUSE_MSG_SLASH]               (intptr_t) gPauseMsg_39,
+    [PAUSE_MSG_DOT]                 (intptr_t) gPauseMsg_3A,
 #if !VERSION_PAL
-    [PAUSE_MSG_3B]                  (s32) gPauseMsg_3B,
+    [PAUSE_MSG_3B]                  (intptr_t) gPauseMsg_3B,
 #endif
-    [PAUSE_MSG_3C]                  (s32) gPauseMsg_3C,
-    [PAUSE_MSG_3D]                  (s32) gPauseMsg_3D,
-    [PAUSE_MSG_3E]                  (s32) gPauseMsg_3E,
+    [PAUSE_MSG_3C]                  (intptr_t) gPauseMsg_3C,
+    [PAUSE_MSG_3D]                  (intptr_t) gPauseMsg_3D,
+    [PAUSE_MSG_3E]                  (intptr_t) gPauseMsg_3E,
 #if !VERSION_PAL
-    [PAUSE_MSG_3F]                  (s32) gPauseMsg_3F,
+    [PAUSE_MSG_3F]                  (intptr_t) gPauseMsg_3F,
 #endif
-    [PAUSE_MSG_40]                  (s32) gPauseMsg_40,
-    [PAUSE_MSG_41]                  (s32) gPauseMsg_41,
-    [PAUSE_MSG_42]                  (s32) gPauseMsg_42,
-    [PAUSE_MSG_MARIO]               (s32) gPauseMsg_43,
-    [PAUSE_MSG_LEVEL]               (s32) gPauseMsg_44,
+    [PAUSE_MSG_40]                  (intptr_t) gPauseMsg_40,
+    [PAUSE_MSG_41]                  (intptr_t) gPauseMsg_41,
+    [PAUSE_MSG_42]                  (intptr_t) gPauseMsg_42,
+    [PAUSE_MSG_MARIO]               (intptr_t) gPauseMsg_43,
+    [PAUSE_MSG_LEVEL]               (intptr_t) gPauseMsg_44,
     [PAUSE_MSG_NO_BADGE]            MSG_MenuTip_None,
-    [PAUSE_MSG_BADGE_BP]            (s32) gPauseMsg_46,
-    [PAUSE_MSG_ALL_BADGES]          (s32) gPauseMsg_47,
+    [PAUSE_MSG_BADGE_BP]            (intptr_t) gPauseMsg_46,
+    [PAUSE_MSG_ALL_BADGES]          (intptr_t) gPauseMsg_47,
 #if VERSION_PAL
-    [PAUSE_MSG_PAL_42]              (s32) gPauseMsg_PAL_42,
+    [PAUSE_MSG_PAL_42]              (intptr_t) gPauseMsg_PAL_42,
 #endif
-    [PAUSE_MSG_ACTIVE]              (s32) gPauseMsg_48,
-    [PAUSE_MSG_BADGES]              (s32) gPauseMsg_49,
-    [PAUSE_MSG_NOT_ENOUGH_BP]       (s32) gPauseMsg_4A,
-    [PAUSE_MSG_DONT_WEAR_MORE]      (s32) gPauseMsg_4B,
+    [PAUSE_MSG_ACTIVE]              (intptr_t) gPauseMsg_48,
+    [PAUSE_MSG_BADGES]              (intptr_t) gPauseMsg_49,
+    [PAUSE_MSG_NOT_ENOUGH_BP]       (intptr_t) gPauseMsg_4A,
+    [PAUSE_MSG_DONT_WEAR_MORE]      (intptr_t) gPauseMsg_4B,
     [PAUSE_MSG_BAGDE_DESC_ALL]      MSG_MenuTip_BadgeTab_All,
     [PAUSE_MSG_BAGDE_DESC_ACTIVE]   MSG_MenuTip_BadgeTab_Equipped,
     [PAUSE_MSG_BAGDE_DESC_NONE]     MSG_MenuTip_None,
-    [PAUSE_MSG_KEY_ITEMS]           (s32) gPauseMsg_4F,
+    [PAUSE_MSG_KEY_ITEMS]           (intptr_t) gPauseMsg_4F,
 #if VERSION_PAL
-    [PAUSE_MSG_PAL_4B]              (s32) gPauseMsg_PAL_4B,
+    [PAUSE_MSG_PAL_4B]              (intptr_t) gPauseMsg_PAL_4B,
 #endif
-    [PAUSE_MSG_CONSUMABLES]         (s32) gPauseMsg_50,
+    [PAUSE_MSG_CONSUMABLES]         (intptr_t) gPauseMsg_50,
     [PAUSE_MSG_DESC_CONSUMABLES]    MSG_MenuTip_ItemTab_Consumables,
     [PAUSE_MSG_DESC_KEY_ITEMS]      MSG_MenuTip_ItemTab_KeyItems,
-    [PAUSE_MSG_PARTNER_HP]          (s32) gPauseMsg_53,
-    [PAUSE_MSG_PARTNER_FP]          (s32) gPauseMsg_54,
-    [PAUSE_MSG_PARTNER_ABILITIES]   (s32) gPauseMsg_55,
-    [PAUSE_MSG_UNKNOWN_SPIRIT]      (s32) gPauseMsg_56,
+    [PAUSE_MSG_PARTNER_HP]          (intptr_t) gPauseMsg_53,
+    [PAUSE_MSG_PARTNER_FP]          (intptr_t) gPauseMsg_54,
+    [PAUSE_MSG_PARTNER_ABILITIES]   (intptr_t) gPauseMsg_55,
+    [PAUSE_MSG_UNKNOWN_SPIRIT]      (intptr_t) gPauseMsg_56,
 };
 
 Gfx* PauseGfxLabels[] = {

@@ -3,9 +3,15 @@
 #include "message_ids.h"
 #include "sprite.h"
 
-#include "charset/charset.h"
-#include "charset/postcard.png.h"
-#include "charset/letter_content_1.png.h"
+#include "port/Engine.h"
+#include "assets/charset.h"
+#include "assets/messages.h"
+
+// On N64, KSEG0 pointers (0x80xxxxxx) are negative as s32, so the original code
+// used sign checks to distinguish message IDs from buffer pointers passed as intptr_t.
+// On 64-bit, heap pointers are always positive, breaking that convention.
+// Valid message IDs are (section << 16 | index) and never exceed 0x01000000.
+#define MSG_ID_IS_PTR(id) ((uintptr_t)(id) > 0x01000000)
 
 enum RewindArrowStates {
     REWIND_ARROW_STATE_INIT = 0,
@@ -14,14 +20,6 @@ enum RewindArrowStates {
     REWIND_ARROW_STATE_CHANGE_COLOR = 3,
     REWIND_ARROW_STATE_CHANGE_COLOR_BACK = 4,
 };
-
-#ifdef SHIFT
-#define MSG_ROM_START (s32)msg_ROM_START
-#elif VERSION_JP
-#define MSG_ROM_START 0x1D40000
-#else
-#define MSG_ROM_START 0x1B83000
-#endif
 
 #if VERSION_PAL
 #define CHOICE_POINTER_MOVE_RATE 5.0
@@ -59,7 +57,7 @@ void* D_PAL_8014AE50[] = {
 };
 #endif
 
-s16 gNextMessageBuffer = 0;
+// s16 gNextMessageBuffer = 0; // no longer needed — messages loaded directly from OTR
 
 Vtx gRewindArrowQuad[] = {
     {{{ -16,   9,   0 }, 0, { 0x000, 0x000 }, { 255, 255, 255, 255 }}},
@@ -92,7 +90,7 @@ s32 gMsgBGScrollAmtY;
 u8* D_8015131C;
 Gfx* D_80151338;
 
-static char gMessageBuffers[2][1024];
+// static char gMessageBuffers[2][1024]; // no longer needed — messages loaded directly from OTR
 static MessagePrintState gMessagePrinters[3];
 #if VERSION_JP
 static s32 D_80155C38;
@@ -212,40 +210,24 @@ void clear_printers(void) {
     load_font(0);
 }
 
-#if VERSION_IQUE
-void load_font_data(Addr offset, u32 size, void* dest) {
-#else
-void load_font_data(Addr offset, u16 size, void* dest) {
-#endif
-    u8* base = charset_ROM_START + (s32) offset;
-
-    dma_copy(base, base + size, dest);
-}
-
 void load_font(s32 font) {
     if (font != D_80155C98) {
         if (font == 0) {
-#if VERSION_JP
-            load_font_data(charset_kana_OFFSET, 0x5710, MsgCharImgKana);
-            load_font_data(charset_latin_OFFSET, 0xBD0, MsgCharImgLatin);
-            load_font_data(charset_kanji_OFFSET, 0x34F0, MsgCharImgTitle); // huh
-            load_font_data(charset_buttons_OFFSET, 0x460, MsgCharImgSubtitle); // what
-            load_font_data(charset_menu_kana_OFFSET, 0x37F8, MsgCharImgMenuKana);
-            load_font_data(charset_menu_latin_OFFSET, 0x798, MsgCharImgMenuLatin);
-#else
-            load_font_data(charset_standard_OFFSET, 0x5100, MsgCharImgNormal);
-#endif
-            load_font_data(charset_standard_pal_OFFSET, 0x500, D_802F4560);
-
-            // fix outline color after loading
-            for (s32 i = 0; i < 80; i++) {
-                // set the transparent color to the outline color but with alpha = 0
-                D_802F4560[i][0] = D_802F4560[i][6] & ~1;
-            }
+// #if VERSION_JP
+//             load_font_data(charset_kana_OFFSET, 0x5710, MsgCharImgKana);
+//             load_font_data(charset_latin_OFFSET, 0xBD0, MsgCharImgLatin);
+//             load_font_data(charset_kanji_OFFSET, 0x34F0, MsgCharImgTitle);
+//             load_font_data(charset_buttons_OFFSET, 0x460, MsgCharImgSubtitle);
+//             load_font_data(charset_menu_kana_OFFSET, 0x37F8, MsgCharImgMenuKana);
+//             load_font_data(charset_menu_latin_OFFSET, 0x798, MsgCharImgMenuLatin);
+// #else
+            MsgCharImgNormal = LOAD_ASSET(CHARSET_STANDARD);
+// #endif
+            D_802F4560 = LOAD_ASSET(CHARSET_STANDARD_PAL);
         } else if (font == 1) {
-            load_font_data(charset_title_OFFSET, 0xF60, MsgCharImgTitle);
-            load_font_data(charset_subtitle_OFFSET, 0xB88, MsgCharImgSubtitle);
-            load_font_data(charset_subtitle_pal_OFFSET, 0x80, D_802F4560);
+            MsgCharImgTitle = LOAD_ASSET(CHARSET_TITLE);
+            MsgCharImgSubtitle = LOAD_ASSET(CHARSET_SUBTITLE);
+            D_802F4560 = LOAD_ASSET(CHARSET_SUBTITLE_PAL);
         }
     }
 }
@@ -260,6 +242,7 @@ void update_messages(void) {
 
     for (i = 0; i < ARRAY_COUNT(gMessagePrinters); i++) {
         if (gMessagePrinters[i].stateFlags & MSG_STATE_FLAG_2) {
+            CALL_CANCELLABLE_CONTINUE_EVENT(MessageUpdate, &gMessagePrinters[i]);
             _update_message(&gMessagePrinters[i]);
         }
     }
@@ -576,6 +559,7 @@ void render_messages(void) {
 
     for (i = 0; i < ARRAY_COUNT(gMessagePrinters); i++) {
         if (gMessagePrinters[i].stateFlags & MSG_STATE_FLAG_2) {
+            CALL_CANCELLABLE_CONTINUE_EVENT(MessageDrawSetup, &gMessagePrinters[i]);
             gSPViewport(gMainGfxPos++, &D_8014C280);
             guOrtho(matrix, 0.0f, 319.0f, -240.0f, 0.0f, -500.0f, 500.0f, 1.0f);
             gSPMatrix(gMainGfxPos++, OS_K0_TO_PHYSICAL(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -590,6 +574,8 @@ void render_messages(void) {
 
     for (i = 0; i < ARRAY_COUNT(gMessagePrinters); i++) {
         if (gMessagePrinters[i].stateFlags & MSG_STATE_FLAG_2) {
+            CALL_CANCELLABLE_CONTINUE_EVENT(MessagePreDraw, &gMessagePrinters[i]);
+
             draw_message_window(&gMessagePrinters[i]);
 
             if (gMessagePrinters[i].windowState == MSG_WINDOW_STATE_WAITING) {
@@ -607,6 +593,8 @@ void render_messages(void) {
             {
                 msg_draw_choice_pointer(&gMessagePrinters[i]);
             }
+
+            CALL_EVENT(MessagePostDraw, &gMessagePrinters[i]);
         }
     }
 }
@@ -800,17 +788,13 @@ void msg_copy_to_print_buffer(MessagePrintState* printer, s32 arg1, s32 arg2) {
                         printer->stateFlags |= MSG_STATE_FLAG_800;
                         printer->delayFlags |= MSG_DELAY_FLAG_1;
                         printer->letterBackgroundImg = heap_malloc(((charset_postcard_png_width * charset_postcard_png_height) / 2));
-                        romAddr = charset_ROM_START + (s32)charset_postcard_OFFSET;
-                        dma_copy(romAddr, romAddr + ((charset_postcard_png_width * charset_postcard_png_height) / 2), printer->letterBackgroundImg);
+                        memcpy(printer->letterBackgroundImg, LOAD_ASSET(CHARSET_POSTCARD), (charset_postcard_png_width * charset_postcard_png_height) / 2);
                         printer->letterBackgroundPal = heap_malloc(0x20);
-                        romAddr = charset_ROM_START + (s32)charset_postcard_pal_OFFSET;
-                        dma_copy(romAddr, romAddr + 0x20, printer->letterBackgroundPal);
+                        memcpy(printer->letterBackgroundPal, LOAD_ASSET(CHARSET_POSTCARD_PAL), 0x20);
                         printer->letterContentImg = heap_malloc(charset_letter_content_1_png_width * charset_letter_content_1_png_height);
-                        romAddr = charset_ROM_START + (s32) MsgLetterRasterOffsets[arg];
-                        dma_copy(romAddr, romAddr + (charset_letter_content_1_png_width * charset_letter_content_1_png_height), printer->letterContentImg);
+                        memcpy(printer->letterContentImg, LOAD_ASSET(CHARSET_LETTER_CONTENT_IMGS[arg]), charset_letter_content_1_png_width * charset_letter_content_1_png_height);
                         printer->letterContentPal = heap_malloc(0x200);
-                        romAddr = charset_ROM_START + (s32) MsgLetterPaletteOffsets[arg];
-                        dma_copy(romAddr, romAddr + 0x200, printer->letterContentPal);
+                        memcpy(printer->letterContentPal, LOAD_ASSET(CHARSET_LETTER_CONTENT_PALS[arg]), 0x200);
                         break;
                     case MSG_STYLE_POPUP:
                     case MSG_STYLE_B:
@@ -990,11 +974,8 @@ void msg_copy_to_print_buffer(MessagePrintState* printer, s32 arg1, s32 arg2) {
                         offset = arg << 8 | argQ;
 
                         D_8015131C = D_80159B50;
-                        dma_copy(icon_ROM_START + gItemIconRasterOffsets[offset],
-                                icon_ROM_START + gItemIconRasterOffsets[offset] + 0x200, a2);
-                        romEnd = icon_ROM_START + gItemIconPaletteOffsets[offset] + 0x20;
-                        dma_copy(icon_ROM_START + gItemIconPaletteOffsets[offset],
-                                 romEnd, D_8015C7E0);
+                        memcpy(a2, LOAD_ASSET((const char*)gItemIconRasterOffsets[offset]), 0x200);
+                        memcpy(D_8015C7E0, LOAD_ASSET((const char*)gItemIconPaletteOffsets[offset]), 0x20);
                         printer->curPrintDelay = printer->printDelayTime;
                         if (--arg1 <= 0) {
                             printer->delayFlags |= MSG_DELAY_FLAG_1;
@@ -1377,57 +1358,21 @@ void initialize_printer(MessagePrintState* printer, s32 arg1, s32 arg2) {
     printer->sizeScale = 1.0f;
 }
 
-#if VERSION_PAL
-void dma_load_msg(u32 msgID, void* dest) {
-    u8* langPtr = D_PAL_8014AE50[gCurrentLanguage];
-    u8* new_langPtr;
-    u8* addr = (u8*) langPtr + (msgID >> 14); // (msgID >> 16) * 4
-    u8* offset[2]; // start, end
-
-    dma_copy(addr, addr + 4, &offset[0]); // Load section offset
-
-    new_langPtr = langPtr;
-    new_langPtr = offset[0] + ((u32) new_langPtr);
-    addr = new_langPtr + ((msgID & 0xFFFF) * 4);
-    dma_copy(addr, addr + 8, &offset); // Load message start and end offsets
-
-    // Load the msg data
-    dma_copy(&langPtr[(u32)offset[0]], &langPtr[(u32)offset[1]], dest);
+static u8* load_msg_asset(u32 msgID) {
+    u32 section = msgID >> 16;
+    u32 index = msgID & 0xFFFF;
+    return (u8*)LOAD_ASSET(gMsgSectionPaths[section][index]);
 }
-#else
-void dma_load_msg(u32 msgID, void* dest) {
-    u8* addr = (u8*) MSG_ROM_START + (msgID >> 14); // (msgID >> 16) * 4
-    u8* offset[2]; // start, end
-
-    dma_copy(addr, addr + 4, &offset[0]); // Load section offset
-
-    addr = MSG_ROM_START + offset[0] + (msgID & 0xFFFF) * 4;
-    dma_copy(addr, addr + 8, &offset); // Load message start and end offsets
-
-    // Load the msg data
-    dma_copy(MSG_ROM_START + offset[0], MSG_ROM_START + offset[1], dest);
-}
-#endif
 
 s8* load_message_to_buffer(s32 msgID) {
-    s8* prevBufferPos;
-
-    dma_load_msg(msgID, &gMessageBuffers[gNextMessageBuffer]);
-    prevBufferPos = gMessageBuffers[gNextMessageBuffer];
-
-    gNextMessageBuffer++;
-    if (gNextMessageBuffer >= ARRAY_COUNT(gMessageBuffers)) {
-        gNextMessageBuffer = 0;
-    }
-
-    return prevBufferPos;
+    return (s8*)load_msg_asset(msgID);
 }
 
-MessagePrintState* msg_get_printer_for_msg(s32 msgID, s32* donePrintingWriteback) {
+MessagePrintState* msg_get_printer_for_msg(intptr_t msgID, bool* donePrintingWriteback) {
     return _msg_get_printer_for_msg(msgID, donePrintingWriteback, 0);
 }
 
-MessagePrintState* _msg_get_printer_for_msg(s32 msgID, s32* donePrintingWriteback, s32 arg2) {
+MessagePrintState* _msg_get_printer_for_msg(intptr_t msgID, bool* donePrintingWriteback, s32 arg2) {
     MessagePrintState* printer;
     s8* srcBuffer;
     s32 height;
@@ -1442,7 +1387,7 @@ MessagePrintState* _msg_get_printer_for_msg(s32 msgID, s32* donePrintingWritebac
     }
 
     srcBuffer = (s8*) msgID;
-    if (msgID >= 0) {
+    if (!MSG_ID_IS_PTR(msgID)) {
         srcBuffer = load_message_to_buffer((s32)srcBuffer);
     }
 
@@ -1473,10 +1418,10 @@ MessagePrintState* _msg_get_printer_for_msg(s32 msgID, s32* donePrintingWritebac
     return nullptr;
 }
 
-s32 msg_printer_load_msg(s32 msgID, MessagePrintState* printer) {
+s32 msg_printer_load_msg(intptr_t msgID, MessagePrintState* printer) {
     s8* buffer;
 
-    if (msgID >= 0) {
+    if (!MSG_ID_IS_PTR(msgID)) {
         buffer = load_message_to_buffer(msgID);
     } else {
         buffer = (s8*) msgID;
@@ -1519,22 +1464,22 @@ void set_message_images(MessageImageData* images) {
     *gMsgVarImages = images;
 }
 
-void set_message_text_var(s32 msgID, s32 index) {
-    u8* mallocSpace = nullptr;
+void set_message_text_var(intptr_t msgID, s32 index) {
     s32 i;
     u8* msgVars;
+    u8* msgData;
 
-    if (msgID >= 0) {
-        mallocSpace = general_heap_malloc(0x400);
-        dma_load_msg(msgID, mallocSpace);
-        msgID = (s32)mallocSpace;
+    if (!MSG_ID_IS_PTR(msgID)) {
+        msgData = load_msg_asset(msgID);
+    } else {
+        msgData = (u8*)msgID;
     }
 
     i = 0;
     msgVars = gMessageMsgVars[index];
     while (true) {
-        msgVars[i] = ((u8*)msgID)[i];
-        if (((u8*)msgID)[i] == MSG_CHAR_READ_END) {
+        msgVars[i] = msgData[i];
+        if (msgData[i] == MSG_CHAR_READ_END) {
             break;
         }
 
@@ -1542,10 +1487,6 @@ void set_message_text_var(s32 msgID, s32 index) {
             msgVars[i - 1] = MSG_CHAR_READ_END;
             break;
         }
-    }
-
-    if (mallocSpace != nullptr) {
-        general_heap_free(mallocSpace);
     }
 }
 
@@ -1670,7 +1611,7 @@ s32 msg_get_draw_char_width(s32 character, s32 charset, s32 variation, f32 msgSc
     return baseWidth * msgScale;
 }
 
-void get_msg_properties(s32 msgID, s32* height, s32* width, s32* maxLineChars, s32* numLines, s32* maxLinesPerPage, s32* numSpaces, u16 charset) {
+void get_msg_properties(intptr_t msgID, s32* height, s32* width, s32* maxLineChars, s32* numLines, s32* maxLinesPerPage, s32* numSpaces, u16 charset) {
     u8* message;
     s32 i;
     u16 pageCount;
@@ -1717,10 +1658,8 @@ void get_msg_properties(s32 msgID, s32* height, s32* width, s32* maxLineChars, s
         return;
     }
 
-    if (msgID >= 0) {
-        buffer = general_heap_malloc(0x400);
-        dma_load_msg(msgID, buffer);
-        message = buffer;
+    if (!MSG_ID_IS_PTR(msgID)) {
+        message = load_msg_asset(msgID);
     } else {
         message = (u8*)msgID;
     }
@@ -1927,10 +1866,6 @@ void get_msg_properties(s32 msgID, s32* height, s32* width, s32* maxLineChars, s
         }
     } while (!stop);
 
-    if (buffer != nullptr) {
-        general_heap_free(buffer);
-    }
-
     for (i = 0; i < lineIndex; i++) {
         if (maxLineWidth < lineWidths[i]) {
             maxLineWidth = lineWidths[i];
@@ -1970,7 +1905,7 @@ void get_msg_properties(s32 msgID, s32* height, s32* width, s32* maxLineChars, s
     }
 }
 
-s32 get_msg_width(s32 msgID, u16 charset) {
+s32 get_msg_width(intptr_t msgID, u16 charset) {
     s32 width;
 
     get_msg_properties(msgID, nullptr, &width, nullptr, nullptr, nullptr, nullptr, charset);
@@ -1978,7 +1913,7 @@ s32 get_msg_width(s32 msgID, u16 charset) {
 }
 
 #if !VERSION_JP
-s32 get_msg_lines(s32 msgID) {
+s32 get_msg_lines(intptr_t msgID) {
     s32 numLines;
 
     get_msg_properties(msgID, nullptr, nullptr, nullptr, &numLines, nullptr, nullptr, 0);
@@ -1986,7 +1921,7 @@ s32 get_msg_lines(s32 msgID) {
 }
 #endif
 
-void draw_msg(s32 msgID, s32 posX, s32 posY, s32 opacity, s32 palette, u8 style) {
+void draw_msg(intptr_t msgID, s32 posX, s32 posY, s32 opacity, s32 palette, u8 style) {
     MessagePrintState stackPrinter;
     MessagePrintState* printer;
     u16 bufferPos;
@@ -2013,13 +1948,11 @@ void draw_msg(s32 msgID, s32 posX, s32 posY, s32 opacity, s32 palette, u8 style)
         printer = &stackPrinter;
         initialize_printer(printer, 1, 0);
 
-        if (msgID < 0) {
+        if (MSG_ID_IS_PTR(msgID)) {
             printer->srcBuffer = (u8*)msgID;
         } else {
-            mallocSpace = general_heap_malloc(0x400);
-            dma_load_msg(msgID, mallocSpace);
-            printer->srcBuffer = mallocSpace;
-            get_msg_properties((s32) printer->srcBuffer, 0, &width, 0, 0, 0, 0, charset);
+            printer->srcBuffer = load_msg_asset(msgID);
+            get_msg_properties((intptr_t) printer->srcBuffer, 0, &width, 0, 0, 0, 0, charset);
             printer->msgWidth = width;
         }
 
@@ -2054,9 +1987,6 @@ void draw_msg(s32 msgID, s32 posX, s32 posY, s32 opacity, s32 palette, u8 style)
         msg_copy_to_print_buffer(printer, 10000, 1);
         appendGfx_message(printer, (s16)posX, (s16)posY, 0, 0, flags, opacity & 0xFF);
 
-        if (mallocSpace != nullptr) {
-            general_heap_free(mallocSpace);
-        }
     }
 }
 

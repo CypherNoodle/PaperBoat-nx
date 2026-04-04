@@ -155,10 +155,10 @@ void filemenu_info_handle_input(MenuPanel* menu) {
         switch (menu->state) {
             case FILE_MENU_CONFIRM:
                 menu->state = FILE_MENU_MAIN;
-                set_window_update(WIN_FILES_STEREO, (s32)filemenu_update_show_options_left);
-                set_window_update(WIN_FILES_MONO, (s32)filemenu_update_show_options_right);
-                set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_options_bottom);
-                set_window_update(WIN_FILES_OPTION_RIGHT, (s32)filemenu_update_show_options_bottom);
+                set_window_update(WIN_FILES_STEREO, (intptr_t)filemenu_update_show_options_left);
+                set_window_update(WIN_FILES_MONO, (intptr_t)filemenu_update_show_options_right);
+                set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_options_bottom);
+                set_window_update(WIN_FILES_OPTION_RIGHT, (intptr_t)filemenu_update_show_options_bottom);
                 filemenu_set_selected(menu, 0, 2);
                 break;
             case FILE_MENU_MESSAGE:

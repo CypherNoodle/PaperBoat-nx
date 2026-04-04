@@ -1,80 +1,50 @@
 #include "common.h"
-#include "ld_addrs.h"
+#include "port/Engine.h"
 
-extern Addr sprite_shading_profiles_data_ROM_START;
-
-/// Packed equivalent of SpriteShadingLightSource as baked into the ROM, smaller due to packed position vector
-typedef struct PackedShadingLightSource {
-    /* 0x00 */ s8 flags;
-    /* 0x01 */ Color_RGB8 rgb;
-    /* 0x04 */ Vec3s pos;
-    /* 0x0A */ f32 falloff;
-    /* 0x0E */ s8 unk_14;
-    /* 0x0F */ char pad_0F[0x1];
-} __attribute__((packed)) PackedShadingLightSource; // size = 0x10
-
-/// Packed equivalent of SpriteShadingProfile as baked into the ROM
-typedef struct PackedShadingProfile {
-    /* 0x00 */ u8 count;
-    /* 0x01 */ char pad_01[0x1];
-    /* 0x02 */ Color_RGB8 ambientColor;
-    /* 0x05 */ u8 ambientPower;
-    /* 0x06 */ PackedShadingLightSource sources[7];
-    /* 0x76 */ char pad_86[0xA];
-} __attribute__((packed)) PackedShadingProfile; // size = 0x100
-
-s32 ShadingOffsetsBuffer[2];
-PackedShadingProfile PackedShadingData;
+extern u8 gSpriteShadingData[0x100];
 
 API_CALLABLE(SetSpriteShading) {
     Bytecode* args = script->ptrReadPos;
     s32 profileID = evt_get_variable(script, *args++);
-    s32 shadingGroupOffset = (profileID >> 0x10) * 8;
-    s32 shadingProfileOffset = (profileID & 0xFFFF) * 4;
-    SpriteShadingProfile* profile;
-    s32 romBase;
-    s32 groupProfiles;
-    s32 groupStart;
-    s32 profileStart;
-    s32 dataOffset;
     s32 i;
+    s32 count;
+    s32 falloff;
+    SpriteShadingProfile* profile;
+    char shadingPath[64];
 
     if (profileID == SHADING_NONE) {
         return ApiStatus_DONE2;
     }
 
-    // load shading group data
-    romBase = (s32)sprite_shading_profiles_ROM_START;
-    dma_copy((u8*)shadingGroupOffset + romBase, (u8*)shadingGroupOffset + romBase + 8, ShadingOffsetsBuffer);
-
-    // load offset to shading data
-    romBase = (s32)sprite_shading_profiles_ROM_START + shadingProfileOffset;
-    groupStart = ShadingOffsetsBuffer[0];
-    groupProfiles = ShadingOffsetsBuffer[1];
-    dma_copy((u8*)groupProfiles + romBase, (u8*)groupProfiles + romBase + 4, ShadingOffsetsBuffer);
-
-    // load shading profile
-    profileStart = ShadingOffsetsBuffer[0];
-    dataOffset = (s32)sprite_shading_profiles_data_ROM_START + groupStart + profileStart;
-    dma_copy((u8*) dataOffset, (u8*) dataOffset + sizeof(PackedShadingData), &PackedShadingData);
+    // Build OTR path from profileID (upper 16 bits = group, lower 16 bits = index)
+    snprintf(shadingPath, sizeof(shadingPath), "__OTR__sprite_shading/g%d_p%d",
+             profileID >> 16, profileID & 0xFFFF);
+    u8* profileData = (u8*)LOAD_ASSET(shadingPath);
+    size_t profileSize = ResourceGetSizeByName(shadingPath);
+    memcpy(gSpriteShadingData, profileData, profileSize);
 
     profile = gSpriteShadingProfile;
-    profile->ambientColor.r = PackedShadingData.ambientColor.r;
-    profile->ambientColor.g = PackedShadingData.ambientColor.g;
-    profile->ambientColor.b = PackedShadingData.ambientColor.b;
-    profile->ambientPower = PackedShadingData.ambientPower;
+    count = gSpriteShadingData[0];
+    profile->ambientColor.r = gSpriteShadingData[2];
+    profile->ambientColor.g = gSpriteShadingData[3];
+    profile->ambientColor.b = gSpriteShadingData[4];
+    profile->ambientPower = gSpriteShadingData[5];
 
-    for (i = 0; i < PackedShadingData.count; i++) {
+    for (i = 0; i < count; i++) {
         SpriteShadingLightSource* source = &gSpriteShadingProfile->sources[i];
-        source->flags = PackedShadingData.sources[i].flags;
-        source->rgb.r = PackedShadingData.sources[i].rgb.r;
-        source->rgb.g = PackedShadingData.sources[i].rgb.g;
-        source->rgb.b = PackedShadingData.sources[i].rgb.b;
-        source->pos.x = PackedShadingData.sources[i].pos.x;
-        source->pos.y = PackedShadingData.sources[i].pos.y;
-        source->pos.z = PackedShadingData.sources[i].pos.z;
-        source->falloff = PackedShadingData.sources[i].falloff;
-        source->unk_14 = PackedShadingData.sources[i].unk_14;
+        source->flags = gSpriteShadingData[6 + 16 * i + 0];
+        source->rgb.r = gSpriteShadingData[6 + 16 * i + 1];
+        source->rgb.g = gSpriteShadingData[6 + 16 * i + 2];
+        source->rgb.b = gSpriteShadingData[6 + 16 * i + 3];
+        source->pos.x = (s16) ((gSpriteShadingData[6 + 16 * i + 4] << 8) + gSpriteShadingData[6 + 16 * i + 5]);
+        source->pos.y = (s16) ((gSpriteShadingData[6 + 16 * i + 6] << 8) + gSpriteShadingData[6 + 16 * i + 7]);
+        source->pos.z = (s16) ((gSpriteShadingData[6 + 16 * i + 8] << 8) + gSpriteShadingData[6 + 16 * i + 9]);
+        falloff = gSpriteShadingData[6 + 16 * i + 13]
+            + (gSpriteShadingData[6 + 16 * i + 12] << 8)
+            + (gSpriteShadingData[6 + 16 * i + 11] << 16)
+            + (gSpriteShadingData[6 + 16 * i + 10] << 24);
+        source->falloff = *(f32*)&falloff;
+        source->unk_14 = gSpriteShadingData[6 + 16 * i + 14];
     }
     gSpriteShadingProfile->flags |= SPR_SHADING_FLAG_ENABLED;
 

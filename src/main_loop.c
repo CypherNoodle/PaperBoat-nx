@@ -5,7 +5,9 @@
 #include "sprite.h"
 #include "overlay.h"
 #include "game_modes.h"
+#include "audio/public.h"
 #include "dx/profiling.h"
+#include "port/interpolation/FrameInterpolation.h"
 
 s32 gOverrideFlags;
 s32 gTimeFreezeMode;
@@ -55,6 +57,8 @@ void step_game_loop(void) {
 
     PlayerData* playerData = &gPlayerData;
     const int MAX_GAME_TIME = (1000*60*60*60) - 1; // 1000 hours minus one frame at 60 fps
+
+    CALL_EVENT(GameFrameUpdate);
 
 #if !VERSION_JP
     update_input();
@@ -178,8 +182,6 @@ void gfx_task_background(void) {
     ASSERT((s32)((u32)((gMainGfxPos - gDisplayContext->backgroundGfx) << 3) >> 3) < ARRAY_COUNT(
                gDisplayContext->backgroundGfx))
 
-    nuGfxTaskStart(&gDisplayContext->backgroundGfx[0], (u32)(gMainGfxPos - gDisplayContext->backgroundGfx) * 8,
-                   NU_GFX_UCODE_F3DEX2, NU_SC_NOSWAPBUFFER);
 }
 
 void gfx_draw_frame(void) {
@@ -189,9 +191,17 @@ void gfx_draw_frame(void) {
     gMainGfxPos = &gDisplayContext->mainGfx[0];
 
     if (gOverrideFlags & GLOBAL_OVERRIDES_DISABLE_DRAW_FRAME) {
-        gCurrentDisplayContextIndex = gCurrentDisplayContextIndex ^ 1;
+        // Still need to end the DL even if skipping render
+        gSPEndDisplayList(gMainGfxPos++);
+        // NOTE: context toggle moved to Graphics_ThreadUpdate
         return;
     }
+
+    // libultraship requires explicit color/depth image targets
+    // Use different sentinel values - if both are the same, libultraship skips fill rectangles
+    // thinking it's a Z buffer clear (see interpreter.cpp GfxDpFillRectangle)
+    gDPSetColorImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, (void*)1);
+    gDPSetDepthImage(gMainGfxPos++, (void*)2);
 
     gSPMatrix(gMainGfxPos++, &MasterIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -204,7 +214,7 @@ void gfx_draw_frame(void) {
     }
 
     player_render_interact_prompts();
-    func_802C3EE4();
+    //func_802C3EE4();
 
     GFX_PROFILER_SWITCH(PROFILER_TIME_SUB_GFX_HUD_ELEMENTS, PROFILER_TIME_SUB_GFX_BACK_UI);
     render_screen_overlay_backUI();
@@ -274,21 +284,12 @@ void gfx_draw_frame(void) {
     gDPFullSync(gMainGfxPos++);
     gSPEndDisplayList(gMainGfxPos++);
 
-    nuGfxTaskStart(gDisplayContext->mainGfx, (u32)(gMainGfxPos - gDisplayContext->mainGfx) * 8, NU_GFX_UCODE_F3DEX2,
-                   NU_SC_TASK_LODABLE | NU_SC_SWAPBUFFER);
-    gCurrentDisplayContextIndex = gCurrentDisplayContextIndex ^ 1;
     crash_screen_set_draw_info(nuGfxCfb_ptr, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
 void load_engine_data(void) {
     s32 i;
 
-    DMA_COPY_SEGMENT(engine4);
-    DMA_COPY_SEGMENT(engine1);
-    DMA_COPY_SEGMENT(evt);
-    DMA_COPY_SEGMENT(entity);
-    DMA_COPY_SEGMENT(engine2);
-    DMA_COPY_SEGMENT(font_width);
 
     gOverrideFlags = 0;
     gGameStatusPtr->unk_79 = 0;

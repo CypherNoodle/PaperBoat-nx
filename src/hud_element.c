@@ -2,6 +2,7 @@
 #include "hud_element.h"
 #include "nu/nusys.h"
 #include "ld_addrs.h"
+#include "port/Engine.h"
 
 #define MAX_HUD_CACHE_ENTRIES 192
 
@@ -121,9 +122,9 @@ BSS s32 FrameQuadIndex;
 void hud_element_setup_cam(void);
 
 void hud_element_load_script(HudElement* hudElement, HudScript* anim) {
-    s32* pos = (s32*)anim;
-    s32 raster;
-    s32 palette;
+    intptr_t* pos = (intptr_t*)anim;
+    intptr_t raster;
+    intptr_t palette;
     s32 preset;
     HudCacheEntry* entry;
     s32 i;
@@ -185,28 +186,10 @@ void hud_element_load_script(HudElement* hudElement, HudScript* anim) {
                 while (true) {
                     if (entry->id == -1) {
                         entry->id = raster;
-                        entry->data = &gHudElementCacheBuffer[*gHudElementCacheSize];
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            capacity = HudElemCacheCapacity;
-                        } else {
-                            capacity = HudElemCacheCapacity / 2;
-                        }
-                        ASSERT(capacity > *gHudElementCacheSize + HudElemSizes[preset].size);
-                        nuPiReadRom((s32)icon_ROM_START + raster, entry->data, HudElemSizes[preset].size);
-                        *gHudElementCacheSize += HudElemSizes[preset].size;
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            *pos = i;
-                        } else {
-                            *pos = (u16)(*pos) | (i << 16);
-                        }
+                        entry->data = (u8*)LOAD_ASSET((const char*)raster);
                         i++;
                         break;
                     } else if (entry->id == raster) {
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            *pos = i;
-                        } else {
-                            *pos = (u16)(*pos) | (i << 16);
-                        }
                         break;
                     }
                     entry++;
@@ -221,28 +204,10 @@ void hud_element_load_script(HudElement* hudElement, HudScript* anim) {
                 while (true) {
                     if (entry->id == -1) {
                         entry->id = palette;
-                        entry->data = &gHudElementCacheBuffer[*gHudElementCacheSize];
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            capacity = HudElemCacheCapacity;
-                        } else {
-                            capacity = HudElemCacheCapacity / 2;
-                        }
-                        ASSERT(capacity > *gHudElementCacheSize + 32);
-                        nuPiReadRom((s32)icon_ROM_START + palette, entry->data, 32);
-                        *gHudElementCacheSize += 32;
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            *pos = i;
-                        } else {
-                            *pos = (u16)(*pos) | (i << 16);
-                        }
+                        entry->data = (u8*)LOAD_ASSET((const char*)palette);
                         i++;
                         break;
                     } else if (entry->id == palette) {
-                        if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                            *pos = i;
-                        } else {
-                            *pos = (u16)(*pos) | (i << 16);
-                        }
                         break;
                     }
                     entry++;
@@ -273,6 +238,8 @@ void hud_element_draw_rect(HudElement* hudElement, s16 texSizeX, s16 texSizeY, s
     s16 baseX, baseY;
     s32 tileMode;
     u16 renderPosX, renderPosY;
+
+    CALL_CANCELLABLE_RETURN_EVENT(HudElementPreDraw, hudElement, &texSizeX, &texSizeY, &drawSizeX, &drawSizeY, &offsetX, &offsetY, &clamp, &dropShadow);
 
     imageAddr = hudElement->imageAddr;
     paletteAddr = hudElement->paletteAddr;
@@ -573,6 +540,8 @@ void hud_element_draw_rect(HudElement* hudElement, s16 texSizeX, s16 texSizeY, s
     }
 
     gDPPipeSync(gMainGfxPos++);
+
+    CALL_EVENT(HudElementPostDraw, hudElement, texSizeX, texSizeY, drawSizeX, drawSizeY, offsetX, offsetY, clamp, dropShadow);
 }
 
 void hud_element_clear_cache(void) {
@@ -788,7 +757,7 @@ s32 hud_element_update(HudElement* hudElement) {
     HudScript* newReadPos;
 
     HudTransform* hudTransform = hudElement->hudTransform;
-    s32* nextPos = (s32*)hudElement->readPos;
+    intptr_t* nextPos = (intptr_t*)hudElement->readPos;
 
     switch (*nextPos++) {
         case HUD_ELEMENT_OP_End:
@@ -1680,7 +1649,9 @@ void render_transformed_hud_elements(void) {
             gSPSetOtherMode(gMainGfxPos++, G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 18, G_AD_DISABLE | G_CD_DISABLE | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE | G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE);
 
             for (i = 0; i < count; i++) {
+                FrameInterpolation_RecordOpenChild("HUD Elements", (*gHudElements)[sortedElements[i]]);
                 render_complex_hud_element((*gHudElements)[sortedElements[i]]);
+                FrameInterpolation_RecordCloseChild();
             }
         }
     }
@@ -1699,7 +1670,9 @@ void render_transformed_hud_elements(void) {
             gSPSetOtherMode(gMainGfxPos++, G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 18, G_AD_DISABLE | G_CD_DISABLE | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE | G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE);
 
             for (i = 0; i < count; i++) {
+                FrameInterpolation_RecordOpenChild("HUD Elements", (*gHudElements)[sortedElements[i]]);
                 render_complex_hud_element((*gHudElements)[sortedElements[i]]);
+                FrameInterpolation_RecordCloseChild();
             }
         }
     }

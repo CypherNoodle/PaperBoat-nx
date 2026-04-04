@@ -247,7 +247,7 @@ void filemenu_yesno_handle_input(MenuPanel* menu) {
                         gWindows[WIN_FILES_MESSAGE].pos.x = CENTER_WINDOW_X(WIN_FILES_MESSAGE);
                         gWindows[WIN_FILES_MESSAGE].pos.y = CENTER_WINDOW_Y(WIN_FILES_MESSAGE);
                         set_window_update(WIN_FILES_MESSAGE, WINDOW_UPDATE_SHOW);
-                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
 
                         selected = filemenu_menus[FILE_MENU_MAIN]->selected;
                         for (i = 0; i < ARRAY_COUNT(gSaveSlotSummary->filename); i++) {
@@ -268,7 +268,7 @@ void filemenu_yesno_handle_input(MenuPanel* menu) {
                         gWindows[WIN_FILES_MESSAGE].pos.x = CENTER_WINDOW_X(WIN_FILES_MESSAGE);
                         gWindows[WIN_FILES_MESSAGE].pos.y = CENTER_WINDOW_Y(WIN_FILES_MESSAGE);
                         set_window_update(WIN_FILES_MESSAGE, WINDOW_UPDATE_SHOW);
-                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                         fio_load_game(filemenu_CopyFromFileIdx);
                         gSaveSlotSummary[filemenu_CopyToFileIdx] = gSaveSlotSummary[filemenu_CopyFromFileIdx];
                         gSaveSlotMetadata[filemenu_CopyToFileIdx] = gSaveSlotMetadata[filemenu_CopyFromFileIdx];
@@ -290,20 +290,20 @@ void filemenu_yesno_handle_input(MenuPanel* menu) {
                         gSaveSlotMetadata[selected].validData = true;
                         strcpy(gSaveSlotMetadata[selected].modName, DX_MOD_NAME);
 
-                        set_window_update(WIN_FILES_INPUT_FIELD, (s32)filemenu_update_hidden_name_input);
-                        set_window_update(WIN_FILES_INPUT_KEYBOARD, (s32)filemenu_update_hidden_name_input);
-                        set_window_update(WIN_FILES_TITLE, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_STEREO, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_MONO, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_CENTER, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_RIGHT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT1_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT2_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT3_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT4_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                        set_window_update(WIN_FILES_INPUT_FIELD, (intptr_t)filemenu_update_hidden_name_input);
+                        set_window_update(WIN_FILES_INPUT_KEYBOARD, (intptr_t)filemenu_update_hidden_name_input);
+                        set_window_update(WIN_FILES_TITLE, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_STEREO, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_MONO, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_CENTER, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_RIGHT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT1_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT2_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT3_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT4_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                         filemenu_currentMenu = FILE_MENU_MESSAGE;
                         filemenu_menus[FILE_MENU_MESSAGE]->state = FM_MESSAGE_CREATED;
                         gWindows[WIN_FILES_MESSAGE].width = 184;
@@ -331,27 +331,27 @@ void filemenu_yesno_handle_input(MenuPanel* menu) {
                     case FM_CONFIRM_DELETE:
                     case FM_CONFIRM_COPY:
                         filemenu_currentMenu = FILE_MENU_MAIN;
-                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                         break;
                     case FM_CONFIRM_CREATE:
                         filemenu_currentMenu = FILE_MENU_INPUT_NAME;
-                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                         break;
                     case FM_CONFIRM_START:
                         filemenu_currentMenu = FILE_MENU_MAIN;
                         selected = filemenu_menus[FILE_MENU_MAIN]->selected;
-                        set_window_update(WIN_FILES_TITLE, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_STEREO, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_MONO, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_CENTER, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_RIGHT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT1_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT2_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT3_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(WIN_FILES_SLOT4_BODY, (s32)filemenu_update_show_with_rotation);
-                        set_window_update(selected + WIN_FILES_SLOT1_BODY, (s32)filemenu_update_deselect_file);
+                        set_window_update(WIN_FILES_TITLE, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_STEREO, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_MONO, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_CENTER, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_RIGHT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT1_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT2_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT3_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(WIN_FILES_SLOT4_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                        set_window_update(selected + WIN_FILES_SLOT1_BODY, (intptr_t)filemenu_update_deselect_file);
                         set_window_update(WIN_FILES_CONFIRM_OPTIONS, WINDOW_UPDATE_HIDE);
                         break;
                 }
@@ -367,27 +367,27 @@ void filemenu_yesno_handle_input(MenuPanel* menu) {
             case FM_CONFIRM_DELETE:
             case FM_CONFIRM_COPY:
                 filemenu_currentMenu = FILE_MENU_MAIN;
-                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                 break;
             case FM_CONFIRM_CREATE:
                 filemenu_currentMenu = FILE_MENU_INPUT_NAME;
-                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32)filemenu_update_hidden_name_confirm);
+                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_hidden_name_confirm);
                 break;
             case FM_CONFIRM_START:
                 filemenu_currentMenu = FILE_MENU_MAIN;
                 selected = filemenu_menus[FILE_MENU_MAIN]->selected;
-                set_window_update(WIN_FILES_TITLE, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_STEREO, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_MONO, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_OPTION_CENTER, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_OPTION_RIGHT, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_OPTION_LEFT, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_SLOT1_BODY, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_SLOT2_BODY, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_SLOT3_BODY, (s32)filemenu_update_show_with_rotation);
-                set_window_update(WIN_FILES_SLOT4_BODY, (s32)filemenu_update_show_with_rotation);
-                set_window_update(selected + WIN_FILES_SLOT1_BODY, (s32)filemenu_update_deselect_file);
+                set_window_update(WIN_FILES_TITLE, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_STEREO, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_MONO, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_OPTION_CENTER, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_OPTION_RIGHT, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_SLOT1_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_SLOT2_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_SLOT3_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(WIN_FILES_SLOT4_BODY, (intptr_t)filemenu_update_show_with_rotation);
+                set_window_update(selected + WIN_FILES_SLOT1_BODY, (intptr_t)filemenu_update_deselect_file);
                 set_window_update(WIN_FILES_CONFIRM_OPTIONS, WINDOW_UPDATE_HIDE);
                 break;
         }

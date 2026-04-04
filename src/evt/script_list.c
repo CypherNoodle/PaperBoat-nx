@@ -250,8 +250,8 @@ Evt* start_script(EvtScript* source, s32 priority, s32 flags) {
     newScript->blockingParent = nullptr;
     newScript->childScript = nullptr;
     newScript->parentScript = nullptr;
-    newScript->owner1.actorID = -1;
-    newScript->owner2.npcID = -1;
+    newScript->owner1.enemy = (struct Enemy*)(intptr_t)-1;
+    newScript->owner2.npc = (struct Npc*)(intptr_t)-1;
     newScript->loopDepth = -1;
     newScript->switchDepth = -1;
     newScript->groupFlags = EVT_GROUP_NOT_BATTLE;
@@ -318,8 +318,8 @@ Evt* start_script_in_group(EvtScript* source, u8 priority, u8 flags, u8 groupFla
     newScript->blockingParent = nullptr;
     newScript->childScript = nullptr;
     newScript->parentScript = nullptr;
-    newScript->owner1.actorID = -1;
-    newScript->owner2.npcID = -1;
+    newScript->owner1.enemy = (struct Enemy*)(intptr_t)-1;
+    newScript->owner2.npc = (struct Npc*)(intptr_t)-1;
     newScript->loopDepth = -1;
     newScript->switchDepth = -1;
     newScript->groupFlags = groupFlags;
@@ -579,27 +579,31 @@ void update_scripts(void) {
             && script->stateFlags != 0
             && !(script->stateFlags & (EVT_FLAG_SUSPENDED | EVT_FLAG_BLOCKED_BY_CHILD | EVT_FLAG_PAUSED))
         ) {
-            b32 stop = false;
-            s32 status;
+            CALL_CANCELLABLE_EVENT(ScriptRequestUpdate, script) {
+                b32 stop = false;
+                s32 status;
 
-            script->frameCounter += script->timeScale;
+                script->frameCounter += script->timeScale;
 
-            do {
-                if (script->frameCounter < 1.0) {
-                    // Continue to next script
-                    break;
-                };
+                do {
+                    if (script->frameCounter < 1.0) {
+                        // Continue to next script
+                        break;
+                    };
 
-                script->frameCounter -= 1.0;
-                status = evt_execute_next_command(script);
-                if (status == EVT_CMD_RESULT_ERROR) {
-                    stop = true;
+                    script->frameCounter -= 1.0;
+                    CALL_CANCELLABLE_EVENT(ScriptFrameUpdate, script, &status) {
+                        status = evt_execute_next_command(script);
+                    }
+                    if (status == EVT_CMD_RESULT_ERROR) {
+                        stop = true;
+                        break;
+                    }
+                } while (status != EVT_CMD_RESULT_YIELD);
+
+                if (stop) {
                     break;
                 }
-            } while (status != EVT_CMD_RESULT_YIELD);
-
-            if (stop) {
-                break;
             }
         }
     }
@@ -608,11 +612,11 @@ void update_scripts(void) {
 
 // Does nothing, is cursed
 void func_802C3EE4(void) {
-    s32 temp;
+    intptr_t temp;
     s32 i;
 
     for (i = 0; i < gScriptListCount; i++) {
-        temp = (s32) (*gCurrentScriptListPtr)[gScriptIndexList[i]];
+        temp = (intptr_t) (*gCurrentScriptListPtr)[gScriptIndexList[i]];
         temp = *((s32*) temp);
         if (temp == gScriptIdList[i]) {
             temp = 1;
@@ -746,7 +750,7 @@ void set_script_group(Evt* script, s32 groupFlags) {
     script->groupFlags = groupFlags;
 }
 
-Trigger* bind_trigger(EvtScript* script, s32 flags, s32 triggerFlagIndex, s32 triggerVar0, s32 triggerVar1,
+Trigger* bind_trigger(EvtScript* script, s32 flags, s32 triggerFlagIndex, intptr_t triggerVar0, intptr_t triggerVar1,
                       s32 priority, s32 arg6) {
     Trigger* trigger;
     TriggerBlueprint bp;

@@ -41,7 +41,7 @@ u8* filemenu_specialSymbols[][5] = {
     [LANGUAGE_ES] = { filemenu_msg_C8, filemenu_msg_C6, filemenu_msg_C7, filemenu_msg_C9, filemenu_msg_CA_es },
 };
 #else
-s32 filemenu_specialSymbols[] = { (s32)filemenu_msg_C6, (s32)filemenu_msg_C7, (s32)filemenu_msg_C8, (s32)filemenu_msg_C9, (s32)filemenu_msg_CA };
+s32 filemenu_specialSymbols[] = { (intptr_t)filemenu_msg_C6, (intptr_t)filemenu_msg_C7, (intptr_t)filemenu_msg_C8, (intptr_t)filemenu_msg_C9, (intptr_t)filemenu_msg_CA };
 #endif
 
 Gfx filemenu_dl_draw_char_init[] = {
@@ -342,13 +342,13 @@ u8 *gFileMenuMessages[] = {
 };
 #else
 s32 gFileMenuMessages[] = {
-    0x00000000, (s32)filemenu_msg_01, (s32)filemenu_msg_02, (s32)filemenu_msg_03, (s32)filemenu_msg_04,
-    (s32)filemenu_msg_05, (s32)filemenu_msg_06, (s32)filemenu_msg_07, (s32)filemenu_msg_08, (s32)filemenu_msg_09,
-    (s32)filemenu_msg_10, (s32)filemenu_msg_11, (s32)filemenu_msg_12, (s32)filemenu_msg_13, (s32)filemenu_msg_14,
-    (s32)filemenu_msg_15, (s32)filemenu_msg_16, (s32)filemenu_msg_17, (s32)filemenu_msg_18, (s32)filemenu_msg_19,
-    (s32)filemenu_msg_20, (s32)filemenu_msg_21, (s32)filemenu_msg_22, (s32)filemenu_msg_23, (s32)filemenu_msg_24,
-    (s32)filemenu_msg_25, (s32)filemenu_msg_26, (s32)filemenu_msg_27, (s32)filemenu_msg_28, (s32)filemenu_msg_29,
-    (s32)filemenu_msg_30, (s32)filemenu_msg_31, (s32)filemenu_msg_32, (s32)filemenu_msg_33, (s32)filemenu_msg_34
+    0x00000000, (intptr_t)filemenu_msg_01, (intptr_t)filemenu_msg_02, (intptr_t)filemenu_msg_03, (intptr_t)filemenu_msg_04,
+    (intptr_t)filemenu_msg_05, (intptr_t)filemenu_msg_06, (intptr_t)filemenu_msg_07, (intptr_t)filemenu_msg_08, (intptr_t)filemenu_msg_09,
+    (intptr_t)filemenu_msg_10, (intptr_t)filemenu_msg_11, (intptr_t)filemenu_msg_12, (intptr_t)filemenu_msg_13, (intptr_t)filemenu_msg_14,
+    (intptr_t)filemenu_msg_15, (intptr_t)filemenu_msg_16, (intptr_t)filemenu_msg_17, (intptr_t)filemenu_msg_18, (intptr_t)filemenu_msg_19,
+    (intptr_t)filemenu_msg_20, (intptr_t)filemenu_msg_21, (intptr_t)filemenu_msg_22, (intptr_t)filemenu_msg_23, (intptr_t)filemenu_msg_24,
+    (intptr_t)filemenu_msg_25, (intptr_t)filemenu_msg_26, (intptr_t)filemenu_msg_27, (intptr_t)filemenu_msg_28, (intptr_t)filemenu_msg_29,
+    (intptr_t)filemenu_msg_30, (intptr_t)filemenu_msg_31, (intptr_t)filemenu_msg_32, (intptr_t)filemenu_msg_33, (intptr_t)filemenu_msg_34
 };
 #endif
 

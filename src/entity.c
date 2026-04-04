@@ -1,38 +1,13 @@
 #include "common.h"
-#include "vars_access.h"
 #include "ld_addrs.h"
 #include "entity.h"
 #include "model.h"
 #include "sprite/player.h"
-
-#ifdef SHIFT
-extern Addr WorldEntityHeapBottom;
-extern Addr WorldEntityHeapBase;
-#define WORLD_ENTITY_HEAP_BOTTOM (s32) WorldEntityHeapBottom
-#define WORLD_ENTITY_HEAP_BASE (s32) WorldEntityHeapBase
-#define entity_jan_iwa_VRAM (void*) entity_jan_iwa_VRAM
-#define entity_sbk_omo_VRAM (void*) entity_sbk_omo_VRAM
-#define entity_default_VRAM (void*) entity_default_VRAM
-#else
-#define WORLD_ENTITY_HEAP_BOTTOM 0x80250000
-#define WORLD_ENTITY_HEAP_BASE 0x80267FF0
-#define entity_jan_iwa_VRAM (void*) 0x802BAE00
-#define entity_sbk_omo_VRAM (void*) 0x802BAE00
-#define entity_default_VRAM (void*) 0x802BAE00
-#endif
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_default_ROM_END;
-extern Addr entity_default_ROM_START;
-extern Addr entity_jan_iwa_ROM_END;
-extern Addr entity_jan_iwa_ROM_START;
-extern Addr entity_sbk_omo_ROM_END;
-extern Addr entity_sbk_omo_ROM_START;
-#endif
+#include <stdio.h>
 
 s32 D_8014AFB0 = 255;
 
-s32 CreateEntityVarArgBuffer[4];
+uintptr_t CreateEntityVarArgBuffer[4];
 HiddenPanelsData gCurrentHiddenPanels;
 s32 gEntityHideMode;
 
@@ -232,14 +207,14 @@ void update_shadows(void) {
     }
 }
 
-void set_entity_commandlist(Entity* entity, s32* entityScript) {
+void set_entity_commandlist(Entity* entity, intptr_t* entityScript) {
     entity->scriptReadPos = entityScript;
     entity->scriptDelay = 1;
     entity->savedReadPos[0] = entity->scriptReadPos;
 }
 
 s32 step_entity_commandlist(Entity* entity) {
-    s32* args = entity->scriptReadPos;
+    intptr_t* args = entity->scriptReadPos;
     s32 ret;
     s32 labelId;
     void (*tempfunc)(Entity*);
@@ -770,18 +745,9 @@ void entity_reset_collision(Entity* entity) {
 }
 
 void load_area_specific_entity_data(void) {
-    //TODO hardcoded map and area IDs, connect these to MapTable.xml eventually
-    if (!isAreaSpecificEntityDataLoaded) {
-        if (gGameStatusPtr->areaID == AREA_JAN || gGameStatusPtr->areaID == AREA_IWA) {
-            DMA_COPY_SEGMENT(entity_jan_iwa);
-        } else if (gGameStatusPtr->areaID == AREA_SBK || gGameStatusPtr->areaID == AREA_OMO) {
-            DMA_COPY_SEGMENT(entity_sbk_omo);
-        } else {
-            DMA_COPY_SEGMENT(entity_default);
-        }
-
-        isAreaSpecificEntityDataLoaded = true;
-    }
+    // No-op on port: area-specific entity code is statically linked,
+    // and entity graphics are loaded from OTR.
+    isAreaSpecificEntityDataLoaded = true;
 }
 
 void clear_entity_data(b32 arg0) {
@@ -858,89 +824,13 @@ void init_entity_data(void) {
 }
 
 void reload_world_entity_data(void) {
-    s32 i;
-    s32 totalSize = 0;
-    s32 temp1;
-    s32 dataLength;
-    void* gfxData;
-    void* animData;
-
-    for (i = 0; i < MAX_ENTITIES; i++) {
-        EntityBlueprint* bp = wEntityBlueprint[i];
-        if (bp == nullptr) {
-            break;
-        }
-
-        if (!(bp->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL)) {
-            void* gfxData;
-
-            dataLength = ((bp->dma.end - bp->dma.start) >> 2);
-            gfxData = (void*)(gEntityHeapBase - totalSize * 4 - dataLength * 4);
-            totalSize += dma_copy(bp->dma.start, bp->dma.end, gfxData) >> 2;
-        } else {
-            DmaEntry* dmaList = bp->dmaList;
-
-            if (bp->entityType == ENTITY_TYPE_RESET_MUNCHLESIA) {
-                gfxData = (void*)gEntityHeapBottom;
-                temp1 = dma_copy(dmaList[0].start, dmaList[0].end, gfxData) >> 2;
-                dma_copy(dmaList[1].start, dmaList[1].end, (void*)(gEntityHeapBottom + temp1 * 4)) >> 2;
-                animData = (void*)(gEntityHeapBottom + temp1 * 4);
-                entity_swizzle_anim_pointers(bp, animData, gfxData);
-            } else {
-                s32 q;
-
-                dataLength = ((dmaList[0].end - dmaList[0].start) >> 2);
-                q = gEntityHeapBase - totalSize * 4;
-                gfxData = (void*)(q - dataLength * 4);
-                totalSize += dma_copy(dmaList[0].start, dmaList[0].end, gfxData) >> 2;
-
-                dataLength = ((dmaList[1].end - dmaList[1].start) >> 2);
-                q = gEntityHeapBase - totalSize * 4;
-                animData = (void*)(q - dataLength * 4);
-                totalSize += dma_copy(dmaList[1].start, dmaList[1].end, animData) >> 2;
-
-                entity_swizzle_anim_pointers(bp, animData, gfxData);
-            }
-        }
-    }
+    // OTR migration: entity data loaded from OTR.
 }
 
 void entity_swizzle_anim_pointers(EntityBlueprint* entityData, void* baseAnim, void* baseGfx) {
-    StaticAnimatorNode* node;
-    s32* ptr = (s32*)((s32)baseAnim + (s32)entityData->modelAnimationNodes);
-
-    while (true) {
-        if (*ptr == -1) {
-            *ptr = 0;
-            return;
-        }
-        node = (StaticAnimatorNode*)((s32)baseAnim + ((*ptr) & 0xFFFF));
-        *ptr++ = (s32)node;
-
-        if ((s32)node->displayList != -1) {
-            node->displayList = (Gfx*)((s32)baseGfx + ((s32)(node->displayList) & 0xFFFF));
-        } else {
-            node->displayList = nullptr;
-        }
-
-        if ((s32)node->sibling != -1) {
-            node->sibling = (StaticAnimatorNode*)((s32)baseAnim + ((s32)(node->sibling) & 0xFFFF));
-        } else {
-            node->sibling = nullptr;
-        }
-
-        if ((s32)node->child != -1) {
-            node->child = (StaticAnimatorNode*)((s32)baseAnim + ((s32)(node->child) & 0xFFFF));
-        } else {
-            node->child = nullptr;
-        }
-
-        if ((s32)node->vtxList != -1) {
-            node->vtxList = (Vtx*)((s32)baseGfx + ((s32)(node->vtxList) & 0xFFFFF));
-        } else {
-            node->vtxList = nullptr;
-        }
-    }
+    // OTR migration: animation nodes are compiled C structs with direct pointers.
+    // Display lists are OTR path strings.
+    // No swizzling needed.
 }
 
 s32 is_entity_data_loaded(Entity* entity, EntityBlueprint* blueprint, s32* loadedStart, s32* loadedEnd) {
@@ -1004,189 +894,28 @@ s32 is_entity_data_loaded(Entity* entity, EntityBlueprint* blueprint, s32* loade
 }
 
 void load_simple_entity_data(Entity* entity, EntityBlueprint* bp, s32 listIndex) {
-    s32 loadedStart;
-    s32 loadedEnd;
-    s32 entitySize;
-    s32 totalSize;
-
-    entity->vertexSegment = 0xA;
-    if (gGameStatusPtr->context == CONTEXT_WORLD) {
-        totalSize = wEntityDataLoadedSize;
-    } else {
-        totalSize = bEntityDataLoadedSize;
-    }
-
-    if (is_entity_data_loaded(entity, bp, &loadedStart, &loadedEnd)) {
-        if (totalSize + ((bp->dma.end - bp->dma.start) >> 2) > 0x5FFCU) {
-            get_entity_type(entity->listIndex);
-            get_entity_type(entity->listIndex);
-            PANIC();
-        }
-        entitySize = (bp->dma.end - bp->dma.start) >> 2;
-        entity->gfxBaseAddr = (void*)(gEntityHeapBase - totalSize * 4 - entitySize * 4);
-        totalSize += dma_copy(bp->dma.start, bp->dma.end, entity->gfxBaseAddr) >> 2;
-        get_entity_type(entity->listIndex);
-    } else {
-        entitySize = (bp->dma.end - bp->dma.start) >> 2;
-        entity->gfxBaseAddr = (void*)(gEntityHeapBase - loadedStart * 4 - entitySize * 4);
-        get_entity_type(entity->listIndex);
-    }
-
-    if (gGameStatusPtr->context == CONTEXT_WORLD) {
-        wEntityDataLoadedSize = totalSize;
-    } else {
-        bEntityDataLoadedSize = totalSize;
-    }
+    // OTR migration: entity model data is loaded from OTR on-demand.
+    // No more DMA loading or entity heap allocation.
 }
 
 void load_split_entity_data(Entity* entity, EntityBlueprint* entityData, s32 listIndex) {
-    s32 swizzlePointers = false;
-    s32 loadedStart, loadedEnd;
-    void* animBaseAddr;
-    s16* animationScript;
-    StaticAnimatorNode** animationNodes;
-    s32 specialSize;
-    s32 dma1size;
-    s32 dma2size_1;
-    s32 dma2size_2;
-    s32 totalLoaded;
-
     if (entityData->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL) {
-        DmaEntry* dmaList = entityData->dmaList;
-        entity->vertexSegment = 0xA;
-
-        switch (entityData->entityType) {
-            case ENTITY_TYPE_RESET_MUNCHLESIA:
-            case ENTITY_TYPE_MUNCHLESIA_ENVELOP:
-            case ENTITY_TYPE_MUNCHLESIA_CHEWING:
-            case ENTITY_TYPE_MUNCHLESIA_RESET1:
-                specialSize = 0x1000;
-                break;
-            case ENTITY_TYPE_MUNCHLESIA_GRAB:
-            case ENTITY_TYPE_MUNCHLESIA_BEGIN_CHEW:
-            case ENTITY_TYPE_MUNCHLESIA_SPIT_OUT:
-            case ENTITY_TYPE_MUNCHLESIA_RESET2:
-                specialSize = 0x2BC0;
-                break;
-            default:
-                specialSize = 0;
-                break;
-        }
-
-        if (specialSize != 0) {
-            if (entityData->entityType == ENTITY_TYPE_RESET_MUNCHLESIA) {
-                is_entity_data_loaded(entity, entityData, &loadedStart, &loadedEnd);
-            }
-            specialSize -= 0x1000;
-
-            dma1size = dma_copy(dmaList[0].start, dmaList[0].end, (void*)(gEntityHeapBottom + specialSize * 4)) / 4;
-            entity->gfxBaseAddr = (void*)(gEntityHeapBottom + specialSize * 4);
-            dma_copy(dmaList[1].start, dmaList[1].end, (void*)(gEntityHeapBottom + specialSize * 4 + dma1size * 4));
-            animBaseAddr = (void*)(gEntityHeapBottom + specialSize * 4 + dma1size * 4);
-            swizzlePointers = true;
-        } else if (is_entity_data_loaded(entity, entityData, &loadedStart, &loadedEnd)) {
-            if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                totalLoaded = wEntityDataLoadedSize;
-            } else {
-                totalLoaded = bEntityDataLoadedSize;
-            }
-
-            if ((totalLoaded + ((dmaList[0].end - dmaList[0].start) >> 2)) > 0x5FFCU) {
-                get_entity_type(entity->listIndex);
-                PANIC();
-            }
-
-            if ((totalLoaded + ((dmaList[1].end - dmaList[1].start) >> 2)) > 0x5FFCU) {
-                get_entity_type(entity->listIndex);
-                PANIC();
-            }
-
-            dma2size_1 = dma_copy(dmaList[0].start, dmaList[0].end, dmaList[0].start + ((gEntityHeapBase - totalLoaded * 4 - (s32)dmaList[0].end) >> 2) * 4) >> 2;
-            entity->gfxBaseAddr = (void*)(gEntityHeapBase - totalLoaded * 4 - dma2size_1 * 4);
-            totalLoaded += dma2size_1;
-
-            dma2size_2 = dma_copy(dmaList[1].start, dmaList[1].end, dmaList[1].start + ((gEntityHeapBase - totalLoaded * 4 - (s32)dmaList[1].end) >> 2) * 4) >> 2;
-            animBaseAddr = (void*)(gEntityHeapBase - totalLoaded * 4 - dma2size_2 * 4);
-            totalLoaded += dma2size_2;
-            get_entity_type(entity->listIndex);
-
-            if (gGameStatusPtr->context == CONTEXT_WORLD) {
-                wEntityDataLoadedSize = totalLoaded;
-            } else {
-                bEntityDataLoadedSize = totalLoaded;
-            }
-            swizzlePointers = true;
-        } else {
-            u32 temp = (dmaList[0].end - dmaList[0].start) >> 2;
-            entity->gfxBaseAddr = (void*)(gEntityHeapBase - loadedStart * 4 - temp * 4);
-            temp = (dmaList[1].end - dmaList[1].start) >> 2;
-            animBaseAddr = (void*)(gEntityHeapBase - loadedEnd * 4 - temp * 4);
-            get_entity_type(entity->listIndex);
-        }
+        entity->virtualModelIndex = create_mesh_animator(entityData->renderCommandList, nullptr);
+        load_mesh_animator_tree(entity->virtualModelIndex, (StaticAnimatorNode**)entityData->modelAnimationNodes);
+        update_model_animator(entity->virtualModelIndex);
+        entity->flags |= ENTITY_FLAG_HAS_ANIMATED_MODEL;
     } else {
         entity->virtualModelIndex = create_model_animator(entityData->renderCommandList);
         load_model_animator_tree(entity->virtualModelIndex, entityData->modelAnimationNodes);
         update_model_animator(entity->virtualModelIndex);
-        return;
     }
-    animationScript = entityData->renderCommandList;
-    animationNodes = (StaticAnimatorNode**)((s32)animBaseAddr + (s32)entityData->modelAnimationNodes);
-    if (swizzlePointers) {
-        entity_swizzle_anim_pointers(entityData, animBaseAddr, entity->gfxBaseAddr);
-    }
-    entity->virtualModelIndex = create_mesh_animator(animationScript, animBaseAddr);
-    load_mesh_animator_tree(entity->virtualModelIndex, animationNodes);
-    update_model_animator(entity->virtualModelIndex);
-    entity->flags |= ENTITY_FLAG_HAS_ANIMATED_MODEL;
 }
 
 s32 func_80111790(EntityBlueprint* data) {
-    s32 i;
-
-    for (i = 0; i < ARRAY_COUNT(*gCurrentEntityListPtr); i++) {
-        Entity* entity = (*gCurrentEntityListPtr)[i];
-
-        if (entity != nullptr && entity->blueprint->dma.start != nullptr) {
-            if (entity->blueprint->dma.start == entity->blueprint) {
-                return true;
-            }
-        }
-    }
     return false;
 }
 
 void entity_free_static_data(EntityBlueprint* data) {
-    s32 freeSlot;
-    s32 size;
-    EntityBlueprint* bp;
-
-    for (freeSlot = 0; freeSlot < MAX_ENTITIES; freeSlot++) {
-        bp = wEntityBlueprint[freeSlot];
-        if (bp == nullptr) {
-            break;
-        }
-    }
-
-    if (freeSlot < MAX_ENTITIES) {
-        bp = wEntityBlueprint[freeSlot - 1];
-        if (bp == data) {
-            if (bp->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL) {
-                DmaEntry* dmaList = bp->dmaList;
-                size = ((dmaList[0].end - dmaList[0].start) >> 2);
-                size += ((dmaList[1].end - dmaList[1].start) >> 2);
-                if (!func_80111790(bp)) {
-                    wEntityBlueprint[freeSlot - 1] = nullptr;
-                    wEntityDataLoadedSize -= size;
-                }
-            } else {
-                size = (bp->dma.end - bp->dma.start) >> 2;
-                if (!func_80111790(bp)) {
-                    wEntityBlueprint[freeSlot - 1] = nullptr;
-                    wEntityDataLoadedSize -= size;
-                }
-            }
-        }
-    }
 }
 
 s32 create_entity(EntityBlueprint* bp, ...) {
