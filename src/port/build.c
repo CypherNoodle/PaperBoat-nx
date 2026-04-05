@@ -7,7 +7,7 @@ const u16 gBuildVersionMinor = 1;
 const u16 gBuildVersionPatch = 0;
 
 const char gGitBranch[] = "dx-develop";
-const char gGitCommitHash[] = "bca66d0";
+const char gGitCommitHash[] = "e62c816";
 const char gGitCommitTag[] = "";
 
 const char gBuildTeam[] = "Caladius";

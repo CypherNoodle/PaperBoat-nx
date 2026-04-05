@@ -9,7 +9,8 @@
 #include "ld_addrs.h"
 #include "boss_common.h"
 #include "mapfs/kzn_bt05_shape.h"
-#include "include_asset.h"
+#include "assets/battle.h"
+#include "port/Engine.h"
 
 #define NAMESPACE A(lava_piranha)
 
@@ -105,9 +106,7 @@ EntityModelScript N(ModelScript4) = {
     ems_End
 };
 
-INCLUDE_IMG("battle/area/kzn2/lava_piranha_vine.png", D_8021C940_5A3020);
-INCLUDE_PAL("battle/area/kzn2/lava_piranha_vine.pal", D_8021CD40_5A3420);
-#include "battle/area/kzn2/lava_piranha_vine.gfx.inc.c"
+// D_8021C940, D_8021CD40, D_8021CF40 vine assets loaded from OTR via assets/battle.h
 
 extern EvtScript N(EVS_Init);
 extern EvtScript N(EVS_Idle);
@@ -531,6 +530,8 @@ void N(worker_render_piranha_vines)(void) {
     renderTask.appendGfx = &N(appendGfx_vines);
     renderTask.appendGfxArg = 0;
     renderTask.dist = 10;
+    renderTask.interpolationName = "piranha_vines_render";
+    renderTask.interpolationTag = TAG_GENERIC(0, &N(VineRenderState));
     renderTask.renderMode = RENDER_MODE_SURFACE_OPA;
 
     queue_render_task(&renderTask);
@@ -548,7 +549,7 @@ API_CALLABLE(N(CreateVineRenderer)) {
 }
 
 static s32 N(unused);
-static s32 N(unusedArray)[64];
+static Bytecode N(unusedArray)[64];
 
 EvtScript N(EVS_Init) = {
     UseArray(N(unusedArray))

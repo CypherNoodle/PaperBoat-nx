@@ -1,7 +1,6 @@
 #include "common.h"
 #include "battle/action_cmd.h"
-#include "battle/action_cmd/whirlwind_bubble.png.h"
-#include "include_asset.h"
+#include "assets/battle.h"
 
 #define NAMESPACE action_command_whirlwind
 
@@ -19,29 +18,7 @@ enum {
 #define HUFF_FILL_TICK 500
 #define BUZZAR_FILL_TICK 600
 
-INCLUDE_IMG("battle/action_cmd/whirlwind_1.png", battle_action_cmd_whirlwind_1_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_1.pal", battle_action_cmd_whirlwind_1_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_2.png", battle_action_cmd_whirlwind_2_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_2.pal", battle_action_cmd_whirlwind_2_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_3.png", battle_action_cmd_whirlwind_3_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_3.pal", battle_action_cmd_whirlwind_3_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_4.png", battle_action_cmd_whirlwind_4_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_4.pal", battle_action_cmd_whirlwind_4_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_5.png", battle_action_cmd_whirlwind_5_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_5.pal", battle_action_cmd_whirlwind_5_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_6.png", battle_action_cmd_whirlwind_6_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_6.pal", battle_action_cmd_whirlwind_6_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_7.png", battle_action_cmd_whirlwind_7_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_7.pal", battle_action_cmd_whirlwind_7_pal);
-
-INCLUDE_IMG("battle/action_cmd/whirlwind_bubble.png", battle_action_cmd_whirlwind_bubble_png);
-INCLUDE_PAL("battle/action_cmd/whirlwind_bubble.pal", battle_action_cmd_whirlwind_bubble_pal);
+// whirlwind textures loaded from OTR via assets/battle.h
 
 HudScript HES_Whirlwind1 = HES_TEMPLATE_CI_ENUM_SIZE(battle_action_cmd_whirlwind_1, 24, 24);
 HudScript HES_Whirlwind2 = HES_TEMPLATE_CI_ENUM_SIZE(battle_action_cmd_whirlwind_2, 24, 24);

@@ -1,8 +1,7 @@
 #include "../area.h"
 #include "sprite.h"
 #include "sprite/npc/Monstar.h"
-#include "battle/area/sam2/actor/img.png.h"
-#include "include_asset.h"
+#include "assets/battle.h"
 
 #define NAMESPACE A(monstar)
 
@@ -144,14 +143,13 @@ EvtScript N(EVS_Init) = {
     End
 };
 
-INCLUDE_IMG("battle/area/sam2/actor/img.png", battle_area_sam2_actor_img_png);
-INCLUDE_PAL("battle/area/sam2/actor/img.pal", battle_area_sam2_actor_img_pal);
+// monstar textures loaded from OTR via assets/battle.h
 
 ImgFXOverlayTexture N(MonstarDetailTexture) = {
-    .raster = battle_area_sam2_actor_img_png,
-    .palette = battle_area_sam2_actor_img_pal,
-    .width = battle_area_sam2_actor_img_png_width,
-    .height = battle_area_sam2_actor_img_png_height,
+    .raster = (IMG_PTR) battle_area_sam2_actor_img_png,
+    .palette = (PAL_PTR) battle_area_sam2_actor_img_pal,
+    .width = 32,
+    .height = 32,
     .offsetX = -4,
     .offsetY = 0,
     .displayList = N(dlist),
@@ -172,7 +170,7 @@ API_CALLABLE(N(UpdateMonstarImgFX)) {
         set_npc_imgfx_comp(part->spriteInstanceID, 0, IMGFX_ALLOC_COLOR_BUF, 20, 0, 0, 255, 0);
     }
 
-    set_npc_imgfx_comp(part->spriteInstanceID, 1, IMGFX_OVERLAY, (s32)&N(MonstarDetailTexture), 255, 0, 255, 0);
+    set_npc_imgfx_comp(part->spriteInstanceID, 1, IMGFX_OVERLAY, (intptr_t)&N(MonstarDetailTexture), 255, 0, 255, 0);
     script->functionTemp[1] += 10;
     if (script->functionTemp[1] >= 360) {
         script->functionTemp[1] %= 360;
