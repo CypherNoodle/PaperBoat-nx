@@ -110,7 +110,7 @@ s32 shop_owner_buy_dialog(s32 messageIndex, s32 itemName, s32 coinCost, s32 bpCo
         } else {
             suffix = MessagePlural;
         }
-        set_message_text_var((s32) suffix, 2);
+        set_message_text_var((intptr_t) suffix, 2);
 #endif
     }
 
@@ -151,7 +151,7 @@ s32 shop_owner_continue_speech_with_quantity(s32 messageIndex, s32 amount) {
         suffixMsg = MessagePlural;
     }
 
-    set_message_text_var((s32) suffixMsg, 1);
+    set_message_text_var((intptr_t) suffixMsg, 1);
 #endif
 
     script = start_script(&EVS_ShopContinueSpeech, EVT_PRIORITY_1, 0);
@@ -800,11 +800,11 @@ void draw_shop_items(void) {
     ShopItemEntity* shopItemEntities;
 
     if (shop->flags & SHOP_FLAG_SHOWING_ITEM_INFO) {
-        set_window_update(WIN_SHOP_ITEM_NAME, (s32) basic_window_update);
-        set_window_update(WIN_SHOP_ITEM_DESC, (s32) basic_window_update);
+        set_window_update(WIN_SHOP_ITEM_NAME, (intptr_t) basic_window_update);
+        set_window_update(WIN_SHOP_ITEM_DESC, (intptr_t) basic_window_update);
     } else {
-        set_window_update(WIN_SHOP_ITEM_NAME, (s32) basic_hidden_window_update);
-        set_window_update(WIN_SHOP_ITEM_DESC, (s32) basic_hidden_window_update);
+        set_window_update(WIN_SHOP_ITEM_NAME, (intptr_t) basic_hidden_window_update);
+        set_window_update(WIN_SHOP_ITEM_DESC, (intptr_t) basic_hidden_window_update);
     }
 
     if (shop->flags & SHOP_FLAG_SHOWING_ITEM_INFO) {

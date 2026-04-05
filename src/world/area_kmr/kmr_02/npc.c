@@ -3,6 +3,7 @@
 #include "model.h"
 #include "game_modes.h"
 #include "sprite/player.h"
+#include "assets/world.h"
 
 extern EvtScript N(EVS_NpcAI_Eldstar_02);
 extern EvtScript N(EVS_NpcAI_Eldstar_02_NoAI);
@@ -78,7 +79,7 @@ EvtScript N(EVS_LetterPrompt_Goompapa) = {
 
 EvtScript N(EVS_LetterReward_Goompapa) = {
     IfEq(LVarC, DELIVERY_ACCEPTED)
-        EVT_GIVE_REWARD(ITEM_LUCKY_DAY)
+        EVT_GIVE_BADGE_REWARD(ITEM_LUCKY_DAY)
     EndIf
     Return
     End
@@ -216,7 +217,8 @@ EvtScript N(EVS_Goombaria_RequestDolly) = {
     Call(ShowChoice, MSG_Choice_0011)
     Wait(10)
     IfEq(LVar0, 0)
-        Call(RemoveItem, ITEM_DOLLY)
+        Call(FindKeyItem, ITEM_DOLLY, LVar0)
+        Call(RemoveKeyItemAt, LVar0)
         ExecWait(N(EVS_HandOverDolly))
         Call(ContinueSpeech, NPC_Goombaria, ANIM_Goombaria_Talk, ANIM_Goombaria_Idle, 0, MSG_CH0_009A)
         Wait(10)
@@ -245,7 +247,7 @@ EvtScript N(EVS_Goombaria_RequestDolly) = {
 };
 
 EvtScript N(EVS_NpcInteract_Goombaria) = {
-    Call(HasItem, ITEM_DOLLY, LVar0)
+    Call(HasKeyItem, ITEM_DOLLY, LVar0)
     IfNe(LVar0, 0)
         ExecWait(N(EVS_Goombaria_RequestDolly))
         Return
@@ -330,13 +332,13 @@ API_CALLABLE(N(IsPlayerHPFull)) {
 
 BSS MessageImageData N(HeartBlockMsgImg);
 
-#include "world/area_kmr/kmr_02/heart_block.png.h"
+#include "port/Engine.h"
 
 API_CALLABLE(N(LoadHeartBlockMsgImg)) {
     N(HeartBlockMsgImg).raster   = N(heart_block_img);
     N(HeartBlockMsgImg).palette  = N(heart_block_pal);
-    N(HeartBlockMsgImg).width    = N(heart_block_img_width);
-    N(HeartBlockMsgImg).height   = N(heart_block_img_height);
+    N(HeartBlockMsgImg).width    = LOAD_ASSET_TEX_WIDTH(N(heart_block_img));
+    N(HeartBlockMsgImg).height   = LOAD_ASSET_TEX_HEIGHT(N(heart_block_img));
     N(HeartBlockMsgImg).format   = G_IM_FMT_CI;
     N(HeartBlockMsgImg).bitDepth = G_IM_SIZ_4b;
     set_message_images(&N(HeartBlockMsgImg));
@@ -533,7 +535,8 @@ EvtScript N(EVS_ReturnToVillage) = {
         Switch(LVar0)
             CaseEq(0)
                 Call(CloseMessage)
-                Call(RemoveItem, ITEM_DOLLY)
+                Call(FindKeyItem, ITEM_DOLLY, LVar0)
+                Call(RemoveKeyItemAt, LVar0)
                 Call(PlayerFaceNpc, NPC_Goombaria, true)
                 Call(PlayerMoveTo, -50, -24, 0)
                 Call(InterpPlayerYaw, 94, 0)
@@ -634,7 +637,7 @@ EvtScript N(EVS_ReturnToVillage) = {
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Idle)
     Call(SetNpcFlagBits, NPC_PARTNER, NPC_FLAG_IGNORE_WORLD_COLLISION, false)
     Wait(10 * DT)
-    EVT_GIVE_REWARD(ITEM_POWER_JUMP)
+    EVT_GIVE_BADGE_REWARD(ITEM_POWER_JUMP)
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Walk)
     Call(NpcMoveTo, NPC_PARTNER, 3, 9, 0)
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Idle)
@@ -795,7 +798,7 @@ EvtScript N(EVS_KootFavorCheck_Goompa) = {
             Call(SetNpcPos, NPC_Goompa, LVar0, LVar1, LVar2)
             Call(SetNpcFlagBits, NPC_Goompa, NPC_FLAG_IGNORE_PLAYER_COLLISION, false)
             Call(SpeakToPlayer, NPC_Goompa, ANIM_Goompa_Talk, ANIM_Goompa_Idle, 0, MSG_CH0_004B)
-            EVT_GIVE_REWARD(ITEM_KOOT_THE_TAPE)
+            EVT_GIVE_KEY_REWARD(ITEM_KOOT_THE_TAPE)
             Call(SpeakToPlayer, NPC_Goompa, ANIM_Goompa_Talk, ANIM_Goompa_Idle, 0, MSG_CH0_004C)
         EndIf
     EndIf
@@ -1665,8 +1668,8 @@ API_CALLABLE(N(func_80242F7C_8B2FEC)) {
         return ApiStatus_BLOCK;
     }
     npc = script->functionTempPtr[2];
-    npc->verticalRenderOffset = sin_deg(script->functionTempF[1]) * 1.5f;
-    script->functionTempF[1] = clamp_angle(script->functionTempF[1] + 18.0f);
+    npc->verticalRenderOffset = sin_deg(script->functionTempF[1].f) * 1.5f;
+    script->functionTempF[1].f = clamp_angle(script->functionTempF[1].f + 18.0f);
     return ApiStatus_BLOCK;
 }
 
