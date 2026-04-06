@@ -59,7 +59,7 @@ void create_audio_system(void) {
 
     for (i = 0; i < ARRAY_COUNT(nuAuTasks); i++) {
         nuAuTasks[i].next = nullptr;
-        nuAuTasks[i].msg = 0;
+        nuAuTasks[i].msg = OS_MESG_32(0);
         nuAuTasks[i].list.t.type = M_AUDTASK;
 #if VERSION_IQUE
         nuAuTasks[i].list.t.ucode_boot = (u64*) rspbootTextStart;
@@ -141,7 +141,7 @@ void nuAuMgr(void* arg) {
                     nuAuTasks[cmdListIndex].list.t.data_ptr = (u64*)cmdListBuf;
                     nuAuTasks[cmdListIndex].list.t.data_size = (cmdListAfter_ptr - cmdListBuf) * sizeof(Acmd);
                     profiler_rsp_started(PROFILER_RSP_AUDIO);
-                    osSendMesg(&nusched.audioRequestMQ, &nuAuTasks[cmdListIndex], OS_MESG_BLOCK);
+                    osSendMesg(&nusched.audioRequestMQ, OS_MESG_PTR(&nuAuTasks[cmdListIndex]), OS_MESG_BLOCK);
                     profiler_rsp_completed(PROFILER_RSP_AUDIO);
                     nuAuCleanDMABuffers();
                     osRecvMesg(&auRtnMesgQ, nullptr, 1);
@@ -191,7 +191,7 @@ void nuAuMgr(void* arg) {
 }
 
 /// DMA callback for audio sample streaming; manages a DMA buffer cache.
-s32 nuAuDmaCallBack(s32 addr, s32 len, void *state, u8 useDma) {
+intptr_t nuAuDmaCallBack(intptr_t addr, s32 len, void *state, u8 useDma) {
     NUDMABuffer* dmaPtr;
     NUDMABuffer* freeBuffer;
     OSIoMesg* mesg;

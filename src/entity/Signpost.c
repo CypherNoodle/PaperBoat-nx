@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ld_addrs.h"
 #include "entity.h"
 #include "assets/entities.h"
 #include "Engine.h"

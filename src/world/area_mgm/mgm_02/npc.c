@@ -35,8 +35,7 @@ extern s32 N(PanelModelIDs)[NUM_PANELS];
 
 BSS s32 D_80248600[NUM_PANELS]; //TODO set name: PanelModelsAssigned
 
-extern IMG_BIN N(panel_peach_img);
-extern PAL_BIN N(panel_peach_pal);
+#include "assets/world.h"
 
 API_CALLABLE(N(SetMsgImgs_Panel));
 
@@ -122,7 +121,7 @@ typedef struct SmashGameData {
 
 void N(appendGfx_score_display)(void* renderData) {
     Enemy* scorekeeper = get_enemy(SCOREKEEPER_ENEMY_IDX);
-    SmashGameData* data = scorekeeper->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = scorekeeper->varTablePtr[SMASH_DATA_VAR_IDX].p;
     HudElemID buttonHID;
     HudElemID meterHID;
     s32 timeLeft;
@@ -175,7 +174,7 @@ void N(appendGfx_score_display)(void* renderData) {
     draw_box(0, WINDOW_STYLE_9, data->windowA_posX, 23, 0, 80, 38, 180, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, nullptr, nullptr, nullptr, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
     draw_msg(MSG_MGM_0047, data->windowA_posX + 42, TEXT_POS_Y, 255, MSG_PAL_WHITE, 0);
     draw_number(NUM_PANELS - data->found, data->windowA_posX + 65, COUNT_POS_Y, DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, 255, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
-    draw_ci_image_with_clipping(&N(panel_peach_img), 32, 32, G_IM_FMT_CI, G_IM_SIZ_4b, &N(panel_peach_pal),
+    draw_ci_image_with_clipping((IMG_PTR)N(panel_peach_img), 32, 32, G_IM_FMT_CI, G_IM_SIZ_4b, (PAL_PTR)N(panel_peach_pal),
         data->windowA_posX + 5, 26, 10, 20, 300, 200, 255);
 
     timeLeft = MIN(data->timeLeft, PLAY_TIME);
@@ -203,7 +202,7 @@ void N(worker_draw_score)(void) {
 }
 
 API_CALLABLE(N(CreateScoreDisplay)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     HudElemID hidButton;
     HudElemID hidMeter;
 
@@ -239,13 +238,13 @@ API_CALLABLE(N(EnableMenus)) {
 }
 
 API_CALLABLE(N(DestroySignpost)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     delete_entity(data->signpostEntity);
     return ApiStatus_DONE2;
 }
 
 API_CALLABLE(N(CreateSignpost)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     s32 entityIndex = create_entity(&Entity_Signpost, 355, 20, -180, 0, 0, 0, 0, MAKE_ENTITY_END);
     data->signpostEntity = entityIndex;
     get_entity_by_index(entityIndex)->boundScriptBytecode = &N(read_sign_instructions);
@@ -254,7 +253,7 @@ API_CALLABLE(N(CreateSignpost)) {
 }
 
 API_CALLABLE(N(OnHitBox)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     s32 hitModelID = evt_get_variable(script, LVarA);
     s32 hitColliderID = evt_get_variable(script, LVarB);
     s32 i;
@@ -302,7 +301,7 @@ API_CALLABLE(N(SetBoxContents)) {
     Enemy* enemy;
     Npc* npc;
 
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     data->found = 0;
     data->timeLeft = PLAY_TIME + 10;
     data->curScore = 0;
@@ -439,7 +438,7 @@ API_CALLABLE(N(RunMinigame)) {
 
     gameFinished = false;
     hittingPeachBlock = false;
-    data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
 
     for (i = 0; i < NUM_BOXES; i++) {
         if (data->box[i].npcID != -1) {
@@ -851,7 +850,7 @@ API_CALLABLE(N(RunMinigame)) {
 
 API_CALLABLE(N(UpdateRecords)) {
     PlayerData* playerData = &gPlayerData;
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     s32 seconds, deciseconds;
     s32 outScore;
 
@@ -882,7 +881,7 @@ API_CALLABLE(N(UpdateRecords)) {
 }
 
 API_CALLABLE(N(GiveCoinReward)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
     s32 coinsLeft = data->curScore;
     s32 increment;
 
@@ -911,7 +910,7 @@ API_CALLABLE(N(GiveCoinReward)) {
 
 API_CALLABLE(N(CleanupGame)) {
     Enemy* enemy = get_enemy(SCOREKEEPER_ENEMY_IDX);
-    SmashGameData* data = enemy->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = enemy->varTablePtr[SMASH_DATA_VAR_IDX].p;
     Npc* npc;
     u32 screenX, screenY,screenZ;
     EffectInstance* writeback;
@@ -978,8 +977,9 @@ API_CALLABLE(N(CleanupGame)) {
 
 API_CALLABLE(N(CreateMinigame)) {
     Enemy* scorekeeper = get_enemy(SCOREKEEPER_ENEMY_IDX);
-    SmashGameData* data = heap_malloc(sizeof(*data));
-    scorekeeper->varTablePtr[SMASH_DATA_VAR_IDX] = data;
+    static SmashGameData dataStorage;
+    SmashGameData* data = &dataStorage;
+    scorekeeper->varTablePtr[SMASH_DATA_VAR_IDX].p = data;
 
     data->windowA_posX = -80;
     data->windowB_posX = SCREEN_WIDTH;
@@ -992,7 +992,7 @@ API_CALLABLE(N(CreateMinigame)) {
 }
 
 API_CALLABLE(N(DestroyMinigame)) {
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX].p;
 
     free_worker(data->workerID);
     hud_element_free(data->buttonHID);

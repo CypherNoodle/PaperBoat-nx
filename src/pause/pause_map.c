@@ -9,10 +9,11 @@
 #define MAP_TITLE_WIDTH 180
 #endif
 
+#include "assets/misc/pause.h"
+
 extern Gfx PauseGfxWorldMap[];
 extern Gfx PauseGfxPathPoints[];
 extern Gfx PauseGfxArrows[];
-extern u8 pause_world_map_png[];
 
 void pause_map_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening);
 void pause_map_draw_title(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening);
@@ -306,7 +307,7 @@ void pause_map_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s
 
 void pause_map_draw_title(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
     s32 msgWidth;
-    s32 msgID;
+    intptr_t msgID;
 
     if (gPauseMenuCurrentTab == 6) {
         if (PauseMapCursorCurrentOption != -1) {

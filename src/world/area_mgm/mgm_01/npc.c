@@ -521,7 +521,7 @@ API_CALLABLE(N(OnBreakBlock)) {
 }
 
 API_CALLABLE(N(CreateBlockEntities)) {
-    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX];
+    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX].p;
     s32 entityIndex;
     s32 initialConfiguration;
     s32 indexA, indexB;
@@ -605,7 +605,7 @@ API_CALLABLE(N(TakeCoinCost)) {
 }
 
 API_CALLABLE(N(InitializePanels)) {
-    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX];
+    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX].p;
     s32 i;
 
     data->curScore = 0;
@@ -626,7 +626,7 @@ API_CALLABLE(N(CreateMinigame)) {
     JumpGameData* data = general_heap_malloc(sizeof(*data));
     HudElemID hid;
 
-    scorekeeper->varTablePtr[JUMP_DATA_VAR_IDX] = data;
+    scorekeeper->varTablePtr[JUMP_DATA_VAR_IDX].p = data;
     data->workerID = create_worker_scene(nullptr, &mgm_01_worker_draw_score);
 
     hid = hud_element_create(&HES_StatusCoin);
@@ -643,7 +643,7 @@ API_CALLABLE(N(CreateMinigame)) {
 }
 
 API_CALLABLE(N(DestroyMinigame)) {
-    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX];
+    JumpGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[JUMP_DATA_VAR_IDX].p;
 
     free_worker(data->workerID);
     hud_element_free(data->hudElemID);

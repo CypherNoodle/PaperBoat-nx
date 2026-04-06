@@ -46,7 +46,7 @@
 #define PHYSICAL_TO_VIRTUAL(addr) ((void*)(uintptr_t)(addr))
 #define VIRTUAL_TO_PHYSICAL(addr) ((uintptr_t)(addr))
 
-#define IS_DEBUG_PANIC(statement, file, line) is_debug_panic(statement, file, line)
+#define IS_DEBUG_PANIC(statement, ...) is_debug_panic(statement)
 
 #define PANIC() IS_DEBUG_PANIC("Panic", __FILE__, __LINE__)
 #define PANIC_MSG(msg, args...) \
@@ -116,11 +116,10 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 #define LAST_DEMO_SCENE_IDX 18
 
 #define WORLD_ENTITY_HEAP_SIZE 0x17FF0
-// Doubled for 64-bit struct growth
-#define COLLISION_HEAP_SIZE 0x30000
+#define COLLISION_HEAP_SIZE 0x18000
 #define GENERAL_HEAP_SIZE 0x54000
 #define SPRITE_HEAP_SIZE 0x80000
-#define BATTLE_HEAP_SIZE 0x4B000
+#define BATTLE_HEAP_SIZE 0x25800
 #define FRAME_BUFFER_SIZE 0x25800
 
 #define CAM_NEAR_CLIP 16

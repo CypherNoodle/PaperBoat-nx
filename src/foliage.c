@@ -187,6 +187,16 @@ API_CALLABLE(SpawnShakeTreeFX) {
     return ApiStatus_DONE2;
 }
 
+API_CALLABLE(ReadSearchBushConfig) {
+    SearchBushConfig* cfg = (SearchBushConfig*) evt_get_variable(script, *script->ptrReadPos++);
+    script->varTable[1] = (Bytecode) cfg->bush;
+    script->varTable[2] = (Bytecode) cfg->drops;
+    script->varTable[3] = (Bytecode) cfg->vectors;
+    script->varTable[4] = (Bytecode) cfg->callback;
+    script->varTable[5] = cfg->type;
+    return ApiStatus_DONE2;
+}
+
 EvtScript EVS_SearchBush = {
     // get player Y to find bottom of bush
     Call(GetGameContext, LVarF)
@@ -195,10 +205,8 @@ EvtScript EVS_SearchBush = {
     Else
         Call(GetPlayerPos, LVar1, LVarF, LVar2)
     EndIf
-    // read SearchBushConfig
-    UseBuf(LVar0)
-    BufRead4(LVar1, LVar2, LVar3, LVar4) // bush models, drops, vectors, callback
-    BufRead1(LVar5) // bush type
+    // read SearchBushConfig (UseBuf/BufRead can't handle 64-bit pointers)
+    Call(ReadSearchBushConfig, LVar0)
     Thread
         Call(ShakeFoliageModels, LVar1, SOUND_SEARCH_BUSH, Float(0.1), Float(1.0), LVarF)
     EndThread
@@ -213,6 +221,17 @@ EvtScript EVS_SearchBush = {
     End
 };
 
+API_CALLABLE(ReadShakeTreeConfig) {
+    ShakeTreeConfig* cfg = (ShakeTreeConfig*) evt_get_variable(script, *script->ptrReadPos++);
+    script->varTable[1] = (Bytecode) cfg->leaves;
+    script->varTable[2] = (Bytecode) cfg->trunk;
+    script->varTable[3] = (Bytecode) cfg->drops;
+    script->varTable[4] = (Bytecode) cfg->vectors;
+    script->varTable[5] = (Bytecode) cfg->callback;
+    script->varTable[6] = cfg->type;
+    return ApiStatus_DONE2;
+}
+
 EvtScript EVS_ShakeTree = {
     SetTimescale(Float(2.0))
     // get player Y to find bottom of tree
@@ -222,10 +241,8 @@ EvtScript EVS_ShakeTree = {
     Else
         Call(GetPlayerPos, LVar1, LVarF, LVar2) // get player Y (ignore X and Z)
     EndIf
-    // read ShakeTreeConfig
-    UseBuf(LVar0)
-    BufRead4(LVar1, LVar2, LVar3, LVar4) // leaf models, trunk models, drops, vectors
-    BufRead2(LVar5, LVar6) // callback, tree type
+    // read ShakeTreeConfig (UseBuf/BufRead can't handle 64-bit pointers)
+    Call(ReadShakeTreeConfig, LVar0)
     Thread
         Call(ShakeFoliageModels, LVar1, SOUND_SHAKE_TREE_LEAVES, Float(0.1), Float(0.2), LVarF)
     EndThread

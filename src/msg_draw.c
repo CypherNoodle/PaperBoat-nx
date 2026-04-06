@@ -3,33 +3,16 @@
 #include "message_ids.h"
 #include "sprite.h"
 
-#include "charset/charset.h"
-#include "charset/postcard.png.h"
-#include "charset/letter_content_1.png.h"
+#include "assets/ui.h"
+#include "port/Engine.h"
 
 //TODO get a real ceil
 s32 my_ceil(f32 f) {
     return (s32)(f + 0.999f);
 }
 
-extern IMG_BIN ui_msg_bubble_left_png[];
-extern IMG_BIN ui_msg_bubble_mid_png[];
-extern IMG_BIN ui_msg_bubble_right_png[];
-extern IMG_BIN ui_msg_arrow_png[];
+// ui_msg_* symbols provided by assets/ui.h (OTR paths)
 extern unsigned char ui_msg_palettes[16][32];
-extern IMG_BIN ui_msg_sign_corner_topleft_png[];
-extern IMG_BIN ui_msg_sign_corner_topright_png[];
-extern IMG_BIN ui_msg_sign_corner_bottomleft_png[];
-extern IMG_BIN ui_msg_sign_corner_bottomright_png[];
-extern IMG_BIN ui_msg_lamppost_corner_bottomright_png[];
-extern IMG_BIN ui_msg_sign_side_top_png[];
-extern IMG_BIN ui_msg_sign_side_left_png[];
-extern IMG_BIN ui_msg_sign_side_right_png[];
-extern IMG_BIN ui_msg_sign_side_bottom_png[];
-extern IMG_BIN ui_msg_sign_fill_png[];
-extern PAL_BIN ui_msg_sign_pal[];
-extern PAL_BIN ui_msg_lamppost_pal[];
-extern IMG_BIN ui_msg_background_png[];
 
 typedef MessageImageData* MessageImageDataList[1];
 
@@ -48,7 +31,7 @@ extern s16 MsgStyleVerticalLineOffsets[];
 
 extern MessageCharset* MsgCharsets[5];
 extern PAL_BIN D_802F4560[80][8];
-extern s32 gMessageBoxFrameParts[2][16];
+extern IMG_BIN* gMessageBoxFrameParts[2][16];
 
 #if VERSION_IQUE
 static IMG_BIN D_801544A0[120][128];
@@ -128,7 +111,7 @@ void msg_draw_speech_bubble(MessagePrintState* printer, s16 posX, s16 posY, s16 
                             s16 height, f32 scaleX, f32 scaleY, u8 opacity, s32 arg9);
 s32 msg_get_draw_char_width(s32 character, s32 charset, s32 variation, f32 msgScale, s32 overrideCharWidth, u16 flags);
 
-void drawbox_message_delegate(s32 data, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
+void drawbox_message_delegate(void* data, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
     MessagePrintState* printer = (MessagePrintState*)data;
 
     appendGfx_message(printer, 0, 0, 0, 0, 4, 0);
@@ -695,10 +678,10 @@ void appendGfx_message(MessagePrintState* printer, s16 posX, s16 posY, u16 addit
                             signRaster = ui_msg_sign_corner_bottomright_png;
                             printer->windowSize.y = 72;
                             msg_drawState->textColor = MSG_PAL_18;
-                            signPalette = ui_msg_sign_pal;
+                            signPalette = (PAL_PTR)LOAD_ASSET(ui_msg_sign_corner_topleft_pal);
                         } else {
                             signRaster = ui_msg_lamppost_corner_bottomright_png;
-                            signPalette = ui_msg_lamppost_pal;
+                            signPalette = (PAL_PTR)LOAD_ASSET(ui_msg_lamppost_corner_bottomright_pal);
                             msg_drawState->textColor = MSG_PAL_1C;
                         }
                         msg_drawState->clipX[0] = 20 + MSG_SIGN_OFFSET_X + 14;
@@ -2041,7 +2024,7 @@ void msg_draw_speech_arrow(MessagePrintState* printer) {
 void msg_draw_frame(s32 posX, s32 posY, s32 sizeX, s32 sizeY, s32 style, s32 palette, s32 fading, s32 bgAlpha, s32 frameAlpha) {
     s32 i;
     s32 frameType;
-    s32 textures[16];
+    IMG_BIN* textures[16];
     u8 r, g, b;
     Rect quads[16];
 

@@ -101,7 +101,7 @@ s32 _show_message(Evt* script, s32 isInitialCall, s32 mode) {
         msg_printer_set_origin_pos(gCurrentPrintContext,
             screenX + ShowMessageScreenOffsetX,
             screenY + ShowMessageScreenOffsetY);
-        script->varTablePtr[12] = speakerNpc;
+        script->varTablePtr[12].p = speakerNpc;
 
         if (speakerNpc != (Npc*) NPC_PLAYER) {
             if (mode == SHOW_MESSAGE_SPEAK_TO_NPC) {
@@ -139,7 +139,7 @@ s32 _show_message(Evt* script, s32 isInitialCall, s32 mode) {
         }
     }
 
-    speakerNpc = script->varTablePtr[12];
+    speakerNpc = script->varTablePtr[12].p;
     if (speakerNpc != (Npc*) NPC_PLAYER) {
         get_screen_coords(gCurrentCameraID, speakerNpc->pos.x, speakerNpc->pos.y + speakerNpc->collisionHeight, speakerNpc->pos.z, &screenX, &screenY, &screenZ);
         animID = script->varTable[13];

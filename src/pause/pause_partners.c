@@ -474,7 +474,7 @@ void pause_partners_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 wid
 }
 
 void pause_partners_draw_title(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
-    s32 msgID = gPartnerPopupProperties[gPausePartnersPartnerIDs[gPausePartnersPartnerIdx[gPausePartnersCurrentPartnerIdx]]].nameMsg;
+    intptr_t msgID = gPartnerPopupProperties[gPausePartnersPartnerIDs[gPausePartnersPartnerIdx[gPausePartnersCurrentPartnerIdx]]].nameMsg;
     s32 level = gPlayerData.partners[gPausePartnersPartnerIDs[gPausePartnersPartnerIdx[gPausePartnersCurrentPartnerIdx]]].level;
     s32 msgWidth = get_msg_width(msgID, 0);
     s32 offset;
@@ -572,7 +572,7 @@ void pause_partners_draw_movelist(MenuPanel* menu, s32 baseX, s32 baseY, s32 wid
 }
 
 void pause_partners_draw_movelist_title(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
-    s32 msgID = pause_get_menu_msg(PAUSE_MSG_PARTNER_ABILITIES);
+    intptr_t msgID = pause_get_menu_msg(PAUSE_MSG_PARTNER_ABILITIES);
     s32 xOffset;
 
 #if VERSION_PAL

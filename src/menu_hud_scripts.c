@@ -1,6 +1,8 @@
-#include"common.h"
+#include "common.h"
 #include "hud_element.h"
 #include "ld_addrs.h"
+#include "assets/ui.h"
+#include "assets/misc/pause.h"
 
 HudScript HES_UnusedBadge = HES_TEMPLATE_CI_ENUM_SIZE(ui_pause_unused_badge_points, 24, 24);
 
@@ -8,7 +10,7 @@ HudScript HES_UnusedBadge_disabled = {
     hs_SetVisible
     hs_SetTileSize(HUD_ELEMENT_SIZE_24x24)
     hs_Loop
-        hs_SetCI_Explicit(60, ui_pause_unused_badge_points, ui_pause_unused_badge_points_disabled_disabled_)
+        hs_SetCI_Explicit(60, ui_pause_unused_badge_points, ui_pause_unused_badge_points_disabled)
     hs_Restart
     hs_End
 };
@@ -19,7 +21,7 @@ HudScript HES_UnusedCompass_disabled = {
     hs_SetVisible
     hs_SetTileSize(HUD_ELEMENT_SIZE_24x24)
     hs_Loop
-        hs_SetCI_Explicit(60, ui_pause_unused_compass, ui_pause_unused_compass_disabled_disabled_)
+        hs_SetCI_Explicit(60, ui_pause_unused_compass, ui_pause_unused_compass_disabled)
     hs_Restart
     hs_End
 };

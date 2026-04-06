@@ -9,6 +9,8 @@ static const ALIGN_ASSET(2) char theater_floor_pal[] = "__OTR__theater/theater_f
 static const ALIGN_ASSET(2) char theater_floor[] = "__OTR__theater/theater_floor";
 static const ALIGN_ASSET(2) char ui_no_controller[] = "__OTR__theater/ui_no_controller";
 
+static const ALIGN_ASSET(2) char theater_gfx[] = "__OTR__theater/theater_gfx";
+
 // Vertices
 static const ALIGN_ASSET(2) char theater_left_wall_vtx[] = "__OTR__theater/theater_left_wall_vtx";
 static const ALIGN_ASSET(2) char theater_right_wall_vtx[] = "__OTR__theater/theater_right_wall_vtx";

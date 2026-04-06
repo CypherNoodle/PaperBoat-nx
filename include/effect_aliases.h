@@ -108,7 +108,7 @@ void flame_main(s32 type, f32 arg1, f32 arg2, f32 arg3, f32 arg4, struct EffectI
 void floating_flower_main(s32 type, f32 posX, f32 posY, f32 posZ, s32 duration);
 void flower_splash_main(f32 posX, f32 posY, f32 posZ, f32 angle);
 void flower_trail_main(s32 triggeredByNpc, f32 posX, f32 posY, f32 posZ, f32 angle, f32 direction);
-void footprint_main(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+void footprint_main(f32 x, f32 y, f32 z, f32 angle, b32 isLeft);
 void gather_energy_pink_main(s32 type, f32 posX, f32 posY, f32 posZ, f32 scale, s32 duration);
 void got_item_outline_main(s32 type, f32 posX, f32 posY, f32 posZ, f32 arg4, struct EffectInstance** outEffect);
 void landing_dust_main(s32 type, f32 x, f32 y, f32 z, f32 arg4);

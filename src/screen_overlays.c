@@ -1,6 +1,6 @@
 #include "common.h"
 #include "overlay.h"
-#include "include_asset.h"
+#include "assets/ui.h"
 
 #define OVERLAY_RENDER_OFF (-1.0f)
 
@@ -13,15 +13,14 @@ ScreenOverlay ScreenOverlays[2];
 
 ScreenTransition CurrentScreenTransition = TRANSITION_END_DEMO_SCENE_BLACK;
 
-INCLUDE_IMG("ui/stencil/star.png", ui_stencil_star_png);
+// TODO: D_8014E8F0, D_8014E9A8, D_8014EA48 use G_ZS_PRIM — check if Fast3D supports this.
+// If not, rewrite OVERLAY_TYPE_2, OVERLAY_TYPE_9, OVERLAY_START_BATTLE with stencil approach.
 
-INCLUDE_IMG("ui/stencil/mario.png", ui_stencil_mario_png);
-
-INCLUDE_IMG("ui/stencil/sharp_circle.png", ui_stencil_sharp_circle_png);
-
-INCLUDE_IMG("ui/stencil/blurry_circle.png", ui_stencil_blurry_circle_png);
-
-#include "vtx/stencil1.vtx.inc.c"
+// #include "vtx/stencil1.vtx.inc.c" — vtx data loaded from OTR
+// TODO: G_ZS_PRIM Z-buffer masking not implemented in Fast3D interpreter.
+// These DLs and vtx stubs are commented out until stencil transitions are rewritten.
+// extern Vtx vtx_stencil1[];
+// extern Vtx vtx_stencil2[];
 
 Gfx Gfx_LoadStencilTex_CommonParams[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
@@ -78,8 +77,11 @@ Gfx Gfx_LoadStencilTex_BlurryCircle[] = {
     gsSPEndDisplayList()
 };
 
-#include "vtx/stencil2.vtx.inc.c"
+// #include "vtx/stencil2.vtx.inc.c" — vtx data loaded from OTR
 
+// TODO: G_ZS_PRIM Z-buffer masking not implemented in Fast3D interpreter.
+// These DLs need rewriting to use stencil texture approach.
+/*
 Gfx D_8014E8F0[] = {
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
@@ -170,6 +172,7 @@ Gfx D_8014EA48[] = {
     gsDPPipeSync(),
     gsDPSetDepthSource(G_ZS_PIXEL)
 };
+*/
 
 void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* overlay) {
     Camera* camera = &gCameras[gCurrentCameraID];
@@ -264,6 +267,8 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             appendGfx_screen_transition_stencil(x1, y1, progress, 0, 0, 0, 0, -1);
             break;
         case OVERLAY_TYPE_2:
+            // TODO: uses G_ZS_PRIM DLs — needs rewrite for Fast3D
+            /*
             s0 = progress;
             guTranslate(&matrixStack[gMatrixListPos], 80.0f, 120.0f, 0.0f);
             gSPMatrix(gMainGfxPos++, &matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -287,8 +292,11 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             gSPMatrix(gMainGfxPos++, &matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gSPDisplayList(gMainGfxPos++, D_8014EA48);
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
+            */
             break;
         case OVERLAY_TYPE_9:
+            // TODO: uses G_ZS_PRIM DLs — needs rewrite for Fast3D
+            /*
             s0 = progress;
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, 0);
             guTranslate(&matrixStack[gMatrixListPos], x1, SCREEN_HEIGHT - y1, 0.0f);
@@ -314,8 +322,11 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, alpha);
             gSPDisplayList(gMainGfxPos++, D_8014E9A8);
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
+            */
             break;
         case OVERLAY_START_BATTLE:
+            // TODO: uses G_ZS_PRIM DLs — needs rewrite for Fast3D
+            /*
             s0 = progress;
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, 0);
             guTranslate(&matrixStack[gMatrixListPos], x1, SCREEN_HEIGHT - y1, 0.0f);
@@ -332,6 +343,7 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, alpha);
             gSPDisplayList(gMainGfxPos++, D_8014E9A8);
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
+            */
             v0 = progress + 40;
             if (progress > 170) {
                 v0 = 170;

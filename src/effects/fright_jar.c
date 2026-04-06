@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/Engine.h"
 
 
 u8 D_E00C2990[] = {

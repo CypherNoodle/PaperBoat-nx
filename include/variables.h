@@ -102,7 +102,8 @@ extern s16 gCurrentCamID;
 
 extern s32 PartnerWishAnims[][5];
 
-extern HeapNode heap_battleHead;
+// On port, heap_battleHead is u8[BATTLE_HEAP_SIZE] — _heap_create needs backing memory
+extern u8 heap_battleHead[BATTLE_HEAP_SIZE];
 
 extern u32 bMarioIdleAnims[];
 extern s32 bMarioDefendAnims[];

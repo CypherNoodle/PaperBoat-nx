@@ -2,7 +2,7 @@
 #include "animation_script.h"
 #include "assets/entities.h"
 
-extern Vtx D_0A000000_E7B0E0[];
+
 
 AnimScript Entity_MunchlesiaEnvelop_Animation = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

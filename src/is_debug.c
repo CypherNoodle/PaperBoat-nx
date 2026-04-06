@@ -1,5 +1,7 @@
 #include "common.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "nu/nusys.h"
 
 void crash_screen_set_assert_info(const char* message);
@@ -104,7 +106,7 @@ char* is_debug_print(char* arg0, const char* str, size_t count) {
 }
 
 void is_debug_panic(const char* message) {
-    crash_screen_set_assert_info(message);
-    *(volatile u32*)0 = 0; // Crash so we can see the crash screen
-    __builtin_unreachable();
+    fprintf(stderr, "PANIC: %s\n", message);
+    fflush(stderr);
+    abort();
 }

@@ -2,6 +2,7 @@
 #define _EFFECTS_INTERNAL_H_
 
 #include "effects.h"
+#include "effects/effect_macros.h"
 
 // slimmed down assert so that all effects still fit under the TLB page size limit of 0x1000 bytes
 #undef ASSERT

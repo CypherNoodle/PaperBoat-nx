@@ -5,7 +5,7 @@
 #include "dx/backtrace.h"
 
 extern u32* gMapFlags;
-extern s32* gMapVars;
+extern Bytecode* gMapVars;
 
 extern char evtDebugPrintBuffer[0x100];
 Bytecode* EvtCallingLine;
@@ -52,7 +52,7 @@ ApiStatus evt_handle_loop(Evt* script) {
 
     ASSERT(loopDepth < 8);
 
-    script->loopStartTable[loopDepth] = (s32)args;
+    script->loopStartTable[loopDepth] = (Bytecode)args;
     script->loopCounterTable[loopDepth] = var;
 
     return ApiStatus_DONE2;
@@ -827,7 +827,7 @@ ApiStatus evt_handle_get_Nth_float(Evt* script) {
 }
 
 ApiStatus evt_handle_set_array(Evt* script) {
-    script->array = (s32*)evt_get_variable(script, *script->ptrReadPos);
+    script->array = (Bytecode*)evt_get_variable(script, *script->ptrReadPos);
     return ApiStatus_DONE2;
 }
 
@@ -841,8 +841,8 @@ ApiStatus evt_handle_allocate_array(Evt* script) {
     s32 size = evt_get_variable(script, *args++);
     Bytecode var = *args++;
 
-    script->array = (s32*)heap_malloc(size * 4);
-    evt_set_variable(script, var, (s32)script->array);
+    script->array = (Bytecode*)heap_malloc(size * sizeof(Bytecode));
+    evt_set_variable(script, var, (Bytecode)script->array);
     return ApiStatus_DONE2;
 }
 
@@ -1034,7 +1034,7 @@ ApiStatus evt_handle_bind(Evt* script) {
     trigger->varTable[2] = evt_get_variable(script, script->varTable[2]);
 
     if (triggerOut != 0) {
-        evt_set_variable(script, triggerOut, (s32)trigger);
+        evt_set_variable(script, triggerOut, (Bytecode)trigger);
     }
 
     return ApiStatus_DONE2;
@@ -1174,8 +1174,9 @@ ApiStatus evt_handle_thread(Evt* script) {
 
     script->ptrNextLine = endLine;
     newScript = start_script_in_group((EvtScript*)startLine, script->priority, EVT_FLAG_RUN_IMMEDIATELY | EVT_FLAG_THREAD, script->groupFlags);
-    newScript->owner1.enemyID = script->owner1.enemyID;
-    newScript->owner2.npcID = script->owner2.npcID;
+    newScript->owner1 = script->owner1;
+    newScript->owner2 = script->owner2;
+    newScript->buffer = script->buffer;
     newScript->array = script->array;
     newScript->flagArray = script->flagArray;
 
@@ -1210,8 +1211,9 @@ ApiStatus evt_handle_child_thread(Evt* script) {
 
     script->ptrNextLine = endLine;
     newScript = start_child_thread(script, startLine, EVT_FLAG_RUN_IMMEDIATELY | EVT_FLAG_THREAD);
-    newScript->owner1.enemyID = script->owner1.enemyID;
-    newScript->owner2.npcID = script->owner2.npcID;
+    newScript->owner1 = script->owner1;
+    newScript->owner2 = script->owner2;
+    newScript->buffer = script->buffer;
     newScript->groupFlags = script->groupFlags;
     newScript->array = script->array;
     newScript->flagArray = script->flagArray;
@@ -1362,7 +1364,7 @@ s32 evt_execute_next_command(Evt* script) {
 
     while (true) {
         s32 status = ApiStatus_DONE2;
-        s32* lines;
+        Bytecode* lines;
         s32 nargs;
 
         #if DX_DEBUG_MENU
@@ -1727,10 +1729,10 @@ s32 evt_execute_next_command(Evt* script) {
     }
 }
 
-s32 evt_get_variable(Evt* script, Bytecode var) {
+Bytecode evt_get_variable(Evt* script, Bytecode var) {
     s32 wordIdx;
     s32 bitIdx;
-    s32 temp;
+    Bytecode temp;
 
     if (var <= EVT_LIMIT) {
         return var;
@@ -1884,7 +1886,7 @@ s32 evt_get_variable_index_alt(s32 var) {
     return var;
 }
 
-s32 evt_set_variable(Evt* script, Bytecode var, s32 value) {
+Bytecode evt_set_variable(Evt* script, Bytecode var, Bytecode value) {
     s32 flagBitPos;
     s32 oldValue;
 
@@ -2169,13 +2171,13 @@ Bytecode* evt_skip_else(Evt* script) {
 Bytecode* evt_goto_end_case(Evt* script) {
     s32 switchDepth = 1;
     Bytecode* pos = script->ptrNextLine;
-    s32* opcode;
-    s32* nargs;
+    Bytecode* opcode;
+    Bytecode nargs;
 
     do {
         opcode = pos++;
-        nargs = pos++;
-        pos += *nargs;
+        nargs = *pos++;
+        pos += nargs;
 
         switch (*opcode) {
             case EVT_OP_END:
@@ -2197,13 +2199,13 @@ Bytecode* evt_goto_end_case(Evt* script) {
 Bytecode* evt_goto_next_case(Evt* script) {
     s32 switchDepth = 1;
     Bytecode* pos = script->ptrNextLine;
-    s32* opcode;
-    s32* nargs;
+    Bytecode* opcode;
+    Bytecode nargs;
 
     do {
         opcode = pos++;
-        nargs = pos++;
-        pos += *nargs;
+        nargs = *pos++;
+        pos += nargs;
 
         switch (*opcode) {
             case EVT_OP_END:

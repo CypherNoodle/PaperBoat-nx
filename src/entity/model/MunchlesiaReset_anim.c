@@ -2,7 +2,7 @@
 #include "animation_script.h"
 #include "assets/entities.h"
 
-extern Vtx D_0A000000_E6E660[];
+
 
 AnimScript Entity_MunchlesiaReset_AnimationIdle = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

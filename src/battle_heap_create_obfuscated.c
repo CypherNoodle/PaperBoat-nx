@@ -5,12 +5,12 @@
 
 extern s32 obfuscated_battle_heap_create[];
 
-#ifdef SHIFT
 void battle_heap_create_obfuscated(void) {
     battle_heap_create();
 }
-#else
-void battle_heap_create_obfuscated(void) {
+
+#if 0 // N64 anti-tamper — ROM hash verification doesn't work on the port
+void battle_heap_create_obfuscated_n64(void) {
     s32(*readFunc)(OSPiHandle*, u32, u32*) = osEPiReadIo;
     s32 seed = 0x33F50000;
     s32 (*battle_heap_create)(void) = (s32 (*) (void)) obfuscated_battle_heap_create;
@@ -51,4 +51,4 @@ void battle_heap_create_obfuscated(void) {
         _heap_create(&heap_battleHead, 0x10000);
     }
 }
-#endif
+#endif // N64 anti-tamper

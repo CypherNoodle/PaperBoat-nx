@@ -546,7 +546,7 @@ void filemenu_draw_contents_file_info(s32 fileIdx,
         } else {
             dx_string_to_msg(buf, gSaveSlotMetadata[fileIdx].modName);
         }
-        xOffset = 66 - get_msg_width((s32)&buf, 0) / 2;
+        xOffset = 66 - get_msg_width((intptr_t)buf, 0) / 2;
         filemenu_draw_message(buf, baseX + xOffset, baseY + 20, 255, MSG_PAL_RED, 0);
         return;
     }

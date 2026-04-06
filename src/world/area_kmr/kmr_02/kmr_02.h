@@ -74,7 +74,6 @@ extern NpcGroupList N(NpcGroup1);
 extern NpcGroupList N(PrologueNPCs);
 extern NpcGroupList N(DefaultNPCs);
 
-extern IMG_BIN N(heart_block_img)[];
-extern PAL_BIN N(heart_block_pal)[];
+// heart_block_img/pal provided by assets/world.h (OTR paths)
 
 API_CALLABLE(N(LoadPartyImage));

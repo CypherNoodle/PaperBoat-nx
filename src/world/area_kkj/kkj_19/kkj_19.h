@@ -10,6 +10,7 @@
 
 #include "sprite/npc/TayceT.h"
 #include "sprite/npc/Twink.h"
+#include "assets/ui.h"
 
 enum {
     // intro
@@ -28,4 +29,3 @@ extern EvtScript N(EVS_ManageBaking);
 extern NpcGroupList N(IntroNPCs);
 extern NpcGroupList N(PeachNPCs);
 
-extern unsigned char ui_box_corners5_png[];

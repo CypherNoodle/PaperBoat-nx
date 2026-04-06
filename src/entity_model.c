@@ -1,5 +1,7 @@
 #include "common.h"
 #include "entity.h"
+#include "port/Engine.h"
+#include "port/Engine.h"
 
 EntityModelScript D_8014C260 = {
     ems_End
@@ -69,6 +71,9 @@ void clear_entity_models(void) {
     entity_fog_alpha = 10;
     entity_fog_dist_min = 800;
     entity_fog_dist_max = 1000;
+
+    extern void entity_Shadow_init_dls(void);
+    entity_Shadow_init_dls();
 }
 
 void init_entity_models(void) {
@@ -191,16 +196,21 @@ void exec_entity_model_commandlist(s32 idx) {
 s32 step_entity_model_commandlist(EntityModel* entityModel) {
     SpriteRasterInfo* imageData;
 
-    u32* curPos = *entityModel->cmdListReadPos;
-    switch (*curPos++) {
+    // EntityModelScript is intptr_t[] — must read with intptr_t stride on 64-bit
+    intptr_t* curPos = (intptr_t*) *entityModel->cmdListReadPos;
+    intptr_t opcode = *curPos++;
+    switch (opcode) {
         case ENTITY_MODEL_SCRIPT_OP_End: // kill model
             free_entity_model_by_ref(entityModel);
-            return 1;
+            return 0; // stop the caller's while loop — model is freed
         case ENTITY_MODEL_SCRIPT_OP_Draw: // set display list ptr
+        {
             entityModel->nextFrameTime = (f32) *curPos++;
-            entityModel->gfx.displayList = (Gfx*) *curPos++;
+            void* dlArg = (void*)*curPos++;
+            entityModel->gfx.displayList = (Gfx*) LOAD_ASSET(dlArg);
             entityModel->cmdListReadPos = (EntityModelScript*) curPos;
             break;
+        }
         case ENTITY_MODEL_SCRIPT_OP_Restart: // restore saved position
             entityModel->cmdListReadPos = entityModel->cmdListSavedPos;
             return 1;

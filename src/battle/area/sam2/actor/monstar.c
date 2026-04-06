@@ -5,8 +5,6 @@
 
 #define NAMESPACE A(monstar)
 
-extern Gfx N(dlist)[];
-
 extern s32 N(DefaultAnims)[];
 extern EvtScript N(EVS_Init);
 extern EvtScript N(EVS_Idle);

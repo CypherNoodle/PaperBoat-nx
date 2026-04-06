@@ -23,6 +23,7 @@ API_CALLABLE(N(SetInitialSentryPosition)) {
     npc->pos.x = 470.0f;
     npc->pos.y = 0.0f;
     npc->pos.z = 5.0f;
+    script->varTable[10] = 0;
     script->varTableF[10] = npc->pos.z;
     return ApiStatus_DONE2;
 }

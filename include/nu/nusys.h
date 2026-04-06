@@ -510,7 +510,7 @@ typedef struct st_ContData {
     u16	button;			/* A,B,C,Z,L,R,START,PAD ,button 	*/
     s8	stick_x;		/* Range acutally used:   -61 <= stick X <= 61	*/
     s8	stick_y;		/* Range actually used:  -63 <= stick Y <= 63	*/
-    u8	errno;		/* Error				*/
+    u8	cont_errno;		/* Error (renamed from errno to avoid C stdlib conflict) */
     u16	trigger;		/* Button trigger data		*/
 } NUContData;
 
@@ -602,9 +602,10 @@ typedef struct st_ContGBPakMesg {
     s32			data[4];
 } NUContGBPakMesg;
 
-typedef OSVoiceHandle NUVrsHandle;
+// Voice types not used in port
+typedef void* NUVrsHandle;
 
-typedef OSVoiceData NUVrsData;
+typedef s32 NUVrsData;
 
 typedef struct stVrsMesg {
     NUVrsHandle*	vrsHandle;
@@ -862,7 +863,8 @@ extern void nuContGBPakMgrInit(void);
 extern void nuContGBPakMgrRemove(void);
 extern s32 nuContGBPakOpen(NUContPakFile* handle, s32 contNo);
 extern s32 nuContGBPakGetStatus(NUContPakFile* handle, u8* status);
-extern s32 nuContGBPakReadID(NUContPakFile* handle, OSGbpakId* id, u8* status);
+// OSGbpakId not used in port
+extern s32 nuContGBPakReadID(NUContPakFile* handle, void* id, u8* status);
 extern s32 nuContGBPakReadWrite(NUContPakFile* handle, u16 flag , u16 address, u8* buffer, u16 size);
 extern s32 nuContGBPakPower(NUContPakFile* handle, s32 flag);
 extern s32 nuContGBPakCheckConnector(NUContPakFile* handle, u8* status);
