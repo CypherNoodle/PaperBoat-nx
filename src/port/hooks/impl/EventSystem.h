@@ -11,7 +11,7 @@ typedef enum {
     EVENT_PRIORITY_LOW,
     EVENT_PRIORITY_NORMAL,
     EVENT_PRIORITY_HIGH,
-} EventPriority;
+} PortEventPriority;
 
 typedef struct {
     bool cancelled;
@@ -26,7 +26,7 @@ typedef struct EventMetadata {
 } EventMetadata;
 
 typedef struct EventListener {
-    EventPriority priority;
+    PortEventPriority priority;
     EventCallback function;
     EventMetadata metadata;
 } EventListener;
@@ -135,7 +135,7 @@ class EventSystem {
 public:
     static EventSystem* Instance;
     EventID RegisterEvent(const char* name = nullptr);
-    ListenerID RegisterListener(EventID id, EventCallback callback, EventPriority priority = EVENT_PRIORITY_NORMAL, const char* file = nullptr, int line = 0);
+    ListenerID RegisterListener(EventID id, EventCallback callback, PortEventPriority priority = EVENT_PRIORITY_NORMAL, const char* file = nullptr, int line = 0);
     void UnregisterListener(EventID ev, ListenerID id);
     void CallEvent(EventID id, IEvent* event, const char* file = nullptr, int line = 0, const char* key = nullptr);
 
@@ -157,7 +157,7 @@ private:
 extern "C" {
 #endif
 extern EventID EventSystem_RegisterEvent(const char* name);
-extern ListenerID EventSystem_RegisterListener(EventID id, EventCallback callback, EventPriority priority, const char* file, int line);
+extern ListenerID EventSystem_RegisterListener(EventID id, EventCallback callback, PortEventPriority priority, const char* file, int line);
 extern void EventSystem_UnregisterListener(EventID ev, ListenerID id);
 extern void EventSystem_CallEvent(EventID id, void* event, const char* file, int line, const char* key);
 #ifdef __cplusplus

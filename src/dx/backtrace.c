@@ -3,10 +3,21 @@
 
 #include "common.h"
 #include <string.h>
+#include "backtrace.h"
+
+#if !USE_PROFILER
+
+// No-op stubs — backtrace relies on MIPS inline asm and stack frame walking
+int backtrace(void **buffer, int size) { return 0; }
+int backtrace_thread(void **buffer, int size, OSThread *thread) { return 0; }
+void debug_backtrace(void) {}
+void backtrace_address_to_string(u32 address, char* dest) { sprintf(dest, "0x%lX", (unsigned long)address); }
+
+#else
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "nu/nusys.h"
-#include "backtrace.h"
 #include "PR/osint.h"
 
 /** Enable to debug why a backtrace is wrong */
@@ -561,3 +572,5 @@ bool __bt_analyze_func(bt_func_t *func, uint32_t *ptr, uint32_t func_start, bool
     }
     return true;
 }
+
+#endif // USE_PROFILER

@@ -1,5 +1,5 @@
 #include "shape_loader.h"
-#include "gcc/string.h"
+#include <string.h>
 #include <stdio.h>
 
 extern void GameEngine_LogInfo(const char *fmt, ...);

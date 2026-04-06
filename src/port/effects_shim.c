@@ -26,7 +26,7 @@ extern s32 rand_int(s32 max);
 extern RenderTask *queue_render_task(RenderTask *task);
 extern void mem_clear(void *data, s32 numBytes);
 extern f32 atan2(f32 startX, f32 startZ, f32 endX, f32 endZ);
-extern bool npc_raycast_down_sides(s32 ignoreFlags, f32 *posX, f32 *posY,
+extern b32 npc_raycast_down_sides(s32 ignoreFlags, f32 *posX, f32 *posY,
                                    f32 *posZ, f32 *hitDepth);
 extern s32 load_effect(s32 effectIndex);
 extern void sfx_play_sound_at_position(s32 soundID, s32 flags, f32 posX,
@@ -42,7 +42,7 @@ extern void draw_msg(intptr_t msgID, s32 posX, s32 posY, s32 opacity,
                      s32 palette, u8 style);
 extern s32 get_msg_width(intptr_t msgID, u16 charset);
 extern void mdl_get_shroud_tint_params(u8 *r, u8 *g, u8 *b, u8 *a);
-extern bool is_point_visible(f32 x, f32 y, f32 z, s32 depthQueryID,
+extern b32 is_point_visible(f32 x, f32 y, f32 z, s32 depthQueryID,
                              f32 *screenX, f32 *screenY);
 
 void shim_guRotateF(float mf[4][4], float a, float x, float y, float z) {
@@ -177,4 +177,8 @@ void shim_mdl_get_shroud_tint_params(u8 *r, u8 *g, u8 *b, u8 *a) {
 void shim_mdl_draw_hidden_panel_surface(Gfx **gfxP, u16 treeIndex) {
   (void)gfxP;
   (void)treeIndex;
+}
+
+void shim_is_debug_panic(const char* message) {
+  is_debug_panic(message);
 }

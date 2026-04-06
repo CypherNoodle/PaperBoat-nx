@@ -334,6 +334,19 @@ s32 osAiSetFrequency(u32 frequency) { return (s32)frequency; }
 // ASP microcode data (stubs)
 u8 n_aspMainTextStart[1];
 u8 n_aspMainDataStart[1];
+u64 n_aspMain_text_bin[1];
+u64 n_aspMain_data_bin[1];
+
+// N64 OS stubs (used by dx/profiling.c)
+u32 __osDisableInt(void) { return 0; }
+void __osRestoreInt(u32 saved) { (void)saved; }
+
+// N64 trig tables (used by some GBI macros)
+s16 sins(u16 angle) { return (s16)(sinf((f32)angle * M_PI / 32768.0f) * 32767.0f); }
+s16 coss(u16 angle) { return (s16)(cosf((f32)angle * M_PI / 32768.0f) * 32767.0f); }
+
+// N64 PI cart handle — stub for port (DMA functions are no-ops)
+OSPiHandle* nuPiCartHandle = NULL;
 
 // ============================================================================
 // Effect Function Stubs

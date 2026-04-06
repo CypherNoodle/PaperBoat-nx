@@ -28,11 +28,11 @@ u16 *GetPrevFramePixels(void) { return gPrevFramePixels; }
 void RequestPrevFrameCapture(void) { gPrevFrameCaptureRequest = 3; }
 
 // External references to existing game functions/data
-extern DisplayContext D_80164000[2];
+extern DisplayContext DisplayContexts[2];
 extern s32 gCurrentDisplayContextIndex;
 extern void step_game_loop(void);
-extern void gfx_task_background_build(void);
-extern void gfx_draw_frame_build(void);
+extern void gfx_task_background(void);
+extern void gfx_draw_frame(void);
 
 // Audio frame hooks from Engine.cpp
 extern void GameEngine_StartAudioFrame(void);
@@ -62,13 +62,13 @@ void Graphics_ThreadUpdate(void) {
   step_game_loop();
 
   // Build background display list (no submission)
-  gfx_task_background_build();
+  gfx_task_background();
 
   // Build main frame display list (no submission)
-  gfx_draw_frame_build();
+  gfx_draw_frame();
 
   // Now create master display list that links both
-  DisplayContext *ctx = &D_80164000[gCurrentDisplayContextIndex];
+  DisplayContext *ctx = &DisplayContexts[gCurrentDisplayContextIndex];
 
   // Link background display list
   gSPDisplayList(gMasterDisp++, ctx->backgroundGfx);

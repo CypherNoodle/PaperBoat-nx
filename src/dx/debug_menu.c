@@ -162,7 +162,7 @@ void dx_debug_update_buttons() {
 // utility functions for drawing menus
 
 void dx_debug_draw_box(s32 posX, s32 posY, s32 sizeX, s32 sizeY, int style, s32 opacity) {
-    draw_box(0, (WindowStyle)style, posX, posY, 0, sizeX, sizeY, opacity,
+    draw_box(0, (void*)(intptr_t)style, posX, posY, 0, sizeX, sizeY, opacity,
         0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, nullptr, 0, nullptr, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
 }
 
@@ -171,7 +171,7 @@ void dx_debug_draw_ascii(char* text, s32 color, s32 posX, s32 posY) {
         MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12
     };
     dx_string_to_msg(&buf[4], text);
-    draw_msg((s32)buf, posX, posY, 255, color, 0);
+    draw_msg((intptr_t)buf, posX, posY, 255, color, 0);
 }
 
 void dx_debug_draw_ascii_with_effect(char* text, s32 color, s32 posX, s32 posY, s32 effect) {
@@ -179,7 +179,7 @@ void dx_debug_draw_ascii_with_effect(char* text, s32 color, s32 posX, s32 posY, 
         MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12
     };
     dx_string_to_msg(&buf[4], text);
-    draw_msg((s32)buf, posX, posY, 255, color, effect);
+    draw_msg((intptr_t)buf, posX, posY, 255, color, effect);
 }
 
 void dx_debug_draw_msg(s32 msgID, s32 color, s32 alpha, s32 posX, s32 posY) {
@@ -187,7 +187,7 @@ void dx_debug_draw_msg(s32 msgID, s32 color, s32 alpha, s32 posX, s32 posY) {
         MSG_CHAR_READ_FUNCTION, MSG_READ_FUNC_SIZE, 12, 12,
     };
     dma_load_msg(msgID, &buf[4]);
-    draw_msg((s32)buf, posX, posY, alpha, color, 0);
+    draw_msg((intptr_t)buf, posX, posY, alpha, color, 0);
 }
 
 void dx_debug_draw_number(s32 number, char* fmt, s32 color, s32 alpha, s32 posX, s32 posY) {
@@ -197,7 +197,7 @@ void dx_debug_draw_number(s32 number, char* fmt, s32 color, s32 alpha, s32 posX,
     };
     sprintf(fmtBuf, fmt, number);
     dx_string_to_msg(&buf[4], fmtBuf);
-    draw_msg((s32)buf, posX, posY, alpha, color, 0);
+    draw_msg((intptr_t)buf, posX, posY, alpha, color, 0);
 }
 
 // efficiently renders an number with (optionally) a digit highlighted using a single draw_msg call
@@ -229,9 +229,9 @@ void dx_debug_draw_editable_number(s32 number, char* fmt, s32 selectedDigit, b32
     msgBuf[pos] = MSG_CHAR_READ_END;
 
     if (hasSelected && selectedDigit == -1) {
-        draw_msg((s32)msgBuf, posX, posY, 255, HighlightColor, 0);
+        draw_msg((intptr_t)msgBuf, posX, posY, 255, HighlightColor, 0);
     } else {
-        draw_msg((s32)msgBuf, posX, posY, 255, DefaultColor, 0);
+        draw_msg((intptr_t)msgBuf, posX, posY, 255, DefaultColor, 0);
     }
 }
 
@@ -827,14 +827,14 @@ void dx_debug_update_select_map() {
             char msgLeftArrow[] = {
                 MSG_CHAR_LEFT, MSG_CHAR_READ_END
             };
-            draw_msg((s32)msgLeftArrow, SubmenuPosX - 2 - round(3.0f * ArrowAnimOffset), SubmenuPosY + 104, 255, DefaultColor, 0);
+            draw_msg((intptr_t)msgLeftArrow, SubmenuPosX - 2 - round(3.0f * ArrowAnimOffset), SubmenuPosY + 104, 255, DefaultColor, 0);
         }
         // right arrow
         if (curCol < maxCol - 1) {
             char msgRightArrow[] = {
                 MSG_CHAR_RIGHT, MSG_CHAR_READ_END
             };
-            draw_msg((s32)msgRightArrow, SubmenuPosX + 128 + round(3.0f * ArrowAnimOffset), SubmenuPosY + 104, 255, DefaultColor, 0);
+            draw_msg((intptr_t)msgRightArrow, SubmenuPosX + 128 + round(3.0f * ArrowAnimOffset), SubmenuPosY + 104, 255, DefaultColor, 0);
         }
     }
 }
@@ -1167,10 +1167,10 @@ void dx_debug_update_edit_partners() {
 
         if (level == 1) {
             char msg[] = { MSG_CHAR_CIRCLE, MSG_CHAR_READ_END };
-            draw_msg((s32)msg, SubmenuPosX + 82, posY - 1, 255, MSG_PAL_BLUE, 0);
+            draw_msg((intptr_t)msg, SubmenuPosX + 82, posY - 1, 255, MSG_PAL_BLUE, 0);
         } else if (level == 2) {
             char msg[] = { MSG_CHAR_CIRCLE, MSG_CHAR_CIRCLE, MSG_CHAR_READ_END };
-            draw_msg((s32)msg, SubmenuPosX + 82, posY - 1, 255, MSG_PAL_BLUE, 0);
+            draw_msg((intptr_t)msg, SubmenuPosX + 82, posY - 1, 255, MSG_PAL_BLUE, 0);
         }
     }
 }
@@ -1367,7 +1367,7 @@ void dx_debug_update_edit_items() {
                 MSG_CHAR_LOWER_E, MSG_CHAR_LOWER_M, MSG_CHAR_LOWER_P, MSG_CHAR_LOWER_T, MSG_CHAR_LOWER_Y,
                 MSG_CHAR_READ_END,
             };
-            draw_msg((s32)msgBuf, SubmenuPosX + 50, posY, 255, DefaultColor, 0);
+            draw_msg((intptr_t)msgBuf, SubmenuPosX + 50, posY, 255, DefaultColor, 0);
         }
     }
 
@@ -1376,14 +1376,14 @@ void dx_debug_update_edit_items() {
         char msgArrow[] = {
             MSG_CHAR_UP, MSG_CHAR_READ_END
         };
-        draw_msg((s32)msgArrow, SubmenuPosX + 132, SubmenuPosY + round(3.0f * ArrowAnimOffset), 255, DefaultColor, 0);
+        draw_msg((intptr_t)msgArrow, SubmenuPosX + 132, SubmenuPosY + round(3.0f * ArrowAnimOffset), 255, DefaultColor, 0);
     }
     // down arrow
     if (menu->startPos + 10 < invSize) {
         char msgArrow[] = {
             MSG_CHAR_DOWN, MSG_CHAR_READ_END
         };
-        draw_msg((s32)msgArrow, SubmenuPosX + 132, SubmenuPosY + 134 - round(3.0f * ArrowAnimOffset), 255, DefaultColor, 0);
+        draw_msg((intptr_t)msgArrow, SubmenuPosX + 132, SubmenuPosY + 134 - round(3.0f * ArrowAnimOffset), 255, DefaultColor, 0);
     }
 }
 
@@ -2266,7 +2266,7 @@ void dx_debug_draw_evt_list() {
             MSG_CHAR_DOWN, MSG_CHAR_READ_END
         };
         s32 posY = EvtDebugInfoY + (9) * RowHeight;
-        draw_msg((s32)msgDownArrow, EvtDebugInfoX + 185, posY - round(2.0f * ArrowAnimOffset), 255, DefaultColor, 0);
+        draw_msg((intptr_t)msgDownArrow, EvtDebugInfoX + 185, posY - round(2.0f * ArrowAnimOffset), 255, DefaultColor, 0);
     }
     // animated up arrow
     if (EvtListDrawPos > 0) {
@@ -2274,7 +2274,7 @@ void dx_debug_draw_evt_list() {
             MSG_CHAR_UP, MSG_CHAR_READ_END
         };
         s32 posY = EvtDebugInfoY + (1) * RowHeight;
-        draw_msg((s32)msgUpArrow, EvtDebugInfoX + 185, posY + round(2.0f * ArrowAnimOffset), 255, DefaultColor, 0);
+        draw_msg((intptr_t)msgUpArrow, EvtDebugInfoX + 185, posY + round(2.0f * ArrowAnimOffset), 255, DefaultColor, 0);
     }
 
     // menu box (upper right)
@@ -2394,7 +2394,7 @@ void dx_debug_draw_var(s32 i, s32 number, char* fmt, s32 color, s32 alpha, s32 p
     };
     sprintf(fmtBuf, fmt, i, number);
     dx_string_to_msg(&buf[4], fmtBuf);
-    draw_msg((s32)buf, posX, posY, alpha, color, 0);
+    draw_msg((intptr_t)buf, posX, posY, alpha, color, 0);
 }
 
 void dx_debug_draw_fvar(s32 i, f32 number, char* fmt, s32 color, s32 alpha, s32 posX, s32 posY) {
@@ -2404,7 +2404,7 @@ void dx_debug_draw_fvar(s32 i, f32 number, char* fmt, s32 color, s32 alpha, s32 
     };
     sprintf(fmtBuf, fmt, i, number);
     dx_string_to_msg(&buf[4], fmtBuf);
-    draw_msg((s32)buf, posX, posY, alpha, color, 0);
+    draw_msg((intptr_t)buf, posX, posY, alpha, color, 0);
 }
 
 void dx_debug_evt_draw_vars() {
@@ -2457,13 +2457,13 @@ void dx_debug_evt_draw_vars() {
                 dx_debug_draw_var(i, DebugEvtAttached->functionTemp[i], "Temp%X  %d", color, 255, posX, posY);
                 break;
             case DEBUG_EVT_DISP_MODE_FLOAT:
-                fval = DebugEvtAttached->functionTempF[i];
+                fval = DebugEvtAttached->functionTempF[i].f;
                 if (fabsf(fval) < MAX_VALID_FLOAT) {
                     dx_debug_draw_fvar(i, fval, "Temp%X  %f", color, 255, posX, posY);
                 } else {
                     dx_debug_draw_var(i, 0, "Temp%X  ---", color, 255, posX, posY);
                 }
-                dx_debug_draw_fvar(i, DebugEvtAttached->functionTempF[i], "Temp%X  %f", color, 255, posX, posY);
+                dx_debug_draw_fvar(i, DebugEvtAttached->functionTempF[i].f, "Temp%X  %f", color, 255, posX, posY);
                 break;
             case DEBUG_EVT_DISP_MODE_FIXED:
                 val = DebugEvtAttached->functionTemp[i];
@@ -2911,7 +2911,7 @@ void dx_debug_console_main() {
                 alpha = round(254 * (timeLeft / 20.0f));
             }
 
-            draw_msg((s32)DebugConsole[idx]->buf, 32, 200 - 15 * idx, alpha, DefaultColor, 0);
+            draw_msg((intptr_t)DebugConsole[idx]->buf, 32, 200 - 15 * idx, alpha, DefaultColor, 0);
             DebugConsole[idx]->timeLeft--;
         }
     }
