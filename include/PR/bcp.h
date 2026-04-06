@@ -1,5 +1,6 @@
 #ifndef _BCP_H_
 #define _BCP_H_
+#if 0 // Disabled on port
 #ifdef BBPLAYER
 
 #include "rcp.h"
@@ -112,4 +113,5 @@
 
 
 #endif
+#endif // Disabled on port
 #endif

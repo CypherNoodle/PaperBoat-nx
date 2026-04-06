@@ -30,6 +30,7 @@
 #ifndef _OS_H_
 #define	_OS_H_
 
+#if 0 // Disabled on port
 #include <PR/os_thread.h>
 #include <PR/os_message.h>
 #include <PR/os_exception.h>
@@ -100,4 +101,5 @@
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_H */

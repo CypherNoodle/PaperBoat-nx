@@ -25,6 +25,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/mbi.h>
 #include <PR/ultratypes.h>
 
@@ -189,4 +190,5 @@ void spFinish( Gfx **glistp );
 
 
 
+#endif // Disabled on port
 #endif /* _SP_H_ */

@@ -31,6 +31,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #define	OS_ERROR_FMT	"/usr/lib/PR/error.fmt"
@@ -172,4 +173,5 @@ OSErrorHandler	osSetErrorHandler(OSErrorHandler);
 
 
 
+#endif // Disabled on port
 #endif	/* __ULTRAERROR_H__ */

@@ -10,6 +10,7 @@
 #ifndef _RDB_H
 #define _RDB_H
 
+#if 0 // Disabled on port
 /* U64 side address */
 #define	RDB_BASE_REG		0xc0000000
 #define RDB_WRITE_INTR_REG	(RDB_BASE_REG + 0x8)
@@ -90,4 +91,5 @@ extern unsigned int	__osRdbSendMessage;
 
 #endif /* _LANGUAGE_C */
 
+#endif // Disabled on port
 #endif /* !_RDB_H */

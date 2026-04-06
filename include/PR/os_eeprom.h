@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 
@@ -100,4 +101,5 @@ extern s32 osEepromLongWrite(OSMesgQueue *, u8, u8 *, int);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_EEPROM_H_ */

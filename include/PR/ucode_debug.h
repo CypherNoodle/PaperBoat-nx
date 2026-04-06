@@ -9,6 +9,7 @@
 #ifndef _UCODE_DEBUG_H_
 #define	_UCODE_DEBUG_H_
 
+#if 0 // Disabled on port
 #define	DEBUG_DL_PTR()		IO_READ(SP_DMEM_START+0xfc0)
 
 
@@ -45,6 +46,7 @@ extern long long int gspS2DEX2d_xbusDataStart[],    gspS2DEX2d_xbusDataEnd[];
 
 #endif /* _LANGUAGE_C */
 
+#endif // Disabled on port
 #endif /* !_UCODE_DEBUG_H */
 
 /*======== End of ucode_debug.h ========*/

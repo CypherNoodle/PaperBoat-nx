@@ -12,6 +12,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -101,4 +102,5 @@ extern void osVoiceCountSyllables(u8 *, u32 *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_VOICE_H_ */

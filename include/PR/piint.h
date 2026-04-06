@@ -1,6 +1,7 @@
 #ifndef _PIINT_H_
 #define _PIINT_H_
 
+#if 0 // Disabled on port
 #include "PR/os_internal.h"
 #include "PR/rcp.h"
 
@@ -153,4 +154,5 @@ OSMesgQueue *osPiGetCmdQueue(void);
         cHandle->pulse = pihandle->pulse;                            \
     }(void)0
 
+#endif // Disabled on port
 #endif

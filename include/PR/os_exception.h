@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -113,4 +114,5 @@ extern OSIntMask	osSetIntMask(OSIntMask);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_EXCEPTION_H_ */

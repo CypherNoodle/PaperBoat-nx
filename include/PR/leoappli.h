@@ -1,3 +1,4 @@
+#if 0 // Disabled on port
 /*
  *  F i l e N a m e  :  l e o a p p l i . h
  *
@@ -272,3 +273,4 @@ typedef LEOCmdReadTimer LEOCmdSetTimer;
 /*-------end of leoappli.h--------------------------*/
 
 
+#endif // Disabled on port

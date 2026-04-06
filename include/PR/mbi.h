@@ -1,6 +1,7 @@
 #ifndef _MBI_H_
 #define	_MBI_H_
 
+#if 0 // Disabled on port
 /**************************************************************************
  *									  *
  *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
@@ -95,4 +96,5 @@
 #define nullptr 0
 #endif
 
+#endif // Disabled on port
 #endif /* !_MBI_H_ */

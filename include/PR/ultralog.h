@@ -31,6 +31,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #define OS_LOG_MAX_ARGS         16
@@ -67,4 +68,5 @@ extern void osDelay(int count);
 
 
 
+#endif // Disabled on port
 #endif

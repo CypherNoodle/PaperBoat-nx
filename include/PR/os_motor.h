@@ -12,6 +12,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 #include "os_pfs.h"
@@ -76,4 +77,5 @@ extern s32 osMotorStart(OSPfs *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_MOTOR_H_ */

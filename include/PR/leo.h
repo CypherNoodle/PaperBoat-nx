@@ -12,6 +12,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/os.h>
 #include <PR/leoappli.h>
 
@@ -273,4 +274,5 @@ extern  void LeoBootGame(void *entry);
 
 
 
+#endif // Disabled on port
 #endif /* !_LEO_H */

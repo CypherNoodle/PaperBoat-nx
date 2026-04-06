@@ -1,6 +1,7 @@
 #ifndef _GU_H_
 #define _GU_H_
 
+#if 0 // Disabled on port
 /**************************************************************************
  *									  *
  *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
@@ -266,4 +267,5 @@ void guSprite2DInit(uSprite *SpritePointer,
 		    int SourceImageOffsetS,
 		    int SourceImageOffsetT);
 
+#endif // Disabled on port
 #endif /* !_GU_H_ */

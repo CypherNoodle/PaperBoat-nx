@@ -2,6 +2,7 @@
 #define _ULTRATYPES_H_
 
 
+#if 0 // Disabled on port
 /**************************************************************************
  *                                                                        *
  *               Copyright (C) 1995, Silicon Graphics, Inc.               *
@@ -86,5 +87,6 @@ typedef unsigned long   size_t;
 #define nullptr    0
 #endif
 
+#endif // Disabled on port
 #endif  /* _ULTRATYPES_H_ */
 

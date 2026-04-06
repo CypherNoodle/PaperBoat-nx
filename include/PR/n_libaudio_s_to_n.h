@@ -1,3 +1,4 @@
+#if 0 // Disabled on port
 #define ALVoice   		N_ALVoice
 #define ALSynth 		N_ALSynth
 #define ALGlobals 		N_ALGlobals
@@ -118,3 +119,4 @@
 
 
 
+#endif // Disabled on port
