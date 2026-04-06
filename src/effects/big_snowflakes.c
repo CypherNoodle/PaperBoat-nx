@@ -1,12 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000900_3641C0[];
-extern Gfx D_090009E8_3642A8[];
-extern Gfx D_09000A10_3642D0[];
-
-Gfx* D_E0060730[] = { D_090009E8_3642A8, D_09000A10_3642D0 };
-Gfx* D_E0060738[] = { D_09000900_3641C0, D_09000900_3641C0 };
+const char* D_E0060730[] = { D_090009E8_3642A8, D_09000A10_3642D0 };
+const char* D_E0060738[] = { D_09000900_3641C0, D_09000900_3641C0 };
 
 void big_snowflakes_init(EffectInstance* effect);
 void big_snowflakes_update(EffectInstance* effect);
@@ -102,6 +99,8 @@ void big_snowflakes_render(EffectInstance* effect) {
     renderTask.appendGfxArg = effect;
     renderTask.dist = 0;
     renderTask.renderMode = RENDER_MODE_CLOUD_NO_ZCMP;
+    renderTask.interpolationName = "big_snowflakes_render";
+    renderTask.interpolationTag = TAG_EFFECT(0, effect);
 
     retTask = queue_render_task(&renderTask);
     retTask->renderMode |= RENDER_TASK_FLAG_REFLECT_FLOOR;
@@ -112,7 +111,7 @@ void big_snowflakes_appendGfx(void* effect) {
     Matrix4f sp18;
     Matrix4f sp58;
     Matrix4f sp98;
-    Gfx* dlist = D_E0060738[0];
+    const char* dlist = D_E0060738[0];
     s32 i;
 
     gSPSegment(gMainGfxPos++, 0x09, VIRTUAL_TO_PHYSICAL(((EffectInstance*)effect)->shared->graphics));
@@ -125,7 +124,7 @@ void big_snowflakes_appendGfx(void* effect) {
 
     data++;
     for (i = 1; i < ((EffectInstance*)effect)->numParts; i++, data++) {
-        Gfx* dlist2 = D_E0060730[i & 1]; // should be able to be i % 2 (ARRAY_COUNT(D_E0060730))
+        const char* dlist2 = D_E0060730[i & 1]; // should be able to be i % 2 (ARRAY_COUNT(D_E0060730))
 
         guTranslateF(sp58, data->unk_04, data->unk_08, data->unk_0C);
         guMtxCatF(sp58, sp98, sp18);

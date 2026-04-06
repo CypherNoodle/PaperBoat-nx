@@ -1,10 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000600_3936A0[];
-extern Gfx D_090008E8_393988[];
-extern Gfx D_09000950_3939F0[];
-extern Gfx D_09000FF8_394098[];
 
 void flashing_box_shockwave_init(EffectInstance* effect);
 void flashing_box_shockwave_update(EffectInstance* effect);

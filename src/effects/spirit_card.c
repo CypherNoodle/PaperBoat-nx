@@ -1,22 +1,17 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
+#include <string.h>
 
-extern Gfx D_09003F98_3FE448[];
-extern Gfx D_09004010_3FE4C0[];
-extern Gfx D_09004088_3FE538[];
-extern Gfx D_09004100_3FE5B0[];
-extern Gfx D_09004178_3FE628[];
-extern Gfx D_090041F0_3FE6A0[];
-extern Gfx D_09004268_3FE718[];
-extern Gfx D_090042E0_3FE790[];
-extern Gfx D_09004360_3FE810[];
-extern Gfx D_09004458_3FE908[];
-extern Gfx D_09004508_3FE9B8[];
-extern Gfx D_09004600_3FEAB0[];
+// Same combined palette fix as something_rotating.c — see comments there.
+// spirit_card uses the same effect_gfx_spirit_card graphics.
+extern u8 sSpiritCardCombinedPals[7][64];
+extern s32 sCombinedPalsInitialized;
+extern void InitCombinedPalettes(void);
 
-Gfx* D_E0112630[] = { D_09004458_3FE908, D_09004600_3FEAB0 };
-Gfx* D_E0112638[] = { D_09004360_3FE810, D_09004508_3FE9B8 };
-Gfx* D_E0112640[] = {
+const char* D_E0112630[] = { D_09004458_3FE908, D_09004600_3FEAB0 };
+const char* D_E0112638[] = { D_09004360_3FE810, D_09004508_3FE9B8 };
+const char* D_E0112640[] = {
     D_09003F98_3FE448, D_09004010_3FE4C0, D_09004088_3FE538, D_09004100_3FE5B0,
     D_09004178_3FE628, D_090041F0_3FE6A0, D_09004268_3FE718
 };
@@ -161,8 +156,19 @@ void spirit_card_appendGfx(void* effect) {
     if (unk_00 < 2) {
         func_E0112330(0, data);
 
+        InitCombinedPalettes();
+
         gSPDisplayList(gMainGfxPos++, D_E0112638[0]);
         gSPDisplayList(gMainGfxPos++, D_E0112640[data->chapter]);
+
+        // Reload combined card_front+spirit_face palette so palettes[0] is contiguous
+        gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, sSpiritCardCombinedPals[data->chapter]);
+        gDPTileSync(gMainGfxPos++);
+        gDPSetTile(gMainGfxPos++, 0, 0, 0, 256, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+        gDPLoadSync(gMainGfxPos++);
+        gDPLoadTLUTCmd(gMainGfxPos++, G_TX_LOADTILE, 31);
+        gDPPipeSync(gMainGfxPos++);
+
         gSPDisplayList(gMainGfxPos++, D_E0112630[0]);
         gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
     }

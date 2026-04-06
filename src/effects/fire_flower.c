@@ -1,12 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern char D_09000000_3803A0[][0x200];
-extern Gfx D_09000D40_3810E0[];
-extern Gfx D_09000DE0_381180[];
-extern Gfx D_09000EB8_381258[];
-extern Gfx D_09000ED8_381278[];
-extern Gfx D_09000EF8_381298[];
 
 s8 D_E007EC30[] = { 50, 60, 70, 80, 90, 100, 105, 100 };
 
@@ -247,16 +242,23 @@ void fire_flower_appendGfx(void* effect) {
     }
 
     gSPDisplayList(gMainGfxPos++, D_09000D40_3810E0);
-    gDPLoadTextureTile_4b(
-        gMainGfxPos++, D_09000000_3803A0[3 - unk_34],
-        G_IM_FMT_CI, 32, 0, 0, 0, 31, 31, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
-        5, 5, G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiTile_4b(
-        gMainGfxPos++, D_09000000_3803A0[2 - unk_34],
-        0x0080, 1, G_IM_FMT_CI, 32, 0, 0, 0, 31, 31, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
-        5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    {
+        static const char* sFireFlowerTex[] = {
+            D_09000000_3803A0, D_09000200_3805A0, D_09000400_3807A0, D_09000600_3809A0
+        };
+        s32 texIdx0 = MAX(0, 3 - unk_34);
+        s32 texIdx1 = MAX(0, 2 - unk_34);
+        gDPLoadTextureTile_4b(
+            gMainGfxPos++, sFireFlowerTex[texIdx0],
+            G_IM_FMT_CI, 32, 0, 0, 0, 31, 31, 0,
+            G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
+            5, 5, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiTile_4b(
+            gMainGfxPos++, sFireFlowerTex[texIdx1],
+            0x0080, 1, G_IM_FMT_CI, 32, 0, 0, 0, 31, 31, 0,
+            G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
+            5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    }
 
     guTranslateF(sp18, unk_2C, 0.0f, 0.0f);
     guScaleF(sp58, unk_30, unk_30, unk_30);

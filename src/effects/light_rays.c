@@ -1,16 +1,13 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090000B0_36E040[];
-extern Gfx D_09000110_36E0A0[];
-extern Gfx D_09000130_36E0C0[];
-extern Gfx D_090001D8_36E168[];
 
-Gfx* D_E006ADF0[] = {
+const char* D_E006ADF0[] = {
     D_09000110_36E0A0, D_09000110_36E0A0, D_090000B0_36E040, D_090000B0_36E040
 };
 
-Gfx* D_E006AE00[] = {
+const char* D_E006AE00[] = {
     D_09000130_36E0C0, D_09000130_36E0C0, D_090001D8_36E168, D_090001D8_36E168
 };
 
@@ -280,8 +277,8 @@ void func_E006A85C(LightRaysFXData* part) {
 void light_rays_appendGfx(void* effect) {
     LightRaysFXData* part = ((EffectInstance*)effect)->data.lightRays;
     s32 type = part->type;
-    Gfx* dlist = D_E006ADF0[type];
-    Gfx* dlist2 = D_E006AE00[type];
+    const char* dlist = D_E006ADF0[type];
+    const char* dlist2 = D_E006AE00[type];
     Matrix4f mtxTransform;
     Matrix4f mtxTemp;
     Matrix4f mtxTranslate;

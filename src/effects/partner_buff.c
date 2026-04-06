@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void partner_buff_init(EffectInstance* effect);
 void partner_buff_update(EffectInstance* effect);
@@ -18,15 +19,9 @@ enum {
     BUFF_STATE_FADE_IN                  = 40
 };
 
-extern Gfx D_09001800_406740[];
-extern Gfx D_090019A0_4068E0[];
-extern Gfx D_09001A18_406958[];
-extern Gfx D_09001A90_4069D0[];
-extern Gfx D_09001B08_406A48[];
-extern Gfx D_09001B80_406AC0[];
 
-Gfx* D_E011AC20[] = { D_09001800_406740 };
-Gfx* D_E011AC24[] = {
+const char* D_E011AC20[] = { D_09001800_406740 };
+const char* D_E011AC24[] = {
     D_090019A0_4068E0, D_09001A18_406958, D_09001A90_4069D0, D_09001B08_406A48, D_09001B80_406AC0,
     nullptr, nullptr, nullptr, nullptr, nullptr
 };
@@ -216,7 +211,7 @@ void func_E011A700(EffectInstance* effect) {
     s32 temp1;
     s32 temp2;
     f32 scale;
-    Gfx* dlist;
+    const char* dlist;
     f32 x, y;
     s32 i;
 

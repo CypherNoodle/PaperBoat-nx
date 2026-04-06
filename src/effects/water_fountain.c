@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 typedef struct UnkStruct {
     /* 0x00 */ s8 unk_00;
@@ -11,9 +12,6 @@ typedef struct UnkStruct {
     /* 0x09 */ char unk_09[1];
 } UnkStruct; // size = 0xA
 
-extern Gfx D_09000280_3B8AE0[];
-extern Gfx D_09000328_3B8B88[];
-extern Gfx D_09000348_3B8BA8[];
 
 UnkStruct D_E00B8900[] = {
     {   0,  0,  30, 140,    0, 255, { 0 } },

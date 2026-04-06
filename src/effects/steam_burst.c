@@ -1,11 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000E00_362470[];
-extern Gfx D_09000F30_3625A0[];
 
-Gfx* D_E005C700[] = { D_09000F30_3625A0 };
-Gfx* D_E005C704[] = { D_09000E00_362470 };
+const char* D_E005C700[] = { D_09000F30_3625A0 };
+const char* D_E005C704[] = { D_09000E00_362470 };
 
 void steam_burst_init(EffectInstance* effect);
 void steam_burst_update(EffectInstance* effect);
@@ -112,8 +111,8 @@ void steam_burst_appendGfx(void* effect) {
     s32 unk_30_s32 = part->unk_30;
     s32 envAlpha = (part->unk_30 - unk_30_s32) * 256.0f;
     s32 cond = (unk_30_s32 == 6);
-    Gfx* dlist = D_E005C700[part->unk_00];
-    Gfx* dlist2 = D_E005C704[part->unk_00];
+    const char* dlist = D_E005C700[part->unk_00];
+    const char* dlist2 = D_E005C704[part->unk_00];
     Matrix4f sp18;
     Matrix4f sp58;
     Matrix4f sp98;

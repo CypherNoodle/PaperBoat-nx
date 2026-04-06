@@ -1,13 +1,12 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void snaking_static_update(EffectInstance*);
 void snaking_static_init(EffectInstance* effect);
 void snaking_static_render(EffectInstance* effect);
 void snaking_static_appendGfx(void* effect);
 
-extern Gfx D_09001000_3B3D90[];
-extern Gfx D_090010F8_3B3E88[];
 
 EffectInstance* snaking_static_main(s32 type, f32 posX, f32 posY, f32 posZ, f32 scale, s32 timeLeft) {
     EffectBlueprint effectBp;

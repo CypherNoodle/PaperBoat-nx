@@ -1,14 +1,13 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001B70_3CF250[];
-extern Gfx D_09001C98_3CF378[];
 
-Gfx* D_E00C6C90[] = {
+const char* D_E00C6C90[] = {
     D_09001C98_3CF378, D_09001C98_3CF378, D_09001C98_3CF378
 };
 
-Gfx* D_E00C6C9C[] = {
+const char* D_E00C6C9C[] = {
     D_09001B70_3CF250, D_09001B70_3CF250, D_09001B70_3CF250, nullptr, nullptr
 };
 

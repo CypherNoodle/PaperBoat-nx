@@ -1,13 +1,11 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000800_4147A0[];
-extern Gfx D_09000B20_414AC0[];
-extern Gfx D_09000B90_414B30[];
 
-Gfx* D_E0126BC0[] = { D_09000B90_414B30 };
-Gfx* D_E0126BC4[] = { D_09000B20_414AC0 };
-Gfx* D_E0126BC8[] = { D_09000800_4147A0 };
+const char* D_E0126BC0[] = { D_09000B90_414B30 };
+const char* D_E0126BC4[] = { D_09000B20_414AC0 };
+const char* D_E0126BC8[] = { D_09000800_4147A0 };
 
 void star_outline_init(EffectInstance* effect);
 void star_outline_update(EffectInstance* effect);

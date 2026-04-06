@@ -1,7 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000240_32FD90[];
 
 void func_E0018000(FootprintFXData* part);
 void footprint_init(EffectInstance* effect);
@@ -125,7 +125,7 @@ void footprint_appendGfx(void* effect) {
 
     for (i = 0; i < effectInst->numParts; i++, part++) {
         if (part->alive) {
-            Gfx* dlist = D_09000240_32FD90;
+            const char* dlist = D_09000240_32FD90;
 
             gDisplayContext->matrixStack[gMatrixListPos] = part->mtx;
 

@@ -1,11 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000100_3E1DD0[];
-extern Gfx D_090001E8_3E1EB8[];
 
-Gfx* D_E00E8630[] = { D_090001E8_3E1EB8 };
-Gfx* D_E00E8634[] = { D_09000100_3E1DD0 };
+const char* D_E00E8630[] = { D_090001E8_3E1EB8 };
+const char* D_E00E8634[] = { D_09000100_3E1DD0 };
 
 void moving_cloud_init(EffectInstance* effect);
 void moving_cloud_update(EffectInstance* effect);

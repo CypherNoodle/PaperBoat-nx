@@ -1,15 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090002C0_392700[];
-extern Gfx D_09000330_392770[];
-extern Gfx D_09000370_3927B0[];
-extern Gfx D_090003B0_3927F0[];
-extern Gfx D_090003F0_392830[];
-extern Gfx D_09000430_392870[];
-extern Gfx D_09000470_3928B0[];
 
-static Gfx* sDlists[] = { D_09000430_392870, D_090003F0_392830, D_090003B0_3927F0, D_09000370_3927B0, D_09000330_392770 };
+static const char* sDlists[] = { D_09000430_392870, D_090003F0_392830, D_090003B0_3927F0, D_09000370_3927B0, D_09000330_392770 };
 
 static s32 sPartParams[4 * 5] = {
     1, 0, 0, 0, 100,

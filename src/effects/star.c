@@ -1,11 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Vtx_t D_09001400_333AA0[];
-extern Gfx D_09001530_333BD0[];
-extern Gfx D_09001650_333CF0[];
-extern Gfx D_09001780_333E20[];
-extern Gfx D_090017D0_333E70[];
 
 void star_init(EffectInstance* effect);
 void star_update(EffectInstance* effect);

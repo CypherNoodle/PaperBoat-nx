@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 u8 D_E00B2BA0[] = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 200, 128, 32, 0, 0, 0, 0 };
 
@@ -8,8 +9,6 @@ void squirt_update(EffectInstance* effect);
 void squirt_render(EffectInstance* effect);
 void squirt_appendGfx(void* effect);
 
-extern Gfx D_09000800_3B5B40[];
-extern Gfx D_090008A8_3B5BE8[];
 
 EffectInstance* squirt_main(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, s32 arg8) {
     EffectBlueprint bp;

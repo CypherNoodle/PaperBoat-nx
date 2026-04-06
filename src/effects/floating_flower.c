@@ -1,9 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 s32 D_E001A610 = 0;
 
-extern Gfx D_090002F0_330750[];
 
 void floating_flower_init(EffectInstance* effect);
 void floating_flower_update(EffectInstance* effect);

@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090003A0_38ED30[];
-extern Gfx D_09000420_38EDB0[];
 
 // perhaps additional, unused colors? 36 bytes would give 12 RGB colors
 s32 D_E008CAF0[] = {

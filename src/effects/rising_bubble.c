@@ -1,21 +1,16 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000200_356730[];
-extern Gfx D_090002E8_356818[];
-extern Gfx D_09000308_356838[];
-extern Gfx D_090003F0_356920[];
-extern Gfx D_09000410_356940[];
-extern Gfx D_09000430_356960[];
 
-Gfx* D_E0046600[] = { D_090002E8_356818 };
+const char* D_E0046600[] = { D_090002E8_356818 };
 
-Gfx* D_E0046604[] = {
+const char* D_E0046604[] = {
     D_090003F0_356920, D_09000410_356940, D_090003F0_356920, D_09000430_356960
 };
 
-Gfx* D_E0046614[] = { D_09000200_356730 };
-Gfx* D_E0046618[] = { D_09000308_356838 };
+const char* D_E0046614[] = { D_09000200_356730 };
+const char* D_E0046618[] = { D_09000308_356838 };
 
 void rising_bubble_init(EffectInstance* effect);
 void rising_bubble_update(EffectInstance* effect);

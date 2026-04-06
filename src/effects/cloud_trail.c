@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_090000E0_32ED30[];
-extern Gfx D_090001B8_32EE08[];
 
 void cloud_trail_init(EffectInstance* effect);
 void cloud_trail_update(EffectInstance* effect);

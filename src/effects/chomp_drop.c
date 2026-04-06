@@ -1,14 +1,12 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void chomp_drop_init(EffectInstance* effect);
 void chomp_drop_update(EffectInstance* effect);
 void chomp_drop_render(EffectInstance* effect);
 void chomp_drop_appendGfx(void* effect);
 
-extern Gfx D_09001040_398080[];
-extern Gfx D_090010E8_398128[];
-extern Gfx D_09001190_3981D0[];
 
 EffectInstance* chomp_drop_main(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, f32 arg6, s32 arg7,
                                 f32 arg8, s32 arg9)

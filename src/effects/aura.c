@@ -1,47 +1,36 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09002000_379F80[];
-extern Gfx D_090020E8_37A068[];
-extern Gfx D_090021D0_37A150[];
-extern Gfx D_090023B0_37A330[];
-extern Gfx D_090023C8_37A348[];
-extern Gfx D_090023E0_37A360[];
-extern Gfx D_090023F8_37A378[];
-extern Gfx D_09002410_37A390[];
-extern Gfx D_09002428_37A3A8[];
-extern Gfx D_09002440_37A3C0[];
-extern Gfx D_09002458_37A3D8[];
-
-Gfx* D_E0076E90[] = {
+const char* D_E0076E90[] = {
     [FX_AURA_CAPTURE]   D_090023E0_37A360,
     [FX_AURA_RED]       D_090023E0_37A360,
     [FX_AURA_BLUE]      D_09002440_37A3C0,
     [FX_AURA_GOLD]      D_09002440_37A3C0
 };
 
-Gfx* D_E0076EA0[] = {
+const char* D_E0076EA0[] = {
     [FX_AURA_CAPTURE]   D_090023F8_37A378,
     [FX_AURA_RED]       D_090023F8_37A378,
     [FX_AURA_BLUE]      D_09002458_37A3D8,
     [FX_AURA_GOLD]      D_09002458_37A3D8
 };
 
-Gfx* D_E0076EB0[] = {
+const char* D_E0076EB0[] = {
     [FX_AURA_CAPTURE]   D_090023B0_37A330,
     [FX_AURA_RED]       D_090023B0_37A330,
     [FX_AURA_BLUE]      D_09002410_37A390,
     [FX_AURA_GOLD]      D_09002410_37A390
 };
 
-Gfx* D_E0076EC0[] = {
+const char* D_E0076EC0[] = {
     [FX_AURA_CAPTURE]   D_090023C8_37A348,
     [FX_AURA_RED]       D_090023C8_37A348,
     [FX_AURA_BLUE]      D_09002428_37A3A8,
     [FX_AURA_GOLD]      D_09002428_37A3A8
 };
 
-Gfx* D_E0076ED0[] = {
+const char* D_E0076ED0[] = {
     [FX_AURA_CAPTURE]   D_09002000_379F80,
     [FX_AURA_RED]       D_09002000_379F80,
     [FX_AURA_BLUE]      D_090020E8_37A068,
@@ -281,6 +270,8 @@ void aura_render(EffectInstance* effect) {
     renderTask.appendGfxArg = effect;
     renderTask.dist = 0;
     renderTask.renderMode = RENDER_MODE_CLOUD_NO_ZCMP;
+    renderTask.interpolationName = "aura_render";
+    renderTask.interpolationTag = TAG_EFFECT(0, effect);
 
     retTask = queue_render_task(&renderTask);
     retTask->renderMode |= RENDER_TASK_FLAG_REFLECT_FLOOR;

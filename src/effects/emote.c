@@ -1,20 +1,11 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09002170_336DE0[];
-extern Gfx D_09002238_336EA8[];
-extern Gfx D_090022E0_336F50[];
-extern Gfx D_09002308_336F78[];
-extern Gfx D_090023B0_337020[];
-extern Gfx D_090023D8_337048[];
-extern Gfx D_09002480_3370F0[];
-extern Gfx D_090024A8_337118[];
-extern Gfx D_09002550_3371C0[];
-extern Gfx D_09002578_3371E8[];
 
-Gfx* D_E0020C90[] = { D_090022E0_336F50, nullptr, D_090023B0_337020, D_09002480_3370F0, D_09002550_3371C0 };
+const char* D_E0020C90[] = { D_090022E0_336F50, nullptr, D_090023B0_337020, D_09002480_3370F0, D_09002550_3371C0 };
 
-Gfx* D_E0020CA4[] = { D_09002238_336EA8, nullptr, D_09002308_336F78, D_090023D8_337048, D_090024A8_337118 };
+const char* D_E0020CA4[] = { D_09002238_336EA8, nullptr, D_09002308_336F78, D_090023D8_337048, D_090024A8_337118 };
 
 s8 D_E0020CB8[40] = {
     0, 0, 1, 2, 3, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -205,8 +196,8 @@ void emote_appendGfx(void* effect) {
     EmoteFXData* part = ((EffectInstance*)effect)->data.emote;
     s32 type = part->unk_00;
     s32 unk_38;
-    Gfx* dlist;
-    Gfx* dlist2;
+    const char* dlist;
+    const char* dlist2;
     Mtx* matrix;
     s32 w;
     s32 h;

@@ -1,27 +1,20 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
 void radial_shimmer_init(EffectInstance* effect);
 void radial_shimmer_update(EffectInstance* effect);
 void radial_shimmer_render(EffectInstance* effect);
 void radial_shimmer_appendGfx(void* effect);
 
-extern Gfx D_09003428_36A188[];
-extern Gfx D_09003508_36A268[];
-extern Gfx D_090035E8_36A348[];
-extern Gfx D_090036C8_36A428[];
-extern Gfx D_09003830_36A590[];
-extern Gfx D_090038B8_36A618[];
-extern Gfx D_090039A8_36A708[];
-extern Gfx D_09003A88_36A7E8[];
 
-Gfx* D_E0066C50[] = {
+const char* D_E0066C50[] = {
     D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590,
     D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590,
     D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590, D_09003830_36A590
 };
 
-Gfx* D_E0066C8C[] = {
+const char* D_E0066C8C[] = {
     D_09003508_36A268, D_090035E8_36A348, D_09003428_36A188, D_090039A8_36A708, D_09003A88_36A7E8,
     D_09003428_36A188, D_090039A8_36A708, D_09003A88_36A7E8, D_090038B8_36A618, D_09003508_36A268,
     D_090038B8_36A618, D_090038B8_36A618, D_09003428_36A188, D_09003A88_36A7E8, D_090036C8_36A428,
@@ -294,8 +287,8 @@ void radial_shimmer_appendGfx(void* effect) {
     s32 temp_f2;
     s32 temp_f4;
     s32 temp_f6;
-    Gfx* dlist2;
-    Gfx* dlist1;
+    const char* dlist2;
+    const char* dlist1;
     s32 temp_s5;
     s32 var_a3;
     s32 alpha;

@@ -1,15 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern IMG_BIN D_09000000_345B40[][0x1000];
-extern IMG_BIN D_09004000_349B40[][0x1000];
-extern Gfx D_09008100_34DC40[];
-extern Gfx D_09008170_34DCB0[];
-extern Gfx D_09008190_34DCD0[];
-extern Gfx D_090081A8_34DCE8[];
-extern Gfx D_090081C0_34DD00[];
 
-Gfx* D_E0036630[] = {
+const char* D_E0036630[] = {
     D_09008170_34DCB0, D_09008190_34DCD0, D_090081A8_34DCE8, D_090081C0_34DD00
 };
 
@@ -107,6 +101,13 @@ void got_item_outline_render(EffectInstance* effect) {
 void func_E003621C(void) {
 }
 
+static const char* sGotItemOutlineTexType0[] = {
+    D_09000000_345B40, D_09001000_346B40, D_09002000_347B40, D_09003000_348B40
+};
+static const char* sGotItemOutlineTexType1[] = {
+    D_09004000_349B40, D_09005000_34AB40, D_09006000_34BB40, D_09007000_34CB40
+};
+
 void got_item_outline_appendGfx(void* effect) {
     GotItemOutlineFXData* data = ((EffectInstance*)effect)->data.gotItemOutline;
     s32 type = data->type;
@@ -146,9 +147,9 @@ void got_item_outline_appendGfx(void* effect) {
             IMG_PTR img;
 
             if (type == 0) {
-                img = D_09000000_345B40[i];
+                img = (IMG_PTR) sGotItemOutlineTexType0[i];
             } else {
-                img = D_09004000_349B40[i];
+                img = (IMG_PTR) sGotItemOutlineTexType1[i];
             }
 
             gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_IA, G_IM_SIZ_8b, 128, img);

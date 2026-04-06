@@ -1,12 +1,10 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001000_3F9CC0[];
-extern Gfx D_09001148_3F9E08[];
-extern Gfx D_09001168_3F9E28[];
 
-Gfx* D_E01108B0[] = { D_09001148_3F9E08 };
-Gfx* D_E01108B4[] = { D_09001000_3F9CC0 };
+const char* D_E01108B0[] = { D_09001148_3F9E08 };
+const char* D_E01108B4[] = { D_09001000_3F9CC0 };
 
 void ice_shard_init(EffectInstance* effect);
 void ice_shard_update(EffectInstance* effect);

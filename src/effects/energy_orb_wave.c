@@ -1,11 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001000_3A5320[];
-extern Gfx D_090010A8_3A53C8[];
-extern Gfx D_090011D0_3A54F0[];
-extern Gfx D_090011F0_3A5510[];
-extern Gfx D_09001210_3A5530[];
 
 void energy_orb_wave_init(EffectInstance* effect);
 void energy_orb_wave_update(EffectInstance* effect);

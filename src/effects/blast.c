@@ -6,19 +6,9 @@ void blast_update(EffectInstance* effect);
 void blast_render(EffectInstance* effect);
 void blast_appendGfx(void* effect);
 
-extern Gfx D_09001300_37ECD0[];
-extern Gfx D_09001378_37ED48[];
-extern Gfx D_090013F0_37EDC0[];
-extern Gfx D_09001468_37EE38[];
-extern Gfx D_090014E0_37EEB0[];
-extern Gfx D_09001558_37EF28[];
-extern Gfx D_090015D0_37EFA0[];
-extern Gfx D_09001648_37F018[];
-extern Gfx D_090016C0_37F090[];
-extern Gfx D_09001738_37F108[];
-extern Gfx D_090017B0_37F180[];
+#include "assets/effects.h"
 
-Gfx* D_E007C510[] = {
+const char* D_E007C510[] = {
     D_09001378_37ED48, D_090013F0_37EDC0, D_09001468_37EE38,
     D_090014E0_37EEB0, D_09001558_37EF28, D_090015D0_37EFA0,
     D_09001648_37F018, D_090016C0_37F090, D_09001738_37F108
@@ -95,7 +85,7 @@ void blast_appendGfx(void* effect) {
     Matrix4f sp18;
     Matrix4f sp58;
     Matrix4f sp98;
-    Gfx* dlist = D_090017B0_37F180;
+    const char* dlist = D_090017B0_37F180;
     BlastFXData* data = ((EffectInstance*) effect)->data.blast;
     s32 unk_20 = data->unk_20;
     f32 t = 256.0f;

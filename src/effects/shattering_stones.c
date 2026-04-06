@@ -1,18 +1,9 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09000C00_341480[];
-extern Gfx D_09001068_3418E8[];
-extern Gfx D_09001080_341900[];
-extern Gfx D_09001098_341918[];
-extern Gfx D_090010B8_341938[];
-extern Gfx D_090010D0_341950[];
-extern Gfx D_090010E8_341968[];
-extern Gfx D_09001108_341988[];
-extern Gfx D_09001120_3419A0[];
-extern Gfx D_09001138_3419B8[];
 
-Gfx* D_E002C940[] = {
+const char* D_E002C940[] = {
     D_09001138_3419B8, D_09001120_3419A0, D_09001108_341988,
     D_090010E8_341968, D_090010D0_341950, D_090010B8_341938,
     D_09001098_341918, D_09001080_341900, D_09001068_3418E8
@@ -179,7 +170,7 @@ void shattering_stones_appendGfx(void* effect) {
 
         part++;
         for (i = 1; i < ((EffectInstance*)effect)->numParts; i++, part++) {
-            Gfx* dlist = D_E002C940[i];
+            const char* dlist = D_E002C940[i];
 
             guTranslateF(sp60, part->unk_00, part->unk_04, part->unk_08);
             guMtxCatF(sp60, spA0, sp20);

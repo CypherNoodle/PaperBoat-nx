@@ -1,8 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
+#include "assets/effects.h"
 
-extern Gfx D_09001100_3601E0[];
-extern Gfx D_090011B0_360290[];
 
 void falling_leaves_init(EffectInstance* effect);
 void falling_leaves_render(EffectInstance* effect);
