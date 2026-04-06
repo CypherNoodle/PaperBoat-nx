@@ -556,6 +556,8 @@ void btl_render_actors(void) {
     Actor* actor;
     s32 i;
 
+    renderTaskPtr->interpolationName = "render_actors";
+
     if (gBattleState != BATTLE_STATE_NONE) {
         btl_popup_messages_draw_world_geometry();
         if (battleStatus->initBattleCallback != nullptr) {
@@ -573,6 +575,7 @@ void btl_render_actors(void) {
                         renderTaskPtr->appendGfx = appendGfx_enemy_actor;
                         renderTaskPtr->dist = actor->curPos.z;
                         renderTaskPtr->renderMode = actor->renderMode;
+                        renderTaskPtr->interpolationTag = TAG_ACTOR(i, actor);
                         queue_render_task(renderTaskPtr);
 
                         if (actor->flags & ACTOR_FLAG_BLUR_ENABLED) {
@@ -580,6 +583,7 @@ void btl_render_actors(void) {
                             renderTaskPtr->appendGfx = appendGfx_enemy_actor_blur;
                             renderTaskPtr->dist = actor->curPos.z;
                             renderTaskPtr->renderMode = RENDER_MODE_SURFACE_XLU_LAYER3;
+                            renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFF, actor);
                             queue_render_task(renderTaskPtr);
                         }
 
@@ -588,6 +592,7 @@ void btl_render_actors(void) {
                             renderTaskPtr->appendGfx = appendGfx_enemy_actor_reflection;
                             renderTaskPtr->dist = actor->curPos.z;
                             renderTaskPtr->renderMode = actor->renderMode;
+                            renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFF, actor);
                             queue_render_task(renderTaskPtr);
                         }
                     }
@@ -599,6 +604,7 @@ void btl_render_actors(void) {
                     renderTaskPtr->appendGfx = appendGfx_partner_actor;
                     renderTaskPtr->dist = actor->curPos.z;
                     renderTaskPtr->renderMode = actor->renderMode;
+                    renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFFF, actor);
                     queue_render_task(renderTaskPtr);
 
                     if (actor->flags & ACTOR_FLAG_BLUR_ENABLED) {
@@ -606,6 +612,7 @@ void btl_render_actors(void) {
                         renderTaskPtr->appendGfx = appendGfx_partner_actor_blur;
                         renderTaskPtr->dist = actor->curPos.z;
                         renderTaskPtr->renderMode = RENDER_MODE_SURFACE_XLU_LAYER3;
+                        renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFFFF, actor);
                         queue_render_task(renderTaskPtr);
                     }
 
@@ -614,6 +621,7 @@ void btl_render_actors(void) {
                         renderTaskPtr->appendGfx = appendGfx_partner_actor_reflection;
                         renderTaskPtr->dist = actor->curPos.z;
                         renderTaskPtr->renderMode = actor->renderMode;
+                        renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFFFFF, actor);
                         queue_render_task(renderTaskPtr);
                     }
                 }
@@ -624,6 +632,7 @@ void btl_render_actors(void) {
                     renderTaskPtr->appendGfx = appendGfx_player_actor;
                     renderTaskPtr->dist = actor->curPos.z;
                     renderTaskPtr->renderMode = actor->renderMode;
+                    renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFFFFFF, actor);
                     queue_render_task(renderTaskPtr);
 
                     if (actor->flags & ACTOR_FLAG_BLUR_ENABLED) {
@@ -631,6 +640,7 @@ void btl_render_actors(void) {
                         renderTaskPtr->appendGfx = (void (*) (void*)) appendGfx_player_actor_blur;
                         renderTaskPtr->dist = actor->curPos.z;
                         renderTaskPtr->renderMode = RENDER_MODE_SURFACE_XLU_LAYER3;
+                        renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xFFFFFFFF, actor);
                         queue_render_task(renderTaskPtr);
                     }
 
@@ -639,6 +649,7 @@ void btl_render_actors(void) {
                         renderTaskPtr->appendGfx = appendGfx_player_actor_reflection;
                         renderTaskPtr->dist = actor->curPos.z;
                         renderTaskPtr->renderMode = actor->renderMode;
+                        renderTaskPtr->interpolationTag = TAG_ACTOR(i * 0xDFFFFFFF, actor);
                         queue_render_task(renderTaskPtr);
                     }
                 }
@@ -675,7 +686,7 @@ void tattle_cam_pre_render(Camera* camera) {
         mdl_get_shroud_tint_params(&r1, &g1, &b1, &a1);
         if (fogA == 255) {
             for (i = 0; i < ARRAY_COUNT(gTattleBgPalette); i++) {
-                gTattleBgPalette[i] = 1;
+                gTattleBgPalette[i] = PACK_PAL_RGBA(0, 0, 0, 1);
             }
         } else {
             for (i = 0; i < ARRAY_COUNT(gTattleBgPalette); i++) {
@@ -683,7 +694,7 @@ void tattle_cam_pre_render(Camera* camera) {
                 u16 blendedB = blend_tattle_background_channel(UNPACK_PAL_B(palColor), fogB >> 3, fogA);
                 u16 blendedG = blend_tattle_background_channel(UNPACK_PAL_G(palColor), fogG >> 3, fogA);
                 u16 blendedR = blend_tattle_background_channel(UNPACK_PAL_R(palColor), fogR >> 3, fogA);
-                gTattleBgPalette[i] = blendedB << 1 | blendedG << 6 | blendedR << 11 | 1;
+                gTattleBgPalette[i] = PACK_PAL_RGBA(blendedR, blendedG, blendedB, 1);
             }
         }
     }

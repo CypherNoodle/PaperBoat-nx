@@ -6,6 +6,7 @@
 #include "fio.h"
 #include "dx/config.h"
 #include "dx/versioning.h"
+#include "port/Engine.h"
 
 #if VERSION_JP
 #define TITLE_WIDTH 272
@@ -134,16 +135,12 @@ void state_init_title_screen(void) {
     gGameStatusPtr->context = CONTEXT_WORLD;
     gGameStatusPtr->introPart = INTRO_PART_NONE;
     startup_fade_screen_update();
-    titleData = load_asset_by_name("title_data", &titleDataSize);
-    titleDataDst = TitleScreen_ImgList = heap_malloc(titleDataSize);
-    decode_yay0(titleData, titleDataDst);
-    general_heap_free(titleData);
-
-    TitleScreen_ImgList_Logo = (s32*)(TitleScreen_ImgList->logo + (s32) TitleScreen_ImgList);
-    TitleScreen_ImgList_Copyright = (u8 (*)[COPYRIGHT_WIDTH]) ((s32*)(TitleScreen_ImgList->copyright + (s32) TitleScreen_ImgList));
-    TitleScreen_ImgList_PressStart = (s32*)(TitleScreen_ImgList->pressStart + (s32) TitleScreen_ImgList);
+    // Load title screen images individually from OTR archive
+    TitleScreen_ImgList_Logo = (s32*) ResourceGetDataByName("__OTR__title_screen/title_logo");
+    TitleScreen_ImgList_Copyright = (u8 (*)[COPYRIGHT_WIDTH]) ResourceGetDataByName("__OTR__title_screen/title_copyright");
+    TitleScreen_ImgList_PressStart = (s32*) ResourceGetDataByName("__OTR__title_screen/title_press_start");
 #if VERSION_JP
-    TitleScreen_ImgList_CopyrightPalette = (s32*)(TitleScreen_ImgList->copyrightPalette + (s32) TitleScreen_ImgList);
+    TitleScreen_ImgList_CopyrightPalette = (s32*) ResourceGetDataByName("__OTR__title_screen/title_copyright_palette");
 #endif
 
     create_cameras();

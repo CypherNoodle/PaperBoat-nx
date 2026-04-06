@@ -955,6 +955,9 @@ void render_npcs(void) {
                 renderTaskPtr->appendGfxArg = npc;
                 renderTaskPtr->appendGfx = appendGfx_npc;
                 renderTaskPtr->renderMode = npc->renderMode;
+                renderTaskPtr->needsInterpolation = true;
+                renderTaskPtr->interpolationName = "render_npcs";
+                renderTaskPtr->interpolationTag = TAG_NPC(i, npc);
 
                 if (npc->flags & NPC_FLAG_HIDING) {
                     u8 r, g, b, a;
@@ -973,6 +976,7 @@ void render_npcs(void) {
                     renderTaskPtr->appendGfx = appendGfx_npc_blur;
                     renderTaskPtr->appendGfxArg = npc;
                     renderTaskPtr->renderMode = RENDER_MODE_SURFACE_XLU_LAYER1;
+                    renderTaskPtr->interpolationTag = TAG_NPC(i * 0xFFF, npc);
                     queue_render_task(renderTaskPtr);
                 }
             }
@@ -1346,7 +1350,7 @@ void npc_render_with_watt_idle_palettes(Npc* npc, s32 arg1, Matrix4f mtx) {
     if (npc->resetPalAdjust != 0) {
         npc->originalPalettesList = spr_get_npc_palettes(npc->curAnim >> 16);
         npc->originalPalettesCount = 0;
-        while ((s32)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
+        while ((intptr_t)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
             npc->originalPalettesCount++;
         }
 
@@ -1456,7 +1460,7 @@ void npc_render_with_single_pal_blending(Npc* npc, s32 yaw, b32 hasDifferentInte
         }
 
         npc->originalPalettesCount = 0;
-        while ((s32)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
+        while ((intptr_t)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
             npc->originalPalettesCount++;
         }
 
@@ -1592,7 +1596,7 @@ void npc_render_with_double_pal_blending(Npc* npc, s32 yaw, Matrix4f mtx) {
         }
 
         npc->originalPalettesCount = 0;
-        while ((s32)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
+        while ((intptr_t)npc->originalPalettesList[npc->originalPalettesCount] != -1) {
             npc->originalPalettesCount++;
         }
 

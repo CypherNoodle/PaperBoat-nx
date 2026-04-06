@@ -5,6 +5,8 @@
 #include "sprite.h"
 #include "model.h"
 #include "game_modes.h"
+#include "port/Engine.h"
+#include "port/shape_loader.h"
 
 #if VERSION_JP
 // TODO: split the filemenu segment

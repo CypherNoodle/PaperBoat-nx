@@ -6,6 +6,8 @@
 #include "battle/battle.h"
 #include "model.h"
 #include "game_modes.h"
+#include "port/Engine.h"
+#include "port/shape_loader.h"
 
 extern u16 gFrameBuf0[];
 extern u16 gFrameBuf1[];
@@ -38,9 +40,7 @@ void state_step_battle(void) {
     u32 currentBattleIndex;
 
     if (BattleTransitionDelay == 5) {
-        if (nuGfxCfb[1] != nuGfxCfb_ptr) {
-            return;
-        }
+        // PORT: Skip N64 frame buffer sync check (nuGfxCfb_ptr never cycles on port)
         BattleTransitionDelay--;
         gOverrideFlags |= GLOBAL_OVERRIDES_DISABLE_DRAW_FRAME;
         nuContRmbForceStop();
@@ -92,7 +92,6 @@ void state_step_battle(void) {
         clear_npcs();
         clear_entity_data(true);
         clear_trigger_data();
-        DMA_COPY_SEGMENT(battle_code);
         initialize_battle();
         btl_save_world_cameras();
         load_battle_section();
@@ -112,6 +111,7 @@ void state_step_battle(void) {
     update_npcs();
     update_item_entities();
     update_effects();
+    iterate_models();
     update_cameras();
 }
 
@@ -170,20 +170,17 @@ void state_step_end_battle(void) {
                 playerStatus->animFlags = SavedWorldAnimFlags;
                 set_game_mode(GAME_MODE_DEMO);
             } else {
-                void* mapShape;
-                u32 sizeTemp;
-
                 partner_init_after_battle(playerData->curPartner);
                 load_map_script_lib();
-                mapShape = load_asset_by_name(wMapShapeName, &sizeTemp);
-                decode_yay0(mapShape, &gMapShapeData);
-                general_heap_free(mapShape);
+                {
+                    char assetPath[64];
+                    snprintf(assetPath, sizeof(assetPath), "__OTR__shapes/%s", wMapShapeName);
+                    u8* shapeData = (u8*)LOAD_ASSET(assetPath);
+                    size_t shapeSize = ResourceGetSizeByName(assetPath);
+                    Shape_LoadFromRawData(&gMapShapeData, shapeData, shapeSize, wMapShapeName);
+                }
                 initialize_collision();
                 restore_map_collision_data();
-
-                if (mapConfig->dmaStart != nullptr) {
-                    dma_copy(mapConfig->dmaStart, mapConfig->dmaEnd, mapConfig->dmaDest);
-                }
 
                 load_map_bg(mapConfig->bgName);
                 if (mapSettings->background != nullptr) {
@@ -193,7 +190,13 @@ void state_step_end_battle(void) {
                         SCREEN_INSET_X, SCREEN_INSET_Y);
                 }
 
-                mdl_load_all_textures(mapSettings->modelTreeRoot, get_asset_offset(wMapTexName, &sizeTemp), sizeTemp);
+                {
+                    char texAssetPath[64];
+                    snprintf(texAssetPath, sizeof(texAssetPath), "__OTR__textures/%s", wMapTexName);
+                    u8* textureData = (u8*)ResourceGetDataByName(texAssetPath);
+                    size_t textureSize = ResourceGetSizeByName(texAssetPath);
+                    mdl_load_all_textures(mapSettings->modelTreeRoot, textureData, textureSize);
+                }
                 mdl_calculate_model_sizes();
                 npc_reload_all();
 

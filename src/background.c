@@ -1,6 +1,7 @@
 #include "common.h"
 #include "model.h"
 #include <string.h>
+#include "port/Engine.h"
 
 char gCloudyFlowerFieldsBg[] = "fla_bg";
 char gSunnyFlowerFieldsBg[] = "flb_bg";
@@ -9,12 +10,11 @@ s16 gBackroundTextureYOffset = 0;
 f32 gBackroundWavePhase = 0.0f;
 
 BSS PAL_BIN gBackgroundPalette[256];
+static PAL_BIN* gBackgroundPaletteTlut = nullptr;
 BSS f32 gBackroundLastScrollValue;
 
 void load_map_bg(char* optAssetName) {
     if (optAssetName != nullptr) {
-        UNK_PTR compressedData;
-        u32 assetSize;
         char* assetName = optAssetName;
 
         if (evt_get_variable(nullptr, GB_StoryProgress) >= STORY_CH6_DESTROYED_PUFF_PUFF_MACHINE) {
@@ -24,9 +24,25 @@ void load_map_bg(char* optAssetName) {
             }
         }
 
-        compressedData = load_asset_by_name(assetName, &assetSize);
-        decode_yay0(compressedData, &gBackgroundImage);
-        general_heap_free(compressedData);
+        // Build OTR path and load pre-processed background (raw bytes)
+        char assetPath[64];
+        snprintf(assetPath, sizeof(assetPath), "__OTR__backgrounds/%s", assetName);
+
+        u8* bgData = (u8*)ResourceGetDataByName(assetPath);
+
+        if (bgData != nullptr) {
+            // Original layout: [rasterOffset:4][paletteOffset:4][startX:2][startY:2][width:2][height:2]
+            u32 rasterOffset = *(u32*)(bgData + 0x00);
+            u32 paletteOffset = *(u32*)(bgData + 0x04);
+
+            // Convert offsets to actual pointers
+            gBackgroundImage.raster = (IMG_PTR)(bgData + rasterOffset);
+            gBackgroundImage.palette = (PAL_PTR)(bgData + paletteOffset);
+            gBackgroundImage.startX = *(u16*)(bgData + 0x08);
+            gBackgroundImage.startY = *(u16*)(bgData + 0x0A);
+            gBackgroundImage.width = *(u16*)(bgData + 0x0C);
+            gBackgroundImage.height = *(u16*)(bgData + 0x0E);
+        }
     }
 }
 
@@ -35,6 +51,8 @@ void reset_background_settings(void) {
     gBackroundWaveEnabled = false;
     gGameStatusPtr->backgroundDarkness = 180;
     gGameStatusPtr->backgroundFlags &= BACKGROUND_RENDER_STATE_MASK;
+    free(gBackgroundPaletteTlut);
+    gBackgroundPaletteTlut = nullptr;
 }
 
 void set_background(BackgroundHeader* bg) {
@@ -145,7 +163,7 @@ void appendGfx_background_texture(void) {
             case ENV_TINT_SHROUD:
                 if (fogA == 255) {
                     for (i = 0; i < ARRAY_COUNT(gBackgroundPalette); i++) {
-                        gBackgroundPalette[i] = 1;
+                        gBackgroundPalette[i] = PACK_PAL_RGBA(0, 0, 0, 1);
                     }
                 } else {
                     // lerp from background palette color to fog color based on fog alpha
@@ -155,7 +173,7 @@ void appendGfx_background_texture(void) {
                         blendedB = blend_background_channel(UNPACK_PAL_B(palColor), fogB >> 3, fogA);
                         blendedG = blend_background_channel(UNPACK_PAL_G(palColor), fogG >> 3, fogA);
                         blendedR = blend_background_channel(UNPACK_PAL_R(palColor), fogR >> 3, fogA);
-                        gBackgroundPalette[i] = blendedB << 1 | blendedG << 6 | blendedR << 11 | 1;
+                        gBackgroundPalette[i] = PACK_PAL_RGBA(blendedR, blendedG, blendedB, 1);
                     }
                 }
                 break;
@@ -179,10 +197,17 @@ void appendGfx_background_texture(void) {
                     if (blendedR > 0x1F) {
                         blendedR = 0x1F;
                     }
-                    gBackgroundPalette[i] = blendedB << 1 | blendedG << 6 | blendedR << 11 | 1;
+                    gBackgroundPalette[i] = PACK_PAL_RGBA(blendedR, blendedG, blendedB, 1);
                 }
                 break;
         }
+
+        // TODO: re-visit this with texture cache invalidation in mind.
+        // Malloc a fresh copy so the TLUT pointer is unique each frame.
+        // The texture cache keys by palette pointer — new address = cache miss.
+        free(gBackgroundPaletteTlut);
+        gBackgroundPaletteTlut = malloc(256 * sizeof(PAL_BIN));
+        memcpy(gBackgroundPaletteTlut, gBackgroundPalette, 256 * sizeof(PAL_BIN));
     }
 
     theta = clamp_angle(-cam->curBoomYaw);
@@ -220,7 +245,7 @@ void appendGfx_background_texture(void) {
     if (!(gGameStatusPtr->backgroundFlags & BACKGROUND_FLAG_FOG)) {
         gDPLoadTLUT_pal256(gMainGfxPos++, gGameStatusPtr->backgroundPalette);
     } else {
-        gDPLoadTLUT_pal256(gMainGfxPos++, gBackgroundPalette);
+        gDPLoadTLUT_pal256(gMainGfxPos++, gBackgroundPaletteTlut);
     }
 
     if (!gBackroundWaveEnabled) {

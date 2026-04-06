@@ -6,6 +6,8 @@
 #include "sprite.h"
 #include "model.h"
 #include "game_modes.h"
+#include "port/Engine.h"
+#include "port/shape_loader.h"
 
 #if VERSION_JP
 // TODO: split this segment
@@ -65,7 +67,7 @@ void state_step_pause(void) {
             update_npcs();
             update_player();
             update_effects();
-            if (nuGfxCfb[1] == nuGfxCfb_ptr) {
+            if (true) { // PORT: nuGfxCfb_ptr never cycles on port, skip framebuffer sync
                 StepPauseDelay = 4;
                 StepPauseState = 2;
                 gOverrideFlags |= GLOBAL_OVERRIDES_DISABLE_DRAW_FRAME;
@@ -189,15 +191,15 @@ void state_step_unpause(void) {
                     sfx_set_reverb_mode(SavedReverbMode);
                     bgm_reset_max_volume();
                     load_map_script_lib();
-                    mapShape = load_asset_by_name(wMapShapeName, &assetSize);
-                    decode_yay0(mapShape, &gMapShapeData);
-                    general_heap_free(mapShape);
+                    {
+                        char assetPath[64];
+                        snprintf(assetPath, sizeof(assetPath), "__OTR__shapes/%s", wMapShapeName);
+                        u8* shapeData = (u8*)LOAD_ASSET(assetPath);
+                        size_t shapeSize = ResourceGetSizeByName(assetPath);
+                        Shape_LoadFromRawData(&gMapShapeData, shapeData, shapeSize, wMapShapeName);
+                    }
                     initialize_collision();
                     restore_map_collision_data();
-
-                    if (mapConfig->dmaStart != nullptr) {
-                        dma_copy(mapConfig->dmaStart, mapConfig->dmaEnd, mapConfig->dmaDest);
-                    }
 
                     load_map_bg(mapConfig->bgName);
                     if (mapSettings->background != nullptr) {

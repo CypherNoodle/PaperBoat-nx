@@ -37,6 +37,8 @@ void update_ambient_sounds(void) {
     AmbientSoundSettings* ambientSoundState = &AmbientSoundData;
     s32 error;
 
+    CALL_CANCELLABLE_RETURN_EVENT(AmbientSoundPreUpdate, ambientSoundState);
+
     switch (ambientSoundState->fadeState) {
         case AMBIENCE_STATE_IDLE:
             break;
@@ -71,10 +73,17 @@ void update_ambient_sounds(void) {
             }
             break;
     }
+
+    CALL_EVENT(AmbientSoundPostUpdate, ambientSoundState);
 }
 
 s32 play_ambient_sounds(s32 soundID, s32 fadeTime) {
     AmbientSoundSettings* state = &AmbientSoundData;
+    s32 result = 1;
+
+    CALL_CANCELLABLE_EVENT_INV(AmbientSoundPlay, state, &soundID, &fadeTime, &result) {
+        return result;
+    }
 
     if (!gGameStatusPtr->musicEnabled) {
         snd_ambient_stop_quick(state->soundID);

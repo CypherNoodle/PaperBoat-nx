@@ -11,7 +11,9 @@ void update_animated_models(void) {
         AnimatedModel* anim = (*gCurrentMeshAnimationListPtr)[i];
 
         if (anim->animModelID >= 0) {
+            FrameInterpolation_RecordOpenChild("animator_matrix", TAG_ANIMATED_MODEL(i, anim));
             update_model_animator_with_transform(anim->animModelID, &anim->mtx);
+            FrameInterpolation_RecordCloseChild();
         }
     }
 }
