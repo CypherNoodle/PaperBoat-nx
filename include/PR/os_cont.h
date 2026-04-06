@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 
@@ -200,4 +201,5 @@ extern void		osContGetReadData(OSContPad *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_CONT_H_ */

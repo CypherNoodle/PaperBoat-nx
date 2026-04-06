@@ -21,6 +21,7 @@
 #ifndef __R4300_H__
 #define __R4300_H__
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 /*
@@ -450,4 +451,5 @@
 #define	FPCSR_RM_RP	0x00000002	/* round to positive infinity */
 #define	FPCSR_RM_RM	0x00000003	/* round to negative infinity */
 
+#endif // Disabled on port
 #endif /* __R4300_H */

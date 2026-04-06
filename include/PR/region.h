@@ -33,6 +33,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 
@@ -114,4 +115,5 @@ extern s32	osGetRegionBufSize(void *);
 
 
 
+#endif // Disabled on port
 #endif  /* _REGION_H_ */

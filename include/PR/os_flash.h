@@ -11,8 +11,7 @@
 
 
 
-#include "ultratypes.h"
-#include "os_pi.h"
+#include "ultra64.h"
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 

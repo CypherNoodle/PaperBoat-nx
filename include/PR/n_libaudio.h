@@ -20,6 +20,7 @@
 #ifndef __N_LIBAUDIO__
 #define __N_LIBAUDIO__
 
+#if 0 // Disabled on port
 #include <PR/libaudio.h>
 
 
@@ -345,4 +346,5 @@ extern long long int    n_aspMainDataStart[], n_aspMainDataEnd[];
 
 
 
+#endif // Disabled on port
 #endif /* __N_LIBAUDIO__ */

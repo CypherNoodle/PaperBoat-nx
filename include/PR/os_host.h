@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -154,4 +155,5 @@ extern void             osInitRdb(u8 *sendBuf, u32 sendSize);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_HOST_H_ */

@@ -1,6 +1,7 @@
 #ifndef _RAMROM_H
 #define	_RAMROM_H
 
+#if 0 // Disabled on port
 /**************************************************************************
  *									  *
  *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
@@ -110,4 +111,5 @@ void __RamRomInit(int key, void *romaddr);
 void __RamRomDestroy(int key);
 #endif /* _EMULATOR */
 
+#endif // Disabled on port
 #endif /* !_RAMROM_H */

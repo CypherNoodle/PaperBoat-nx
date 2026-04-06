@@ -20,6 +20,7 @@
 #ifndef _GBI_H_
 #define	_GBI_H_
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 /*
@@ -4586,4 +4587,5 @@ typedef union {
 #endif /* _LANGUAGE_C */
 
 
+#endif // Disabled on port
 #endif /* _GBI_H_ */

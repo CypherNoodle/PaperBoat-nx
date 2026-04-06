@@ -1,6 +1,7 @@
 #ifndef _RCP_H_
 #define _RCP_H_
 
+#if 0 // Disabled on port
 /**************************************************************************
  *                                                                        *
  *               Copyright (C) 1995, Silicon Graphics, Inc.               *
@@ -849,4 +850,5 @@
 
 #endif
 
+#endif // Disabled on port
 #endif  /* _RCP_H_ */

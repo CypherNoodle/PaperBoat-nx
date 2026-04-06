@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -104,4 +105,5 @@ extern void *		 osPhysicalToVirtual(u32);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_CONVERT_H_ */

@@ -23,6 +23,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -194,4 +195,5 @@ extern OSYieldResult	osSpTaskYielded(OSTask *tp);
 
 
 
+#endif // Disabled on port
 #endif /* !_SPTASK_H */

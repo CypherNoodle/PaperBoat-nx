@@ -1,6 +1,7 @@
 #ifndef _SIINT_H
 #define _SIINT_H
 
+#if 0 // Disabled on port
 #include "PR/os_internal.h"
 #include "PR/rcp.h"
 
@@ -12,4 +13,5 @@ void __osSiRelAccess(void);
 int __osSiDeviceBusy(void);
 void __osSiCreateAccessQueue(void);
 
+#endif // Disabled on port
 #endif

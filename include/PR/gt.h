@@ -47,6 +47,7 @@
 #ifndef _GT_H_
 #define	_GT_H_
 
+#if 0 // Disabled on port
 /* this file should be #included AFTER gbi.h */
 
 #include "sptask.h"
@@ -362,4 +363,5 @@ typedef union {
 #ifdef	_LANGUAGE_MAKEROM
 #endif	/* _LANGUAGE_MAKEROM */
 
+#endif // Disabled on port
 #endif	/* _GT_H_ */

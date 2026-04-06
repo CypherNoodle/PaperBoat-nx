@@ -1,3 +1,4 @@
+#if 0 // Disabled on port
 /**************************************************************************
  *									  *
  *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
@@ -40,3 +41,4 @@ typedef	float	Matrix[4][4];
 #define	ABS(d)		((d) > 0) ? (d) : -(d)
 
 extern float	__libm_qnan_f;
+#endif // Disabled on port

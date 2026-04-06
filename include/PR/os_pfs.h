@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 
@@ -193,4 +194,5 @@ extern s32 osPfsNumFiles(OSPfs *, s32 *, s32 *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_PFS_H_ */

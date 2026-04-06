@@ -30,6 +30,7 @@
 #ifndef _OS_LIBC_H_
 #define	_OS_LIBC_H_
 
+#if 0 // Disabled on port
 #include "os_pfs.h"
 
 
@@ -90,4 +91,5 @@
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_LIBC_H_ */

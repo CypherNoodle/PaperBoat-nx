@@ -8,6 +8,7 @@
 
 #ifndef	__GL_IMAGE_H__
 #define	__GL_IMAGE_H__
+#if 0 // Disabled on port
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -123,4 +124,5 @@ unsigned short *ibufalloc();
 #ifdef __cplusplus
 } // extern "C"
 #endif
+#endif // Disabled on port
 #endif	/* !__GL_IMAGE_H__ */

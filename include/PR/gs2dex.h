@@ -12,6 +12,7 @@
 #ifndef	_GS2DEX_H_
 #define	_GS2DEX_H_
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 
 /*===========================================================================*
@@ -380,6 +381,7 @@ extern	void	guS2DInitBg(uObjBg *);
   extern void	guS2DEmuBgRect1Cyc(Gfx **, uObjBg *);
 #endif
 
+#endif // Disabled on port
 #endif /* _GS2DEX_H_ */
 
 /*======== End of gs2dex.h ========*/

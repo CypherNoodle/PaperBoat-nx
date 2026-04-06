@@ -1,5 +1,6 @@
 #ifndef _VIINT_H
 #define _VIINT_H
+#if 0 // Disabled on port
 #include "PR/os_internal.h"
 
 #define OS_TV_TYPE_PAL 0
@@ -67,4 +68,5 @@ extern __OSViContext *__osViNext;
 extern u32 __additional_scanline;
 __OSViContext *__osViGetCurrentContext(void);
 void __osViInit(void);
+#endif // Disabled on port
 #endif

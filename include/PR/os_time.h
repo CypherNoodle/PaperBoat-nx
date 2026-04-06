@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 
@@ -107,4 +108,5 @@ extern int		osStopTimer(OSTimer *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_TIME_H_ */

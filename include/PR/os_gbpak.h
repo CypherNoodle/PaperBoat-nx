@@ -12,6 +12,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_message.h"
 #include "os_pfs.h"
@@ -100,4 +101,5 @@ extern  s32	osGbpakCheckConnector(OSPfs *, u8 *);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_GBPAK_H_ */

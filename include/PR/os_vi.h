@@ -32,6 +32,7 @@
 
 
 
+#if 0 // Disabled on port
 #include <PR/ultratypes.h>
 #include "os_thread.h"
 #include "os_message.h"
@@ -291,4 +292,5 @@ extern void		osCreateViManager(OSPri);
 
 
 
+#endif // Disabled on port
 #endif /* !_OS_VI_H_ */

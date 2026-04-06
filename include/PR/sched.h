@@ -31,6 +31,7 @@
 #ifndef __sched__
 #define __sched__
 
+#if 0 // Disabled on port
 #include <ultra64.h>
 
 #define OS_SC_STACKSIZE      0x2000
@@ -111,5 +112,6 @@ void            osScAddClient(OSSched *s, OSScClient *c, OSMesgQueue *msgQ);
 void            osScRemoveClient(OSSched *s, OSScClient *c);
 OSMesgQueue     *osScGetCmdQ(OSSched *s);
 
+#endif // Disabled on port
 #endif
 
