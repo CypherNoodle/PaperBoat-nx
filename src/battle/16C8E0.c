@@ -51,7 +51,8 @@ s32 BattleScreenFadeAmt = 255;
 
 extern HudScript HES_HPBar;
 extern HudScript HES_SmallStarPoint;
-extern HudScript HES_ItemStarPoint;
+extern HudScript HES_Item_StarPoint;
+#define HES_ItemStarPoint HES_Item_StarPoint
 extern HudScript HES_StatusSPShine;
 
 void btl_render_actors(void);

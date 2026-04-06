@@ -9,7 +9,7 @@ f32 GlobalTimeRate = 1.0f;
 
 // script_list
 BSS u32* gMapFlags;
-BSS s32* gMapVars;
+BSS Bytecode* gMapVars;
 BSS s32 gNumScripts;
 BSS ScriptList gWorldScriptList;
 BSS ScriptList gBattleScriptList;
@@ -17,6 +17,9 @@ BSS ScriptList* gCurrentScriptListPtr;
 BSS s32 gScriptIndexList[MAX_SCRIPTS];
 BSS s32 gScriptIdList[MAX_SCRIPTS];
 BSS s32 gScriptListCount;
+
+// sprite shading — SetSpriteShading copies OTR data here for parsing
+BSS u8 gSpriteShadingData[0x100];
 
 // evt
 BSS char evtDebugPrintBuffer[0x100];
@@ -60,8 +63,8 @@ BSS PopupMenu gItemChoicePopupMenu;
 BSS u32 gWorldMapFlags[MAX_MAPFLAGS];
 BSS u32 gBattleMapFlags[MAX_MAPFLAGS];
 
-BSS u32 gWorldMapVars[MAX_MAPVARS];
-BSS u32 gBattleMapVars[MAX_MAPVARS];
+BSS Bytecode gWorldMapVars[MAX_MAPVARS];
+BSS Bytecode gBattleMapVars[MAX_MAPVARS];
 
 BSS PushBlockGrid* wPushBlockGrids[8];
 
@@ -255,6 +258,9 @@ Evt* start_script(EvtScript* source, s32 priority, s32 flags) {
     newScript->loopDepth = -1;
     newScript->switchDepth = -1;
     newScript->groupFlags = EVT_GROUP_NOT_BATTLE;
+    newScript->buffer = 0;
+    newScript->array = 0;
+    newScript->flagArray = 0;
     newScript->ptrSavedPos = nullptr;
     newScript->frameCounter = 0.0f;
     newScript->unk_158 = 0;
@@ -323,6 +329,9 @@ Evt* start_script_in_group(EvtScript* source, u8 priority, u8 flags, u8 groupFla
     newScript->loopDepth = -1;
     newScript->switchDepth = -1;
     newScript->groupFlags = groupFlags;
+    newScript->buffer = 0;
+    newScript->array = 0;
+    newScript->flagArray = 0;
     newScript->ptrSavedPos = nullptr;
     newScript->frameCounter = 0.0f;
     newScript->unk_158 = 0;
@@ -391,6 +400,7 @@ Evt* start_child_script(Evt* parentScript, EvtScript* source, s32 flags) {
     child->loopDepth = -1;
     child->switchDepth = -1;
     child->groupFlags = parentScript->groupFlags;
+    child->buffer = parentScript->buffer;
     child->ptrSavedPos = nullptr;
     child->array = parentScript->array;
     child->flagArray = parentScript->flagArray;
@@ -455,12 +465,13 @@ Evt* start_child_thread(Evt* parentScript, Bytecode* nextLine, s32 newState) {
     child->childScript = nullptr;
     child->priority = parentScript->priority;
     child->id = UniqueScriptCounter++;
-    child->owner1.actorID = parentScript->owner1.actorID;
-    child->owner2.npcID = parentScript->owner2.npcID;
+    child->owner1 = parentScript->owner1;
+    child->owner2 = parentScript->owner2;
     child->loopDepth = -1;
     child->switchDepth = -1;
     child->groupFlags = parentScript->groupFlags;
     child->ptrSavedPos = nullptr;
+    child->buffer = parentScript->buffer;
     child->array = parentScript->array;
     child->flagArray = parentScript->flagArray;
     child->timeScale = GlobalTimeRate;
@@ -770,7 +781,7 @@ Trigger* bind_trigger(EvtScript* script, s32 flags, s32 triggerFlagIndex, intptr
     return trigger;
 }
 
-Trigger* bind_trigger_1(EvtScript* script, s32 flags, s32 triggerFlagIndex, s32 triggerVar0, s32 triggerVar1,
+Trigger* bind_trigger_1(EvtScript* script, s32 flags, s32 triggerFlagIndex, intptr_t triggerVar0, intptr_t triggerVar1,
                         s32 priority) {
     return bind_trigger(script, flags, triggerFlagIndex, triggerVar0, triggerVar1, priority, 1);
 }

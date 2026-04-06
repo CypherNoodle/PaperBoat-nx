@@ -774,7 +774,7 @@ EvtScript N(EVS_NpcInteract_Merlee) = {
         Set(LVar0, ITEM_CRYSTAL_BALL)
         Set(LVar1, 1)
         ExecWait(N(GiveItemReward))
-        Call(AddKeyItem, ITEM_CRYSTAL_BALL)
+        EVT_GIVE_REWARD(ITEM_CRYSTAL_BALL)
         Set(GF_DRO01_Gift_CrystalBall, 1)
         Wait(20)
         Call(func_802D2C14, 0)

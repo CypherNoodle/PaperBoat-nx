@@ -16,8 +16,8 @@ enum {
 API_CALLABLE(MakeLerp) {
     Bytecode* ptrReadPos = script->ptrReadPos;
 
-    script->varTableF[LERP_VAR_C] = evt_get_float_variable(script, *ptrReadPos++); // start
-    script->varTableF[LERP_VAR_D] = evt_get_float_variable(script, *ptrReadPos++); // end
+    script->varTable[LERP_VAR_C] = evt_get_variable(script, *ptrReadPos++); // start
+    script->varTable[LERP_VAR_D] = evt_get_variable(script, *ptrReadPos++); // end
     script->varTable[LERP_VAR_F] = evt_get_variable(script, *ptrReadPos++); // duration
     script->varTable[LERP_VAR_B] = evt_get_variable(script, *ptrReadPos++); // easing type
     script->varTable[LERP_VAR_E] = 0; // elapsed
@@ -26,13 +26,15 @@ API_CALLABLE(MakeLerp) {
 }
 
 API_CALLABLE(UpdateLerp) {
-    evt_set_float_variable(script, LocalVar(LERP_VAR_0), update_lerp(
+    // Store as integer — many consumers read varTable[0] directly (e.g. TitlePrimAlpha,
+    // boomPitch). evt_set_float_variable encodes as EVT fixed-point which breaks them.
+    script->varTable[LERP_VAR_0] = (s32) update_lerp(
         script->varTable[LERP_VAR_B],
-        script->varTableF[LERP_VAR_C],
-        script->varTableF[LERP_VAR_D],
+        script->varTable[LERP_VAR_C],
+        script->varTable[LERP_VAR_D],
         script->varTable[LERP_VAR_E],
         script->varTable[LERP_VAR_F]
-    ));
+    );
 
     if (script->varTable[LERP_VAR_E] >= script->varTable[LERP_VAR_F]) {
         script->varTable[LERP_VAR_1] = false; // finished
@@ -404,7 +406,7 @@ API_CALLABLE(LoadPath) {
     s32 easingType = evt_get_variable(script, *args++);
     Path* path = heap_malloc(sizeof(*path));
 
-    script->varTablePtr[15] = path;
+    script->varTablePtr[15].p = path;
     path->numVectors = numVectors;
     path->lengths = heap_malloc(numVectors * sizeof(f32));
     path->staticVectorList = vectorList;
@@ -419,7 +421,7 @@ API_CALLABLE(LoadPath) {
 }
 
 API_CALLABLE(GetNextPathPos) {
-    Path* path = script->varTablePtr[0xF];
+    Path* path = script->varTablePtr[0xF].p;
     Vec3f pos;
     f32 alpha;
     f32 diff;
@@ -454,7 +456,7 @@ API_CALLABLE(GetNextPathPos) {
     } else {
         heap_free(path->lengths);
         heap_free(path->vectors);
-        heap_free(script->varTablePtr[15]);
+        heap_free(script->varTablePtr[15].p);
         script->varTable[0] = 0;
     }
 

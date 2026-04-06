@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/Engine.h"
 
 void sleep_bubble_appendGfx(void* effect);
 void sleep_bubble_init(EffectInstance* effect);

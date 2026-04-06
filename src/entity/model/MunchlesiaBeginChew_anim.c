@@ -2,7 +2,7 @@
 #include "animation_script.h"
 #include "assets/entities.h"
 
-extern Vtx D_0A000000_E815F0[];
+
 
 AnimScript Entity_MunchlesiaBeginChew_Animation = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

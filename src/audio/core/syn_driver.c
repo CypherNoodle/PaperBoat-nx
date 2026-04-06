@@ -333,7 +333,7 @@ void au_syn_stop_voice(u8 voiceIdx) {
     decoder->first = true;
     decoder->sample = 0;
     if (decoder->instrument != nullptr) {
-        decoder->memin = (s32)decoder->instrument->wavData;
+        decoder->memin = (intptr_t)decoder->instrument->wavData;
         if (decoder->instrument->type == AL_ADPCM_WAVE) {
             if (decoder->instrument->loopEnd != 0){
                 decoder->loop.count = decoder->instrument->loopCount;
@@ -363,7 +363,7 @@ void au_syn_start_voice_params(u8 voiceIdx, u8 busID, Instrument* instrument, f3
     pvoice->busID = busID;
     decoder->instrument = instrument;
 
-    pvoice->decoder.memin = (s32)decoder->instrument->wavData;
+    pvoice->decoder.memin = (intptr_t)decoder->instrument->wavData;
     pvoice->decoder.sample = 0;
 
     switch (decoder->instrument->type) {
@@ -422,7 +422,7 @@ void au_syn_set_wavetable(u8 voiceIdx, Instrument* instrument) {
     AuLoadFilter* decoder = &pvoice->decoder;
 
     pvoice->decoder.instrument = instrument;
-    pvoice->decoder.memin = (s32)decoder->instrument->wavData;
+    pvoice->decoder.memin = (intptr_t)decoder->instrument->wavData;
     pvoice->decoder.sample = 0;
 
     switch (decoder->instrument->type) {
@@ -746,7 +746,7 @@ void au_init_delay_channel(s16 channel) {
 
 void alHeapInit(ALHeap* hp, u8* base, s32 len) {
     u32 i;
-    s32 alignBytes = 0x10 - ((s32)base & 0xF);
+    s32 alignBytes = 0x10 - ((intptr_t)base & 0xF);
 
     if (alignBytes != 0x10) {
         hp->base = base + alignBytes;

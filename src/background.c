@@ -202,12 +202,10 @@ void appendGfx_background_texture(void) {
                 break;
         }
 
-        // TODO: re-visit this with texture cache invalidation in mind.
-        // Malloc a fresh copy so the TLUT pointer is unique each frame.
-        // The texture cache keys by palette pointer — new address = cache miss.
         free(gBackgroundPaletteTlut);
         gBackgroundPaletteTlut = malloc(256 * sizeof(PAL_BIN));
         memcpy(gBackgroundPaletteTlut, gBackgroundPalette, 256 * sizeof(PAL_BIN));
+        gfx_texture_cache_clear();
     }
 
     theta = clamp_angle(-cam->curBoomYaw);

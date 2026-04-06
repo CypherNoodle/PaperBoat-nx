@@ -489,11 +489,11 @@ EvtScript N(EVS_Withdraw_Bobomb_Door_0) = {
 };
 
 // special 'script' used only to organize the quiz waves
-#define QS_NEXT(npcID, script)  npcID, (s32) script,
+#define QS_NEXT(npcID, script)  npcID, (intptr_t) script,
 #define QS_WAIT(n)  -2, n,
 #define QS_END      -1,
 
-s32 N(QS_Release_Wave_0)[] = {
+intptr_t N(QS_Release_Wave_0)[] = {
     QS_NEXT(NPC_DarkTroopa_01,  N(EVS_Release_DarkTroopa))
     QS_WAIT(5 * DT)
     QS_NEXT(NPC_Goomba_01,      N(EVS_Release_Goomba))
@@ -510,7 +510,7 @@ s32 N(QS_Release_Wave_0)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_1)[] = {
+intptr_t N(QS_Release_Wave_1)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Release_RedShyGuy))
     QS_WAIT(5 * DT)
     QS_NEXT(NPC_RedShyGuy_02,   N(EVS_Release_RedShyGuy))
@@ -535,7 +535,7 @@ s32 N(QS_Release_Wave_1)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_2)[] = {
+intptr_t N(QS_Release_Wave_2)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Release_RedShyGuy_Door_1))
     QS_NEXT(NPC_BlueShyGuy_01,  N(EVS_Release_BlueShyGuy_Door_2))
     QS_NEXT(NPC_Bobomb_01,      N(EVS_Release_Bobomb_Door_0))
@@ -550,7 +550,7 @@ s32 N(QS_Release_Wave_2)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_3)[] = {
+intptr_t N(QS_Release_Wave_3)[] = {
     QS_NEXT(NPC_Goomba_01,      N(EVS_Release_Goomba))
     QS_WAIT(8 * DT)
     QS_NEXT(NPC_KoopaTroopa_01, N(EVS_Release_KoopaTroopa))
@@ -569,7 +569,7 @@ s32 N(QS_Release_Wave_3)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_4)[] = {
+intptr_t N(QS_Release_Wave_4)[] = {
     QS_NEXT(NPC_Goomba_01,      N(EVS_Release_Goomba))
     QS_WAIT(5 * DT)
     QS_NEXT(NPC_KoopaTroopa_01, N(EVS_Release_KoopaTroopa))
@@ -578,7 +578,7 @@ s32 N(QS_Release_Wave_4)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_5)[] = {
+intptr_t N(QS_Release_Wave_5)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Release_RedShyGuy))
     QS_WAIT(5 * DT)
     QS_NEXT(NPC_RedShyGuy_02,   N(EVS_Release_RedShyGuy))
@@ -601,7 +601,7 @@ s32 N(QS_Release_Wave_5)[] = {
     QS_END
 };
 
-s32 N(QS_Release_Wave_6)[] = {
+intptr_t N(QS_Release_Wave_6)[] = {
     QS_NEXT(NPC_DarkTroopa_01,  N(EVS_Release_DarkTroopa))
     QS_WAIT(10 * DT)
     QS_NEXT(NPC_BlueShyGuy_01,  N(EVS_Release_BlueShyGuy))
@@ -621,7 +621,7 @@ s32 N(QS_Release_Wave_6)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_0)[] = {
+intptr_t N(QS_Withdraw_Wave_0)[] = {
     QS_NEXT(NPC_DarkTroopa_01,  N(EVS_Withdraw_DarkTroopa))
     QS_NEXT(NPC_DarkTroopa_02,  N(EVS_Withdraw_DarkTroopa))
     QS_NEXT(NPC_DarkTroopa_03,  N(EVS_Withdraw_DarkTroopa))
@@ -632,7 +632,7 @@ s32 N(QS_Withdraw_Wave_0)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_1)[] = {
+intptr_t N(QS_Withdraw_Wave_1)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Withdraw_RedShyGuy))
     QS_NEXT(NPC_RedShyGuy_02,   N(EVS_Withdraw_RedShyGuy))
     QS_NEXT(NPC_RedShyGuy_03,   N(EVS_Withdraw_RedShyGuy))
@@ -647,7 +647,7 @@ s32 N(QS_Withdraw_Wave_1)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_2)[] = {
+intptr_t N(QS_Withdraw_Wave_2)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Withdraw_RedShyGuy_Door_1))
     QS_NEXT(NPC_RedShyGuy_02,   N(EVS_Withdraw_RedShyGuy_Door_1))
     QS_NEXT(NPC_BlueShyGuy_01,  N(EVS_Withdraw_BlueShyGuy_Door_2))
@@ -659,7 +659,7 @@ s32 N(QS_Withdraw_Wave_2)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_3)[] = {
+intptr_t N(QS_Withdraw_Wave_3)[] = {
     QS_NEXT(NPC_Goomba_01,      N(EVS_Withdraw_Goomba))
     QS_NEXT(NPC_Goomba_02,      N(EVS_Withdraw_Goomba))
     QS_NEXT(NPC_KoopaTroopa_01, N(EVS_Withdraw_KoopaTroopa))
@@ -673,14 +673,14 @@ s32 N(QS_Withdraw_Wave_3)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_4)[] = {
+intptr_t N(QS_Withdraw_Wave_4)[] = {
     QS_NEXT(NPC_Goomba_01,      N(EVS_Withdraw_Goomba))
     QS_NEXT(NPC_KoopaTroopa_01, N(EVS_Withdraw_KoopaTroopa))
     QS_NEXT(NPC_DarkTroopa_01,  N(EVS_Withdraw_DarkTroopa))
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_5)[] = {
+intptr_t N(QS_Withdraw_Wave_5)[] = {
     QS_NEXT(NPC_RedShyGuy_01,   N(EVS_Withdraw_RedShyGuy))
     QS_NEXT(NPC_RedShyGuy_02,   N(EVS_Withdraw_RedShyGuy))
     QS_NEXT(NPC_GreenShyGuy_01, N(EVS_Withdraw_GreenShyGuy))
@@ -694,7 +694,7 @@ s32 N(QS_Withdraw_Wave_5)[] = {
     QS_END
 };
 
-s32 N(QS_Withdraw_Wave_6)[] = {
+intptr_t N(QS_Withdraw_Wave_6)[] = {
     QS_NEXT(NPC_DarkTroopa_01, N(EVS_Withdraw_DarkTroopa))
     QS_NEXT(NPC_DarkTroopa_02, N(EVS_Withdraw_DarkTroopa))
     QS_NEXT(NPC_DarkTroopa_03, N(EVS_Withdraw_DarkTroopa))

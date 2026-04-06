@@ -33,8 +33,11 @@ API_CALLABLE(N(SurroundPlayer)) {
             script->varTable[14] = 0;
         }
     }
+    script->varTable[11] = 0;
     script->varTableF[11] = playerStatus->pos.x;
+    script->varTable[12] = 0;
     script->varTableF[12] = playerStatus->pos.y;
+    script->varTable[13] = 0;
     script->varTableF[13] = playerStatus->pos.z;
     return ApiStatus_DONE2;
 }

@@ -41,7 +41,7 @@ u8* filemenu_specialSymbols[][5] = {
     [LANGUAGE_ES] = { filemenu_msg_C8, filemenu_msg_C6, filemenu_msg_C7, filemenu_msg_C9, filemenu_msg_CA_es },
 };
 #else
-s32 filemenu_specialSymbols[] = { (intptr_t)filemenu_msg_C6, (intptr_t)filemenu_msg_C7, (intptr_t)filemenu_msg_C8, (intptr_t)filemenu_msg_C9, (intptr_t)filemenu_msg_CA };
+intptr_t filemenu_specialSymbols[] = { (intptr_t)filemenu_msg_C6, (intptr_t)filemenu_msg_C7, (intptr_t)filemenu_msg_C8, (intptr_t)filemenu_msg_C9, (intptr_t)filemenu_msg_CA };
 #endif
 
 Gfx filemenu_dl_draw_char_init[] = {
@@ -341,7 +341,7 @@ u8 *gFileMenuMessages[] = {
     filemenu_msg_12, filemenu_msg_36, filemenu_msg_37, filemenu_msg_38, filemenu_msg_39,
 };
 #else
-s32 gFileMenuMessages[] = {
+intptr_t gFileMenuMessages[] = {
     0x00000000, (intptr_t)filemenu_msg_01, (intptr_t)filemenu_msg_02, (intptr_t)filemenu_msg_03, (intptr_t)filemenu_msg_04,
     (intptr_t)filemenu_msg_05, (intptr_t)filemenu_msg_06, (intptr_t)filemenu_msg_07, (intptr_t)filemenu_msg_08, (intptr_t)filemenu_msg_09,
     (intptr_t)filemenu_msg_10, (intptr_t)filemenu_msg_11, (intptr_t)filemenu_msg_12, (intptr_t)filemenu_msg_13, (intptr_t)filemenu_msg_14,
@@ -619,21 +619,21 @@ void filemenu_draw_message(u8* message, s32 x, s32 y, s32 alpha, s32 color, u32 
         y -= 2;
     }
 
-    if ((u32)message < 0x100) {
-        if ((u32)message - 0xA2 >= 0x4E) {
-            filemenu_draw_char((s32)message, x, y, flag1, color, flag2);
+    if ((uintptr_t)message < 0x100) {
+        if ((uintptr_t)message - 0xA2 >= 0x4E) {
+            filemenu_draw_char((s32)(uintptr_t)message, x, y, flag1, color, flag2);
             return;
         }
-        if ((s32) message >= 0xC6) {
+        if ((uintptr_t) message >= 0xC6) {
 #if VERSION_PAL
-            message = (u8*) filemenu_specialSymbols[gCurrentLanguage][(s32) message - 0xC6];
+            message = (u8*) filemenu_specialSymbols[gCurrentLanguage][(uintptr_t) message - 0xC6];
 #else
-            message = (u8*)filemenu_specialSymbols[(s32) message - 0xC6];
+            message = (u8*)filemenu_specialSymbols[(uintptr_t) message - 0xC6];
 #endif
         }
     }
 
-    if ((s32) message < 0) {
+    if ((uintptr_t) message >= 0x100) {
         u8* tmp;
         filemenu_draw_char(0xF3, x, y, flag1, color, flag2);
         tmp = message;

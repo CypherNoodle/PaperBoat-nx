@@ -1,7 +1,9 @@
 #include "common.h"
+#include "message_ids.h"
 #include "hud_element.h"
 #include "item_entity.h"
 #include "world/world.h"
+#include "assets/ui.h"
 
 #if !VERSION_JP
 #define MSG_FullDesc_32 0
@@ -330,7 +332,7 @@ s32 MenuIndexFromPartnerID[] = {
 
 PartnerPopupProperties gPartnerPopupProperties[] = {
     [PARTNER_NONE] {
-        (s32) "なし",
+        (s32) 1,//"なし",
         0,
         MSG_NONE,
         MSG_NONE,
@@ -456,50 +458,18 @@ s32 pad_after_move_table[] = {
     0x00000000, 0x00000000, 0x00000000
 };
 
-extern IMG_BIN ui_msg_frame_a_1_1_png[];
-extern IMG_BIN ui_msg_frame_a_1_2_png[];
-extern IMG_BIN ui_msg_frame_a_1_3_png[];
-extern IMG_BIN ui_msg_frame_a_1_4_png[];
-extern IMG_BIN ui_msg_frame_a_1_5_png[];
-extern IMG_BIN ui_msg_frame_a_2_1_png[];
-extern IMG_BIN ui_msg_frame_a_2_5_png[];
-extern IMG_BIN ui_msg_frame_a_3_1_png[];
-extern IMG_BIN ui_msg_frame_a_3_5_png[];
-extern IMG_BIN ui_msg_frame_a_4_1_png[];
-extern IMG_BIN ui_msg_frame_a_4_5_png[];
-extern IMG_BIN ui_msg_frame_a_5_1_png[];
-extern IMG_BIN ui_msg_frame_a_5_2_png[];
-extern IMG_BIN ui_msg_frame_a_5_3_png[];
-extern IMG_BIN ui_msg_frame_a_5_4_png[];
-extern IMG_BIN ui_msg_frame_a_5_5_png[];
-extern IMG_BIN ui_msg_frame_b_1_1_png[];
-extern IMG_BIN ui_msg_frame_b_1_2_png[];
-extern IMG_BIN ui_msg_frame_b_1_3_png[];
-extern IMG_BIN ui_msg_frame_b_1_4_png[];
-extern IMG_BIN ui_msg_frame_b_1_5_png[];
-extern IMG_BIN ui_msg_frame_b_2_1_png[];
-extern IMG_BIN ui_msg_frame_b_2_5_png[];
-extern IMG_BIN ui_msg_frame_b_3_1_png[];
-extern IMG_BIN ui_msg_frame_b_3_5_png[];
-extern IMG_BIN ui_msg_frame_b_4_1_png[];
-extern IMG_BIN ui_msg_frame_b_4_5_png[];
-extern IMG_BIN ui_msg_frame_b_5_1_png[];
-extern IMG_BIN ui_msg_frame_b_5_2_png[];
-extern IMG_BIN ui_msg_frame_b_5_3_png[];
-extern IMG_BIN ui_msg_frame_b_5_4_png[];
-extern IMG_BIN ui_msg_frame_b_5_5_png[];
 
 IMG_BIN* gMessageBoxFrameParts[2][16] = {
     {
-        ui_msg_frame_a_1_1_png, ui_msg_frame_a_1_2_png, ui_msg_frame_a_1_3_png, ui_msg_frame_a_1_4_png,
-        ui_msg_frame_a_1_5_png, ui_msg_frame_a_2_1_png, ui_msg_frame_a_2_5_png, ui_msg_frame_a_3_1_png,
-        ui_msg_frame_a_3_5_png, ui_msg_frame_a_4_1_png, ui_msg_frame_a_4_5_png, ui_msg_frame_a_5_1_png,
-        ui_msg_frame_a_5_2_png, ui_msg_frame_a_5_3_png, ui_msg_frame_a_5_4_png, ui_msg_frame_a_5_5_png,
+        (IMG_BIN*)ui_msg_frame_a_1_1_png, (IMG_BIN*)ui_msg_frame_a_1_2_png, (IMG_BIN*)ui_msg_frame_a_1_3_png, (IMG_BIN*)ui_msg_frame_a_1_4_png,
+        (IMG_BIN*)ui_msg_frame_a_1_5_png, (IMG_BIN*)ui_msg_frame_a_2_1_png, (IMG_BIN*)ui_msg_frame_a_2_5_png, (IMG_BIN*)ui_msg_frame_a_3_1_png,
+        (IMG_BIN*)ui_msg_frame_a_3_5_png, (IMG_BIN*)ui_msg_frame_a_4_1_png, (IMG_BIN*)ui_msg_frame_a_4_5_png, (IMG_BIN*)ui_msg_frame_a_5_1_png,
+        (IMG_BIN*)ui_msg_frame_a_5_2_png, (IMG_BIN*)ui_msg_frame_a_5_3_png, (IMG_BIN*)ui_msg_frame_a_5_4_png, (IMG_BIN*)ui_msg_frame_a_5_5_png,
     },
     {
-        ui_msg_frame_b_1_1_png, ui_msg_frame_b_1_2_png, ui_msg_frame_b_1_3_png, ui_msg_frame_b_1_4_png,
-        ui_msg_frame_b_1_5_png, ui_msg_frame_b_2_1_png, ui_msg_frame_b_2_5_png, ui_msg_frame_b_3_1_png,
-        ui_msg_frame_b_3_5_png, ui_msg_frame_b_4_1_png, ui_msg_frame_b_4_5_png, ui_msg_frame_b_5_1_png,
-        ui_msg_frame_b_5_2_png, ui_msg_frame_b_5_3_png, ui_msg_frame_b_5_4_png, ui_msg_frame_b_5_5_png,
+        (IMG_BIN*)ui_msg_frame_b_1_1_png, (IMG_BIN*)ui_msg_frame_b_1_2_png, (IMG_BIN*)ui_msg_frame_b_1_3_png, (IMG_BIN*)ui_msg_frame_b_1_4_png,
+        (IMG_BIN*)ui_msg_frame_b_1_5_png, (IMG_BIN*)ui_msg_frame_b_2_1_png, (IMG_BIN*)ui_msg_frame_b_2_5_png, (IMG_BIN*)ui_msg_frame_b_3_1_png,
+        (IMG_BIN*)ui_msg_frame_b_3_5_png, (IMG_BIN*)ui_msg_frame_b_4_1_png, (IMG_BIN*)ui_msg_frame_b_4_5_png, (IMG_BIN*)ui_msg_frame_b_5_1_png,
+        (IMG_BIN*)ui_msg_frame_b_5_2_png, (IMG_BIN*)ui_msg_frame_b_5_3_png, (IMG_BIN*)ui_msg_frame_b_5_4_png, (IMG_BIN*)ui_msg_frame_b_5_5_png,
     }
 };

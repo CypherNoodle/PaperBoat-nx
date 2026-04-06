@@ -1043,9 +1043,12 @@ s32 spr_load_npc_sprite(s32 animID, u32* extraAnimList) {
         header = spr_load_sprite(spriteIndex - 1, false, useTailAlloc);
         SpriteInstances[listIndex].spriteData = header;
         NpcSpriteData[spriteIndex] = header;
-        if (extraAnimList != nullptr) {
-            spr_load_npc_extra_anims(header, extraAnimList);
-        }
+        // PC port: All sprites are asset-loaded in native format with 8-byte pointers.
+        // spr_load_npc_extra_anims was designed for N64 ROM-loaded sprites with 4-byte pointers
+        // and incorrectly shrinks heap allocations via _heap_realloc, causing heap corruption.
+        // if (extraAnimList != nullptr) {
+        //     spr_load_npc_extra_anims(header, extraAnimList);
+        // }
     }
     compList = spr_allocate_components(header->maxComponents);
     SpriteInstances[listIndex].componentList = compList;

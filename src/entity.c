@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "model.h"
 #include "sprite/player.h"
+#include "port/interpolation/FrameInterpolation.h"
 #include <stdio.h>
 
 s32 D_8014AFB0 = 255;
@@ -227,7 +228,7 @@ s32 step_entity_commandlist(Entity* entity) {
             ret = false;
             break;
         case ENTITY_SCRIPT_OP_Jump:
-            entity->scriptReadPos = (s32*)*args;
+            entity->scriptReadPos = (intptr_t*)*args;
             entity->scriptDelay = 1;
             entity->savedReadPos[0] = entity->scriptReadPos;
             ret = true;
@@ -358,12 +359,13 @@ void render_entities(void) {
                     }
 
                     if (entity->gfxBaseAddr == nullptr) {
-                        render_animated_model(entity->virtualModelIndex, &entity->transformMatrix);
+                        render_animated_model(entity->virtualModelIndex, &entity->transformMatrix, TAG_OBJ(i, entity));
                     } else {
                         render_animated_model_with_vertices(entity->virtualModelIndex,
                                       &entity->transformMatrix,
                                       entity->vertexSegment,
-                                      entity->gfxBaseAddr);
+                                      entity->gfxBaseAddr,
+                                      TAG_OBJ(i, entity));
                     }
                 } else {
                     if (D_8014AFB0 == 255) {
@@ -412,12 +414,13 @@ void render_shadows(void) {
                 }
             } else if (shadow->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL) {
                 if (shadow->vertexArray == nullptr) {
-                    render_animated_model(shadow->entityModelID, &shadow->transformMatrix);
+                    render_animated_model(shadow->entityModelID, &shadow->transformMatrix, TAG_SHADOW(i, shadow));
                 } else {
                     render_animated_model_with_vertices(shadow->entityModelID,
                                   &shadow->transformMatrix,
                                   shadow->vertexSegment,
-                                  shadow->vertexArray);
+                                  shadow->vertexArray,
+                                  TAG_SHADOW(i, shadow));
                 }
             } else {
                 if (shadow->flags & ENTITY_FLAG_FADING_AWAY) {
@@ -783,13 +786,14 @@ void clear_entity_data(b32 arg0) {
         }
     }
 
-    if (gGameStatusPtr->context == CONTEXT_WORLD) {
-        gEntityHeapBottom = WORLD_ENTITY_HEAP_BOTTOM;
-        gEntityHeapBase = WORLD_ENTITY_HEAP_BASE;
-    } else {
-        gEntityHeapBottom = (s32) BattleEntityHeapBottom;
-        gEntityHeapBase = gEntityHeapBottom + 0x3000;
-    }
+    // Entity heap not used on port — data loaded from OTR on-demand
+    // if (gGameStatusPtr->context == CONTEXT_WORLD) {
+    //     gEntityHeapBottom = WORLD_ENTITY_HEAP_BOTTOM;
+    //     gEntityHeapBase = WORLD_ENTITY_HEAP_BASE;
+    // } else {
+    //     gEntityHeapBottom = (s32) BattleEntityHeapBottom;
+    //     gEntityHeapBase = gEntityHeapBottom + 0x3000;
+    // }
 
     gCurrentEntityListPtr = get_entity_list();
     gCurrentShadowListPtr = get_shadow_list();
@@ -805,8 +809,8 @@ void clear_entity_data(b32 arg0) {
 
 void init_entity_data(void) {
     if (gGameStatusPtr->context == CONTEXT_WORLD) {
-        gEntityHeapBottom = WORLD_ENTITY_HEAP_BOTTOM;
-        gEntityHeapBase = WORLD_ENTITY_HEAP_BASE;
+        // gEntityHeapBottom = WORLD_ENTITY_HEAP_BOTTOM;
+        // gEntityHeapBase = WORLD_ENTITY_HEAP_BASE;
         reload_world_entity_data();
     } else {
         s32 i;
@@ -814,8 +818,8 @@ void init_entity_data(void) {
         for (i = 0; i < ARRAY_COUNT(bEntityBlueprint); i++) {
             bEntityBlueprint[i] = 0;
         }
-        gEntityHeapBottom = (s32) BattleEntityHeapBottom;
-        gEntityHeapBase = gEntityHeapBottom + 0x3000;
+        // gEntityHeapBottom = (s32) BattleEntityHeapBottom;
+        // gEntityHeapBase = gEntityHeapBottom + 0x3000;
     }
     gCurrentEntityListPtr = get_entity_list();
     gCurrentShadowListPtr = get_shadow_list();
@@ -940,9 +944,9 @@ s32 create_entity(EntityBlueprint* bp, ...) {
     }
 
     for (idx = 0; idx < ARRAY_COUNT(CreateEntityVarArgBuffer); idx++) {
-        s32 arg = va_arg(ap, s32);
+        uintptr_t arg = va_arg(ap, uintptr_t);
 
-        if (arg == MAKE_ENTITY_END) {
+        if (arg == (uintptr_t)(intptr_t)MAKE_ENTITY_END) {
             break;
         }
         CreateEntityVarArgBuffer[idx] = arg;
@@ -1079,7 +1083,7 @@ API_CALLABLE(MakeEntity) {
     EntityBlueprint* entityData;
     s32 x, y, z;
     s32 flags;
-    s32 nextArg;
+    uintptr_t nextArg;
     s32 entityIndex;
     s32 idx;
 

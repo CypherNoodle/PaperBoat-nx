@@ -6,6 +6,7 @@
 #include "port/Engine.h"
 #include "assets/charset.h"
 #include "assets/messages.h"
+#include "assets/ui.h"
 
 // On N64, KSEG0 pointers (0x80xxxxxx) are negative as s32, so the original code
 // used sign checks to distinguish message IDs from buffer pointers passed as intptr_t.
@@ -104,11 +105,6 @@ PAL_BIN D_8015C7E0[0x10];
 
 extern s16 MsgStyleVerticalLineOffsets[];
 
-extern IMG_BIN ui_msg_rewind_arrow_png[];
-extern PAL_BIN ui_msg_rewind_arrow_pal[];
-extern IMG_BIN ui_msg_star_png[];
-extern IMG_BIN ui_msg_star_silhouette_png[];
-
 extern IMG_BIN MsgCharImgTitle[];
 extern IMG_BIN MsgCharImgNormal[];
 extern MessageCharset* MsgCharsets[5];
@@ -120,9 +116,6 @@ extern IMG_BIN MsgCharImgLatin[];
 extern IMG_BIN MsgCharImgMenuKana[];
 extern IMG_BIN MsgCharImgMenuLatin[];
 #endif
-
-extern IMG_BIN ui_point_right_png[];
-extern PAL_BIN ui_point_right_pal[];
 
 MessageNumber gMsgNumbers[] = {
 #if VERSION_JP
@@ -180,7 +173,7 @@ s32 draw_image_with_clipping(IMG_PTR raster, s32 width, s32 height, s32 fmt, s32
 s32 _update_message(MessagePrintState* printer);
 void msg_copy_to_print_buffer(MessagePrintState* printer, s32 arg1, s32 arg2);
 void initialize_printer(MessagePrintState* printer, s32 arg1, s32 arg2);
-MessagePrintState* _msg_get_printer_for_msg(s32 msgID, s32* donePrintingWriteback, s32 arg2);
+MessagePrintState* _msg_get_printer_for_msg(intptr_t msgID, bool* donePrintingWriteback, s32 arg2);
 void msg_update_rewind_arrow(s32);
 void msg_draw_rewind_arrow(s32);
 void msg_draw_choice_pointer(MessagePrintState* printer);
@@ -221,13 +214,17 @@ void load_font(s32 font) {
 //             load_font_data(charset_menu_kana_OFFSET, 0x37F8, MsgCharImgMenuKana);
 //             load_font_data(charset_menu_latin_OFFSET, 0x798, MsgCharImgMenuLatin);
 // #else
-            MsgCharImgNormal = LOAD_ASSET(CHARSET_STANDARD);
+            // memcpy needed: MsgCharImgNormal is an array (address used as compile-time
+            // initializer in gMsgNumbers), so we can't reassign it — copy OTR data in
+            memcpy(MsgCharImgNormal, LOAD_ASSET(CHARSET_STANDARD), 0x5100);
 // #endif
-            D_802F4560 = LOAD_ASSET(CHARSET_STANDARD_PAL);
+            // memcpy needed: D_802F4560 is a 2D array (PAL_BIN[80][8]) indexed by palette number,
+            // so we copy OTR data into it rather than reassigning
+            memcpy(D_802F4560, LOAD_ASSET(CHARSET_STANDARD_PAL), 0x500);
         } else if (font == 1) {
-            MsgCharImgTitle = LOAD_ASSET(CHARSET_TITLE);
-            MsgCharImgSubtitle = LOAD_ASSET(CHARSET_SUBTITLE);
-            D_802F4560 = LOAD_ASSET(CHARSET_SUBTITLE_PAL);
+            memcpy(MsgCharImgTitle, LOAD_ASSET(CHARSET_TITLE), 0xF60);
+            memcpy(MsgCharImgSubtitle, LOAD_ASSET(CHARSET_SUBTITLE), 0xB88);
+            memcpy(D_802F4560, LOAD_ASSET(CHARSET_SUBTITLE_PAL), 0x80);
         }
     }
 }
@@ -623,10 +620,9 @@ void msg_play_speech_sound(MessagePrintState* printer, u8 character) {
     }
 }
 
-extern s32 gItemIconRasterOffsets[];
-extern s32 gItemIconPaletteOffsets[];
-extern IMG_PTR MsgLetterRasterOffsets[];
-extern PAL_PTR MsgLetterPaletteOffsets[];
+extern intptr_t gItemIconRasterOffsets[];
+extern intptr_t gItemIconPaletteOffsets[];
+// MsgLetterRasterOffsets/MsgLetterPaletteOffsets removed — letter content loaded from OTR
 extern MsgVoice MsgVoices[];
 
 #if VERSION_PAL
@@ -787,12 +783,12 @@ void msg_copy_to_print_buffer(MessagePrintState* printer, s32 arg1, s32 arg2) {
                         printer->windowState = MSG_WINDOW_STATE_OPENING;
                         printer->stateFlags |= MSG_STATE_FLAG_800;
                         printer->delayFlags |= MSG_DELAY_FLAG_1;
-                        printer->letterBackgroundImg = heap_malloc(((charset_postcard_png_width * charset_postcard_png_height) / 2));
-                        memcpy(printer->letterBackgroundImg, LOAD_ASSET(CHARSET_POSTCARD), (charset_postcard_png_width * charset_postcard_png_height) / 2);
+                        printer->letterBackgroundImg = heap_malloc(((CHARSET_POSTCARD_WIDTH * CHARSET_POSTCARD_HEIGHT) / 2));
+                        memcpy(printer->letterBackgroundImg, LOAD_ASSET(CHARSET_POSTCARD), (CHARSET_POSTCARD_WIDTH * CHARSET_POSTCARD_HEIGHT) / 2);
                         printer->letterBackgroundPal = heap_malloc(0x20);
                         memcpy(printer->letterBackgroundPal, LOAD_ASSET(CHARSET_POSTCARD_PAL), 0x20);
-                        printer->letterContentImg = heap_malloc(charset_letter_content_1_png_width * charset_letter_content_1_png_height);
-                        memcpy(printer->letterContentImg, LOAD_ASSET(CHARSET_LETTER_CONTENT_IMGS[arg]), charset_letter_content_1_png_width * charset_letter_content_1_png_height);
+                        printer->letterContentImg = heap_malloc(CHARSET_LETTER_CONTENT_WIDTH * CHARSET_LETTER_CONTENT_HEIGHT);
+                        memcpy(printer->letterContentImg, LOAD_ASSET(CHARSET_LETTER_CONTENT_IMGS[arg]), CHARSET_LETTER_CONTENT_WIDTH * CHARSET_LETTER_CONTENT_HEIGHT);
                         printer->letterContentPal = heap_malloc(0x200);
                         memcpy(printer->letterContentPal, LOAD_ASSET(CHARSET_LETTER_CONTENT_PALS[arg]), 0x200);
                         break;
@@ -1278,7 +1274,7 @@ void msg_copy_to_print_buffer(MessagePrintState* printer, s32 arg1, s32 arg2) {
 
     printer->printBufferPos = printBuf - printer->printBuffer;
     printer->delayFlags = 0;
-    printer->srcBufferPos = (u16)(s32)(srcBuf - (s32)printer->srcBuffer);
+    printer->srcBufferPos = (u16)(srcBuf - printer->srcBuffer);
     *printBuf = MSG_CHAR_PRINT_END;
 }
 #endif
@@ -1368,6 +1364,19 @@ s8* load_message_to_buffer(s32 msgID) {
     return (s8*)load_msg_asset(msgID);
 }
 
+// dx's debug_menu.c and Credits.inc.c call dma_load_msg — on port, messages come from OTR
+void dma_load_msg(u32 msgID, void* dest) {
+    u8* src = load_msg_asset(msgID);
+    if (src != NULL) {
+        // copy enough for any message (OTR messages are null-terminated)
+        s32 len = 0;
+        while (src[len] != 0xFD && len < 0x400) { // MSG_CHAR_READ_END
+            len++;
+        }
+        memcpy(dest, src, len + 1);
+    }
+}
+
 MessagePrintState* msg_get_printer_for_msg(intptr_t msgID, bool* donePrintingWriteback) {
     return _msg_get_printer_for_msg(msgID, donePrintingWriteback, 0);
 }
@@ -1388,7 +1397,7 @@ MessagePrintState* _msg_get_printer_for_msg(intptr_t msgID, bool* donePrintingWr
 
     srcBuffer = (s8*) msgID;
     if (!MSG_ID_IS_PTR(msgID)) {
-        srcBuffer = load_message_to_buffer((s32)srcBuffer);
+        srcBuffer = load_message_to_buffer(msgID);
     }
 
     for (i = 0; i < ARRAY_COUNT(gMessagePrinters); i++) {
@@ -1836,7 +1845,7 @@ void get_msg_properties(intptr_t msgID, s32* height, s32* width, s32* maxLineCha
                         }
                         break;
                     case MSG_READ_FUNC_VAR:
-                        lineWidth += get_msg_width((s32)gMessageMsgVars[message[i++]], 0);
+                        lineWidth += get_msg_width((intptr_t)gMessageMsgVars[message[i++]], 0);
                         break;
                 }
                 break;

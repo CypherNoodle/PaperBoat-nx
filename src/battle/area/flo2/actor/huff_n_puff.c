@@ -241,7 +241,7 @@ API_CALLABLE(N(HuffPuffBreath)) {
     s32 var8 = evt_get_variable(script, *args++);
     EffectInstance* effect = fx_huff_puff_breath(var1, var2, var3, var4, var5, var6, var7, var8);
 
-    evt_set_variable(script, *args++, (s32)effect);
+    evt_set_variable(script, *args++, (Bytecode)effect);
     return ApiStatus_DONE2;
 }
 

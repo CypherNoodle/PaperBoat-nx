@@ -129,9 +129,9 @@ enum ItemIDs {
     ITEM_PRISON_KEY                         = 0x07A,
     ITEM_SILVER_CREDIT                      = 0x07B,
     ITEM_GOLD_CREDIT                        = 0x07C,
-    ITEM_UNUSED_PRISON_KEY1                 = 0x07D,
-    ITEM_UNUSED_PRISON_KEY2                 = 0x07E,
-    ITEM_UNUSED_PRISON_KEY3                 = 0x07F,
+    ITEM_UNUSED_PRISON_KEY_1                = 0x07D,
+    ITEM_UNUSED_PRISON_KEY_2                = 0x07E,
+    ITEM_UNUSED_PRISON_KEY_3                = 0x07F,
     ITEM_FIRE_FLOWER                        = 0x080,
     ITEM_SNOWMAN_DOLL                       = 0x081,
     ITEM_THUNDER_RAGE                       = 0x082,
@@ -223,11 +223,11 @@ enum ItemIDs {
     ITEM_BOILED_EGG                         = 0x0D8,
     ITEM_YOSHI_COOKIE                       = 0x0D9,
     ITEM_JELLY_SHROOM                       = 0x0DA,
-    ITEM_UNUSED_JELLY_SHROOM1               = 0x0DB,
-    ITEM_UNUSED_JELLY_SHROOM2               = 0x0DC,
-    ITEM_UNUSED_JELLY_SHROOM3               = 0x0DD,
-    ITEM_UNUSED_JELLY_SHROOM4               = 0x0DE,
-    ITEM_UNUSED_JELLY_SHROOM5               = 0x0DF,
+    ITEM_UNUSED_JELLY_SHROOM_1              = 0x0DB,
+    ITEM_UNUSED_JELLY_SHROOM_2              = 0x0DC,
+    ITEM_UNUSED_JELLY_SHROOM_3              = 0x0DD,
+    ITEM_UNUSED_JELLY_SHROOM_4              = 0x0DE,
+    ITEM_UNUSED_JELLY_SHROOM_5              = 0x0DF,
     ITEM_SPIN_SMASH                         = 0x0E0,
     ITEM_MULTIBOUNCE                        = 0x0E1,
     ITEM_POWER_PLUS_A                       = 0x0E2,
@@ -299,8 +299,8 @@ enum ItemIDs {
     ITEM_POWER_SMASH                        = 0x124,
     ITEM_SUPER_SMASH                        = 0x125,
     ITEM_MEGA_SMASH                         = 0x126,
-    ITEM_UNUSED_POWER_SMASH1                = 0x127,
-    ITEM_UNUSED_POWER_SMASH2                = 0x128,
+    ITEM_UNUSED_POWER_SMASH_1               = 0x127,
+    ITEM_UNUSED_POWER_SMASH_2               = 0x128,
     ITEM_DEEP_FOCUS_A                       = 0x129,
     ITEM_SUPER_FOCUS                        = 0x12A,
     ITEM_SHRINK_SMASH                       = 0x12B,
@@ -371,17 +371,10 @@ enum ItemIDs {
     ITEM_MENU_ITEMS                         = 0x16C,
 };
 
-#define ITEM_FIRST_KEY              ITEM_KOOPA_FORTRESS_KEY
-#define ITEM_LAST_KEY               ITEM_UNUSED_PRISON_KEY3
-#define ITEM_FIRST_CONSUMABLE       ITEM_FIRE_FLOWER
-#define ITEM_LAST_CONSUMABLE        ITEM_JELLY_SHROOM
-#define ITEM_FIRST_BADGE            ITEM_SPIN_SMASH
-#define ITEM_LAST_BADGE             ITEM_UNUSED_ATTACK_FX_4
-
-#define ITEM_NUM_KEYS (ITEM_LAST_KEY - ITEM_FIRST_KEY + 1)
-#define ITEM_NUM_CONSUMABLES (ITEM_LAST_CONSUMABLE - ITEM_FIRST_CONSUMABLE + 1)
-
-#define IS_ITEM(itemID) (itemID >= ITEM_FIRST_KEY && itemID <= ITEM_LAST_CONSUMABLE)
-#define IS_BADGE(itemID) (itemID >= ITEM_FIRST_BADGE && itemID <= ITEM_LAST_BADGE)
+#define NUM_ITEMS 365
+#define ITEM_NUM_CONSUMABLES 96
+#define ITEM_NUM_BADGES 118
+#define ITEM_NUM_KEYS 119
+#define ITEM_FIRST_CONSUMABLE 128
 
 #endif // ITEM_ENUM_H

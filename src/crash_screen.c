@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "dx/backtrace.h"
-#include "include_asset.h"
+#include "assets/misc/misc.h"
+#include "port/Engine.h"
 
 typedef struct {
     /* 0x000 */ OSThread thread;
@@ -27,7 +28,7 @@ u8 gCrashScreencharToGlyph[128] = {
     23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,
 };
 
-INCLUDE_IMG("crash_screen/font.png", gCrashScreenFont);
+u32* gCrashScreenFont;
 
 // The font image is on 6x7 grid
 #define GLYPH(x, y) (x + (y * 5))
@@ -432,8 +433,8 @@ void crash_screen_thread_entry(void* unused) {
     OSMesg mesg;
     OSThread* faultedThread;
 
-    osSetEventMesg(OS_EVENT_CPU_BREAK, &gCrashScreen.queue, (OSMesg)1);
-    osSetEventMesg(OS_EVENT_FAULT, &gCrashScreen.queue, (OSMesg)2);
+    osSetEventMesg(OS_EVENT_CPU_BREAK, &gCrashScreen.queue, OS_MESG_32(1));
+    osSetEventMesg(OS_EVENT_FAULT, &gCrashScreen.queue, OS_MESG_32(2));
 
     do {
         osRecvMesg(&gCrashScreen.queue, &mesg, 1);
@@ -453,6 +454,7 @@ void crash_screen_set_draw_info(u16* frameBufPtr, s16 width, s16 height) {
 }
 
 void crash_screen_init(void) {
+    gCrashScreenFont = LOAD_ASSET(misc_crash_screen_font_png);
     gCrashScreen.width = SCREEN_WIDTH;
     gCrashScreen.height = 16;
     gCrashScreen.frameBuf = (u16*)((osMemSize | 0xA0000000) - ((SCREEN_WIDTH * SCREEN_HEIGHT) * 2));

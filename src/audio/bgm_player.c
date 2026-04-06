@@ -1378,6 +1378,43 @@ void au_bgm_player_update_playing(BGMPlayer *player) {
                                 POST_BGM_READ();
                             }
                             bgm_args_done:
+                            // Byte-swap multi-byte SeqArgs fields for little-endian.
+                            // Raw bytes are filled in big-endian order from the BGM stream,
+                            // but union fields (u16/s16/u32) read in native endianness.
+                            switch (opcode) {
+                                case 0xE0: // MasterTempo: u16 at [0..1]
+                                case 0xE5: // MasterVolumeFade: u16 at [0..1], u8 at [2]
+                                case 0xEF: // TrackDetune: s16 at [0..1]
+                                case 0xF6: // TrackVolumeFade: u16 at [0..1], u8 at [2]
+                                case 0xFC: // Branch: u16 at [0..1], u8 at [2]
+                                case 0xFE: // Detour: u16 at [0..1], u8 at [2]
+                                {
+                                    u8 t = player->seqCmdArgs.raw[0];
+                                    player->seqCmdArgs.raw[0] = player->seqCmdArgs.raw[1];
+                                    player->seqCmdArgs.raw[1] = t;
+                                    break;
+                                }
+                                case 0xE4: // MasterTempoFade: u16 at [0..1], u16 at [2..3]
+                                {
+                                    u8 t = player->seqCmdArgs.raw[0];
+                                    player->seqCmdArgs.raw[0] = player->seqCmdArgs.raw[1];
+                                    player->seqCmdArgs.raw[1] = t;
+                                    t = player->seqCmdArgs.raw[2];
+                                    player->seqCmdArgs.raw[2] = player->seqCmdArgs.raw[3];
+                                    player->seqCmdArgs.raw[3] = t;
+                                    break;
+                                }
+                                case 0xFD: // EventTrigger: u32 at [0..3]
+                                {
+                                    u8 t = player->seqCmdArgs.raw[0];
+                                    player->seqCmdArgs.raw[0] = player->seqCmdArgs.raw[3];
+                                    player->seqCmdArgs.raw[3] = t;
+                                    t = player->seqCmdArgs.raw[1];
+                                    player->seqCmdArgs.raw[1] = player->seqCmdArgs.raw[2];
+                                    player->seqCmdArgs.raw[2] = t;
+                                    break;
+                                }
+                            }
                             CurrentSeqCmdHandler = SeqCmdHandlers[opcode - 0xE0];
                             CurrentSeqCmdHandler(player, track);
                         }

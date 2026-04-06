@@ -310,7 +310,7 @@ API_CALLABLE(ShakeCam) {
                 break;
         }
 
-        script->functionTempF[3] = 1.0f;
+        script->functionTempF[3].f = 1.0f;
         script->functionTemp[1] = duration;
 
         if (gGameStatusPtr->context == CONTEXT_WORLD) {
@@ -334,22 +334,22 @@ API_CALLABLE(ShakeCam) {
     }
 
     camera->flags |= CAMERA_FLAG_SHAKING;
-    scale = script->functionTempF[3];
+    scale = script->functionTempF[3].f;
     switch (shakeMode) {
         case CAM_SHAKE_CONSTANT_VERTICAL:
             guTranslateF(camera->mtxViewShaking, 0.0f, -scale * magnitude, 0.0f);
-            script->functionTempF[3] = -script->functionTempF[3];
+            script->functionTempF[3].f = -script->functionTempF[3].f;
             break;
         case CAM_SHAKE_ANGULAR_HORIZONTAL:
             guRotateF(camera->mtxViewShaking, scale * magnitude, 0.0f, 0.0f, 1.0f);
-            script->functionTempF[3] = -script->functionTempF[3];
+            script->functionTempF[3].f = -script->functionTempF[3].f;
             break;
         case CAM_SHAKE_DECAYING_VERTICAL:
             guTranslateF(camera->mtxViewShaking, 0.0f, -scale * magnitude, 0.0f);
             if ((script->functionTemp[1] < (duration * 2)) && (duration < script->functionTemp[1])) {
-                script->functionTempF[3] = script->functionTempF[3] * -0.8;
+                script->functionTempF[3].f = script->functionTempF[3].f * -0.8;
             } else {
-                script->functionTempF[3] = -script->functionTempF[3];
+                script->functionTempF[3].f = -script->functionTempF[3].f;
             }
             break;
     }
@@ -662,8 +662,8 @@ API_CALLABLE(GetCamPosition) {
 
 API_CALLABLE(WaitForCam) {
     Bytecode* args = script->ptrReadPos;
-    s32 id = evt_get_variable(script, *args++);
-    f32 endInterpValue = evt_get_float_variable(script, *args++);
+    s32 id = evt_get_variable(script, args[0]);
+    f32 endInterpValue = evt_get_float_variable(script, args[1]);
     Camera* camera = &gCameras[id];
 
     if (isInitialCall || (endInterpValue > camera->interpAlpha)) {

@@ -226,6 +226,19 @@ EffectInstance* create_effect_instance(EffectBlueprint* effectBp) {
         sharedData++;
     }
 
+    // On N64, the TLB miss handler transparently loaded effect overlays on first access.
+    // On the port all code is statically linked, so we lazy-load here instead.
+    if (i >= ARRAY_COUNT(gEffectSharedData)) {
+        load_effect(effectBp->effectID);
+        sharedData = &gEffectSharedData[0];
+        for (i = 0; i < ARRAY_COUNT(gEffectSharedData); i++) {
+            if ((sharedData->flags & FX_SHARED_DATA_LOADED) && (sharedData->effectIndex == effectBp->effectID)) {
+                break;
+            }
+            sharedData++;
+        }
+    }
+
     ASSERT(i < ARRAY_COUNT(gEffectSharedData));
 
     // If this is the first new instance of the effect, initialize the function pointers

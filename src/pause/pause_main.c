@@ -22,7 +22,7 @@ void pause_draw_cursor(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 hei
 
 BSS s32 gPauseHeldButtons;
 BSS s32 gPausePressedButtons;
-BSS s32 gPauseCurrentDescMsg;
+BSS intptr_t gPauseCurrentDescMsg;
 BSS HudScript* gPauseCurrentDescIconScript;
 BSS HudElemID gPauseCursorHID;
 BSS s8 gPauseMenuCurrentTab;
@@ -30,7 +30,7 @@ BSS s8 D_802700D[7]; //padding
 
 static s32 gPauseTutorialFrameCounter;
 static HudElemID gPauseCommonHIDs[8];
-static s32 gPauseShownDescMsg;
+static intptr_t gPauseShownDescMsg;
 static s32 gPauseDescTextMaxPos;
 static s32 gPauseDescTextPos;
 static s32 gPauseDescTextOffset;
@@ -480,7 +480,7 @@ void pause_main_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, 
 }
 
 void pause_textbox_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 width, s32 height, s32 opacity, s32 darkening) {
-    s32 msgID = gPauseShownDescMsg;
+    intptr_t msgID = gPauseShownDescMsg;
 
     if (msgID == MSG_NONE) {
         return;
@@ -718,7 +718,7 @@ void pause_handle_input(s32 pressed, s32 held) {
     s32 numLines;
     s32 i;
     MenuPanel** menuPanels;
-    s32 currentDescMsg = gPauseCurrentDescMsg;
+    intptr_t currentDescMsg = gPauseCurrentDescMsg;
     MenuPanel* currentPanel = gPausePanels[gPauseMenuCurrentTab];
 
     if (evt_get_variable(nullptr, GF_Tutorial_Badges)) {

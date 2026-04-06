@@ -106,15 +106,19 @@ set(BUILD_MARIO_ARTIST OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/torch)
 
 # Collect all game C sources (excluding .inc.c which are included by other files)
-file(GLOB_RECURSE GAME_SOURCES ${CMAKE_SOURCE_DIR}/src/*.c)
-file(GLOB_RECURSE INC_FILES ${CMAKE_SOURCE_DIR}/src/*.inc.c)
+# Also, dx now has some cpp files.
+file(GLOB_RECURSE GAME_SOURCES ${CMAKE_SOURCE_DIR}/src/*.c ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE INC_FILES ${CMAKE_SOURCE_DIR}/src/*.inc.c ${CMAKE_SOURCE_DIR}/src/*.inc.cpp)
 list(REMOVE_ITEM GAME_SOURCES ${INC_FILES})
 
-# Exclude port sources (handled separately), os/ (handled by libultraship), dx/ (needs PORT guards)
+# Exclude port sources (handled separately), os/ (handled by libultraship)
 list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/port/")
 list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/os/")
 list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/boot/")
-list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/dx/")
+
+# Exclude effects/gfx/ asset data files (replaced by OTR)
+list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/effects/gfx/")
+list(FILTER GAME_SOURCES EXCLUDE REGEX "unused_gfx\\.c$")
 
 # Exclude region-specific files (for building VERSION_US)
 list(FILTER GAME_SOURCES EXCLUDE REGEX "/[^/]*_(jp|fr|es|de|en|en_de|pal|ique)\\.c$")
@@ -127,6 +131,15 @@ list(FILTER GAME_SOURCES EXCLUDE REGEX "/(npc_composer|npc_hint_dryite_companion
 
 # Exclude kzn_19 animation files that are #included
 list(FILTER GAME_SOURCES EXCLUDE REGEX "/kzn_19_anim[0-9]+\\.c$")
+
+# Exclude JP-only narrator file (uses MSG_Intro_JP_* not available in US)
+list(FILTER GAME_SOURCES EXCLUDE REGEX "/hos_10/narrator\\.c$")
+
+# Exclude sam2 dlist/vtx — DL and vertices loaded from OTR (sam2_monstar.yml)
+list(FILTER GAME_SOURCES EXCLUDE REGEX "/battle/area/sam2/(dlist|vtx)\\.c$")
+
+# Exclude pra_02/entity.c old unsplit version. pra_02_3_entity.c is the correct dx split... I think?
+list(FILTER GAME_SOURCES EXCLUDE REGEX "/pra_02/entity\\.c$")
 
 #=================== SSE2NEON ===================
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")

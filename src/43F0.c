@@ -63,7 +63,7 @@ HeapNode* _heap_create(HeapNode* addr, u32 size) {
     if (size < 32) {
         return (HeapNode*)-1;
     } else {
-        HeapNode* heapNode = (HeapNode*)ALIGN16((u32)addr);
+        HeapNode* heapNode = (HeapNode*)ALIGN16((uintptr_t)addr);
 
         size -= ((u8*)heapNode - (u8*)addr);
         heapNode->next = nullptr;
@@ -142,9 +142,12 @@ void* _heap_malloc(HeapNode* head, u32 size) {
             heap_nextMallocID = HeapEntryID2 + 1;
             pPrevHeapNode->entryID = HeapEntryID2;
         }
-        return (u8*)pPrevHeapNode + sizeof(HeapNode);
+        {
+            void* result = (u8*)pPrevHeapNode + sizeof(HeapNode);
+            mem_clear(result, size);
+            return result;
+        }
     }
-    debug_printf("warning: out of memory\n");
     return nullptr;
 }
 
@@ -440,55 +443,26 @@ void copy_matrix(Matrix4f src, Matrix4f dest) {
 
 // maybe u32
 u32 dma_copy(Addr romStart, Addr romEnd, void* vramDest) {
-    u32 length = romEnd - romStart;
-    s32 i;
-
-    ASSERT_MSG(((u32)vramDest & 7) == 0, "dma_copy: dest not 8-byte aligned");
-
-    osInvalICache(vramDest, length);
-
-    for (i = 0; i + ROM_CHUNK_SIZE < length; i += ROM_CHUNK_SIZE) {
-        nuPiReadRom((u32)romStart + i, vramDest + i, ROM_CHUNK_SIZE);
-    }
-
-    if (i != length) {
-        nuPiReadRom((u32)romStart + i, vramDest + i, length - i);
-    }
-
-    return length;
+    // All data loaded from OTR — no ROM DMA needed
+    (void)romStart;
+    (void)romEnd;
+    (void)vramDest;
+    return 0;
 }
 
 s32 dma_write(Addr romStart, Addr romEnd, void* vramDest) {
-    u32 length = romEnd - romStart;
-    s32 i;
-
-    for (i = 0; i + ROM_CHUNK_SIZE < length; i += ROM_CHUNK_SIZE) {
-        dma_write_block(romStart + i, (u32)vramDest + i, ROM_CHUNK_SIZE);
-    }
-
-    if (i != length) {
-        dma_write_block(romStart + i, (u32)vramDest + i, length - i);
-    }
-
-    return length;
+    // No ROM/flash writes in port — save handled separately
+    (void)romStart;
+    (void)romEnd;
+    (void)vramDest;
+    return 0;
 }
 
 void dma_write_block(Addr dramAddr, u32 devAddr, s32 size) {
-    OSIoMesg osIoMesg;
-    OSMesg osMesg;
-    OSMesgQueue osMesgQueue;
-
-    osWritebackDCache(dramAddr, size);
-    osCreateMesgQueue(&osMesgQueue, &osMesg, 1);
-
-    osIoMesg.hdr.pri = 0;
-    osIoMesg.hdr.retQueue = &osMesgQueue;
-    osIoMesg.dramAddr = dramAddr;
-    osIoMesg.devAddr = devAddr;
-    osIoMesg.size = size;
-
-    osEPiStartDma(nuPiCartHandle, &osIoMesg, 1);
-    osRecvMesg(&osMesgQueue, &osMesg, 1);
+    // No ROM/flash writes in port
+    (void)dramAddr;
+    (void)devAddr;
+    (void)size;
 }
 
 // advance the global RNG via LCG algorithm and return a random integer [0,2^32)

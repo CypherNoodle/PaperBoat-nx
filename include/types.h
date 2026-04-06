@@ -10,7 +10,7 @@
 #define UNK_FUN_PTR(name) void(*name)(void)
 #define UNK_ARGS
 
-typedef char* (*PrintCallback)(void*, const char*, u32);
+// PrintCallback typedef removed — provided by libultraship's libultra/printf.h (as void*)
 
 /// Linker symbol address, as in `ld_addrs.h`.
 typedef u8 Addr[];

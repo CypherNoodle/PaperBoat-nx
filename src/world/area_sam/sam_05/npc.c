@@ -1,6 +1,6 @@
 #include "sam_05.h"
 #include "sprite.h"
-#include "include_asset.h"
+#include "assets/world.h"
 
 NpcSettings N(NpcSettings_Monstar) = {
     .height = 150,
@@ -42,18 +42,13 @@ EvtScript N(EVS_NpcDefeat_Monstar) = {
     End
 };
 
-INCLUDE_IMG("world/area_sam/sam_05/monstar.png", sam_05_monstar_png);
-INCLUDE_IMG("world/area_sam/sam_05/monstar_blank1.png", D_80242970);
-INCLUDE_IMG("world/area_sam/sam_05/monstar_blank2.png", D_80242B70);
-INCLUDE_IMG("world/area_sam/sam_05/monstar_blank3.png", D_80242D70);
-INCLUDE_PAL("world/area_sam/sam_05/monstar.pal", sam_05_monstar_pal);
-#include "world/area_sam/sam_05/monstar.png.h"
+// monstar textures loaded from OTR via assets/world.h
 
 ImgFXOverlayTexture N(MonstarDetailTexture) = {
-    .raster  = N(monstar_png),
-    .palette = N(monstar_pal),
-    .width   = N(monstar_png_width),
-    .height  = N(monstar_png_height),
+    .raster  = sam_05_monstar_png,
+    .palette = sam_05_monstar_pal,
+    .width   = 32,
+    .height  = 32,
     .offsetX  = -2,
     .offsetY  = 0,
     .displayList  = N(monstar_gfx),

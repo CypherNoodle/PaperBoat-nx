@@ -468,7 +468,7 @@ void filemenu_choose_name_handle_input(MenuPanel* menu) {
                 }
 
                 sfx_play_sound(SOUND_MENU_NEXT);
-                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32) filemenu_update_show_name_confirm);
+                set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_show_name_confirm);
                 gWindows[WIN_FILES_CONFIRM_OPTIONS].width = 69;
                 gWindows[WIN_FILES_CONFIRM_OPTIONS].height = 44;
                 gWindows[WIN_FILES_CONFIRM_OPTIONS].pos.x = CENTER_WINDOW_X(WIN_FILES_CONFIRM_OPTIONS);
@@ -515,19 +515,19 @@ void filemenu_choose_name_handle_input(MenuPanel* menu) {
         filemenu_filename_pos--;
         if (filemenu_filename_pos < 0) {
             filemenu_filename_pos = 0;
-            set_window_update(WIN_FILES_INPUT_FIELD, (s32) &filemenu_update_hidden_name_input);
-            set_window_update(WIN_FILES_INPUT_KEYBOARD, (s32) &filemenu_update_hidden_name_input);
-            set_window_update(WIN_FILES_TITLE, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_STEREO, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_MONO, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_OPTION_LEFT, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_OPTION_CENTER, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_OPTION_RIGHT, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_OPTION_LEFT, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_SLOT1_BODY, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_SLOT2_BODY, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_SLOT3_BODY, (s32) &filemenu_update_show_with_rotation);
-            set_window_update(WIN_FILES_SLOT4_BODY, (s32) &filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_INPUT_FIELD, (intptr_t)&filemenu_update_hidden_name_input);
+            set_window_update(WIN_FILES_INPUT_KEYBOARD, (intptr_t)&filemenu_update_hidden_name_input);
+            set_window_update(WIN_FILES_TITLE, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_STEREO, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_MONO, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_OPTION_CENTER, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_OPTION_RIGHT, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_OPTION_LEFT, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_SLOT1_BODY, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_SLOT2_BODY, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_SLOT3_BODY, (intptr_t)&filemenu_update_show_with_rotation);
+            set_window_update(WIN_FILES_SLOT4_BODY, (intptr_t)&filemenu_update_show_with_rotation);
             filemenu_currentMenu = FILE_MENU_MAIN;
             return;
         }
@@ -550,7 +550,7 @@ void filemenu_choose_name_handle_input(MenuPanel* menu) {
         }
 
         sfx_play_sound(SOUND_MENU_NEXT);
-        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (s32) filemenu_update_show_name_confirm);
+        set_window_update(WIN_FILES_CONFIRM_OPTIONS, (intptr_t)filemenu_update_show_name_confirm);
 
         gWindows[WIN_FILES_CONFIRM_OPTIONS].width = 69;
         gWindows[WIN_FILES_CONFIRM_OPTIONS].height = 44;

@@ -3,8 +3,8 @@
 
 #include "ultra64.h"
 
-// Should be at least the width of a pointer i.e. intptr_t
-typedef s32 Bytecode;
+// Must be at least the width of a pointer for 64-bit compatibility
+typedef intptr_t Bytecode;
 
 enum {
     EVT_OP_INTERNAL_FETCH,

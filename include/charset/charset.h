@@ -1,6 +1,6 @@
 #ifndef _CHARSET_H_
 
-#include "charset/peach_letter.png.h"
+// peach_letter loaded from OTR (see assets/charset.h)
 
 #if VERSION_JP
 extern unsigned char charset_kana_OFFSET[];

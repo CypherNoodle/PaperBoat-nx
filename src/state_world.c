@@ -27,6 +27,7 @@ void state_step_world(void) {
     profiler_update(PROFILE_TIME_WORLD_ITEM_ENTITIES, 0);
     update_effects();
     profiler_update(PROFILE_TIME_WORLD_EFFECTS, 0);
+    iterate_models();
     update_cameras();
     profiler_update(PROFILE_TIME_WORLD_CAMERAS, 0);
 }

@@ -157,18 +157,18 @@ EvtScript N(EVS_UpdatePadlockPositions) = {
 #include "world/common/todo/GetEntityPosition.inc.c"
 
 EvtScript N(EVS_ItemPrompt_RedPadlock) = {
-    SetGroup(EVT_GROUP_00)
+    SetGroup(EVT_GROUP_NEVER_PAUSE)
     Call(SetTimeFreezeMode, TIME_FREEZE_PARTIAL)
     Call(ShowKeyChoicePopup)
     IfEq(LVar0, 0)
         Call(ShowMessageAtScreenPos, MSG_Menus_00D8, 160, 40)
         Call(CloseChoicePopup)
-        Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+        Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
         Return
     EndIf
     IfEq(LVar0, -1)
         Call(CloseChoicePopup)
-        Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+        Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
         Return
     EndIf
     Call(RemoveItem, ITEM_RED_KEY)
@@ -186,25 +186,25 @@ EvtScript N(EVS_ItemPrompt_RedPadlock) = {
     Set(LVar0, MV_FarRedPadlock)
     Set(MV_FarRedPadlock, -1)
     Call(N(RemovePadlock))
-    Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+    Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
     Unbind
     Return
     End
 };
 
 EvtScript N(EVS_ItemPrompt_BluePadlock) = {
-    SetGroup(EVT_GROUP_00)
+    SetGroup(EVT_GROUP_NEVER_PAUSE)
     Call(SetTimeFreezeMode, TIME_FREEZE_PARTIAL)
     Call(ShowKeyChoicePopup)
     IfEq(LVar0, 0)
         Call(ShowMessageAtScreenPos, MSG_Menus_00D8, 160, 40)
         Call(CloseChoicePopup)
-        Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+        Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
         Return
     EndIf
     IfEq(LVar0, -1)
         Call(CloseChoicePopup)
-        Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+        Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
         Return
     EndIf
     Call(RemoveItem, ITEM_BLUE_KEY)
@@ -222,7 +222,7 @@ EvtScript N(EVS_ItemPrompt_BluePadlock) = {
     Set(LVar0, MV_FarBluePadlock)
     Set(MV_FarBluePadlock, -1)
     Call(N(RemovePadlock))
-    Call(SetTimeFreezeMode, TIME_FREEZE_NORMAL)
+    Call(SetTimeFreezeMode, TIME_FREEZE_NONE)
     Unbind
     Return
     End

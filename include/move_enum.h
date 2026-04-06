@@ -53,15 +53,15 @@ enum MoveIDs {
     MOVE_D_DOWN_JUMP                        = 0x02E,
     MOVE_SHRINK_STOMP                       = 0x02F,
     MOVE_EARTHQUAKE_JUMP                    = 0x030,
-    MOVE_UNUSED_DEFEND_PLUS                 = 0x031,
+    MOVE_DEFEND                             = 0x031,
     MOVE_UNUSED_32                          = 0x032,
     MOVE_DAMAGE_DODGE                       = 0x033,
     MOVE_ITEMS                              = 0x034,
     MOVE_DOUBLE_DIP                         = 0x035,
     MOVE_TRIPLE_DIP                         = 0x036,
-    MOVE_UNUSED_37                          = 0x037,
+    MOVE_CHANGE_PARTNER                     = 0x037,
     MOVE_QUICK_CHANGE                       = 0x038,
-    MOVE_UNUSED_39                          = 0x039,
+    MOVE_RUN_AWAY                           = 0x039,
     MOVE_UNUSED_3A                          = 0x03A,
     MOVE_POWER_PLUS                         = 0x03B,
     MOVE_ALLOR_NOTHING                      = 0x03C,
@@ -190,6 +190,8 @@ enum MoveIDs {
     MOVE_SPOOK                              = 0x0B7,
     MOVE_FAN_SMACK                          = 0x0B8,
 };
+
+#define NUM_MOVES 185
 
 #define STAR_POWER_INDEX(x) (x - MOVE_FOCUS)
 

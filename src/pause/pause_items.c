@@ -123,7 +123,8 @@ void pause_items_draw_contents(MenuPanel* menu, s32 baseX, s32 baseY, s32 width,
     s32 isSelected, itemOffsetX, itemOffsetY;
     s32* iconIDs;
     s32 itemIcon;
-    s32 msg, msgX, msgY, opacity1;
+    intptr_t msg;
+    s32 msgX, msgY, opacity1;
     s32 selectedPosX, selectedPosY;
     s32 cursorOffsetX, cursorOffsetY;
 

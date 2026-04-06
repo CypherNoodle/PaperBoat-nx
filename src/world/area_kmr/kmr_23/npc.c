@@ -40,10 +40,7 @@ AnimID N(StarSpiritAnimations)[][2] = {
 
 s32 imgPadding = 0;
 
-INCLUDE_IMG("world/area_kmr/kmr_23/window_ul.png", kmr_23_window_ul_img);
-INCLUDE_IMG("world/area_kmr/kmr_23/window_ur.png", kmr_23_window_ur_img);
-INCLUDE_IMG("world/area_kmr/kmr_23/window_ll.png", kmr_23_window_ll_img);
-INCLUDE_IMG("world/area_kmr/kmr_23/window_lr.png", kmr_23_window_lr_img);
+// window textures loaded from OTR via assets/world.h
 
 s32 D_802417C8_9091F8 = 0;
 
@@ -81,7 +78,7 @@ API_CALLABLE(N(CreateEndChapterData)) {
     if (isInitialCall) {
         data = heap_malloc(sizeof(*data));
         script->userData = data;
-        evt_set_variable(script, MV_EndChapterDataPtr, (s32) data);
+        evt_set_variable(script, MV_EndChapterDataPtr, (Bytecode) data);
         data->chapter = evt_get_variable(script, *args++);
         data->pos.x = evt_get_float_variable(script, *args++);
         data->pos.y = evt_get_float_variable(script, *args++);
@@ -141,14 +138,14 @@ API_CALLABLE(N(AccelerateCardSpin)) {
     s32 duration;
 
     if (isInitialCall) {
-        script->functionTempF[1] = evt_get_float_variable(script, *args++);
+        script->functionTempF[1].f = evt_get_float_variable(script, *args++);
         duration = script->functionTemp[2] = evt_get_variable(script, *args++);
         script->functionTemp[0] = 0;
-        script->functionTempF[1] = script->functionTempF[1] / duration;
+        script->functionTempF[1].f = script->functionTempF[1].f / duration;
     }
 
     data = (EndChapter*) evt_get_variable(script, MV_EndChapterDataPtr);
-    data->angularVelocity += script->functionTempF[1];
+    data->angularVelocity += script->functionTempF[1].f;
 
     script->functionTemp[0]++;
     if (script->functionTemp[0] < script->functionTemp[2]) {

@@ -529,6 +529,7 @@ API_CALLABLE(UseEntryHeading) {
     gPlayerStatus.pos.x = (entryX + (var1 * sinTheta)) - (exitTangentFrac * cosTheta);
     gPlayerStatus.pos.z = (entryZ - (var1 * cosTheta)) - (exitTangentFrac * sinTheta);
 
+    script->varTable[5] = 0;
     script->varTableF[5] = dist2D(gPlayerStatus.pos.x, gPlayerStatus.pos.z, entryX, entryZ) / var2;
     gPlayerStatus.flags |= PS_FLAG_CAMERA_DOESNT_FOLLOW;
 

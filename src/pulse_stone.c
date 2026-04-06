@@ -1,6 +1,6 @@
 #include "common.h"
-#include "include_asset.h"
-#include <stdlib.h>
+#include "assets/misc/pulse_stone.h"
+#include "port/Engine.h"
 
 typedef struct PulseStoneData {
     /* 0x00 */ Vec3f pos;
@@ -18,11 +18,8 @@ enum {
     PULSE_STONE_HOLD       = 2, // icon reaches final size
 };
 
-#include "pulse_stone_icon.png.h"
-INCLUDE_IMG("pulse_stone_icon.png", pulse_stone_icon_img);
-INCLUDE_PAL("pulse_stone_icon.pal", pulse_stone_icon_1_pal);
-INCLUDE_PAL("pulse_stone_icon.flash.pal", pulse_stone_icon_2_pal);
-#include "pulse_stone_icon.gfx.inc.c"
+#define pulse_stone_icon_img_width 56
+#define pulse_stone_icon_img_height 56
 
 BSS PulseStoneData PulseStoneNotification;
 PulseStoneData* PulseStonePtr = &PulseStoneNotification;
@@ -97,7 +94,7 @@ void appendGfx_pulse_stone_icon(void) {
 
         gSPMatrix(gMainGfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++],
                     G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPDisplayList(gMainGfxPos++, pulse_stone_icon_gfx);
+        gSPDisplayList(gMainGfxPos++, (Gfx*) LOAD_ASSET(pulse_stone_icon_gfx));
 
         dx = abs((gGameStatusPtr->mapID % 7) - 2);
         dy = gGameStatusPtr->mapID / 7;

@@ -79,7 +79,7 @@ EvtScript N(EVS_LetterPrompt_Goompapa) = {
 
 EvtScript N(EVS_LetterReward_Goompapa) = {
     IfEq(LVarC, DELIVERY_ACCEPTED)
-        EVT_GIVE_BADGE_REWARD(ITEM_LUCKY_DAY)
+        EVT_GIVE_REWARD(ITEM_LUCKY_DAY)
     EndIf
     Return
     End
@@ -217,8 +217,7 @@ EvtScript N(EVS_Goombaria_RequestDolly) = {
     Call(ShowChoice, MSG_Choice_0011)
     Wait(10)
     IfEq(LVar0, 0)
-        Call(FindKeyItem, ITEM_DOLLY, LVar0)
-        Call(RemoveKeyItemAt, LVar0)
+        Call(RemoveItem, ITEM_DOLLY)
         ExecWait(N(EVS_HandOverDolly))
         Call(ContinueSpeech, NPC_Goombaria, ANIM_Goombaria_Talk, ANIM_Goombaria_Idle, 0, MSG_CH0_009A)
         Wait(10)
@@ -247,7 +246,7 @@ EvtScript N(EVS_Goombaria_RequestDolly) = {
 };
 
 EvtScript N(EVS_NpcInteract_Goombaria) = {
-    Call(HasKeyItem, ITEM_DOLLY, LVar0)
+    Call(HasItem, ITEM_DOLLY, LVar0)
     IfNe(LVar0, 0)
         ExecWait(N(EVS_Goombaria_RequestDolly))
         Return
@@ -535,8 +534,7 @@ EvtScript N(EVS_ReturnToVillage) = {
         Switch(LVar0)
             CaseEq(0)
                 Call(CloseMessage)
-                Call(FindKeyItem, ITEM_DOLLY, LVar0)
-                Call(RemoveKeyItemAt, LVar0)
+                Call(RemoveItem, ITEM_DOLLY)
                 Call(PlayerFaceNpc, NPC_Goombaria, true)
                 Call(PlayerMoveTo, -50, -24, 0)
                 Call(InterpPlayerYaw, 94, 0)
@@ -637,7 +635,7 @@ EvtScript N(EVS_ReturnToVillage) = {
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Idle)
     Call(SetNpcFlagBits, NPC_PARTNER, NPC_FLAG_IGNORE_WORLD_COLLISION, false)
     Wait(10 * DT)
-    EVT_GIVE_BADGE_REWARD(ITEM_POWER_JUMP)
+    EVT_GIVE_REWARD(ITEM_POWER_JUMP)
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Walk)
     Call(NpcMoveTo, NPC_PARTNER, 3, 9, 0)
     Call(SetNpcAnimation, NPC_PARTNER, ANIM_Goompa_Idle)
@@ -798,7 +796,7 @@ EvtScript N(EVS_KootFavorCheck_Goompa) = {
             Call(SetNpcPos, NPC_Goompa, LVar0, LVar1, LVar2)
             Call(SetNpcFlagBits, NPC_Goompa, NPC_FLAG_IGNORE_PLAYER_COLLISION, false)
             Call(SpeakToPlayer, NPC_Goompa, ANIM_Goompa_Talk, ANIM_Goompa_Idle, 0, MSG_CH0_004B)
-            EVT_GIVE_KEY_REWARD(ITEM_KOOT_THE_TAPE)
+            EVT_GIVE_REWARD(ITEM_KOOT_THE_TAPE)
             Call(SpeakToPlayer, NPC_Goompa, ANIM_Goompa_Talk, ANIM_Goompa_Idle, 0, MSG_CH0_004C)
         EndIf
     EndIf
