@@ -52,6 +52,7 @@ void N(func_80240160_8AA5B0)(s32 x1, s32 y1, s32 x2, s32 y2, s32 arg4) {
 
     n = (y2 - y1) / 6;
     m = (y2 - y1) % 6;
+    // TODO: Framebuffer readback
     img = nuGfxCfb_ptr;
 
     for (i = 0; i < n; i++) {

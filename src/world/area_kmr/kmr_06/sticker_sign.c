@@ -1,8 +1,8 @@
 #include "kmr_06.h"
-#include "ld_addrs.h"
+#include "port/Engine.h"
 
-extern s32 gItemIconRasterOffsets[];
-extern s32 gItemIconPaletteOffsets[];
+extern intptr_t gItemIconRasterOffsets[];
+extern intptr_t gItemIconPaletteOffsets[];
 
 typedef struct StickerData {
     /* 0x00 */ s32 imgfxIdx;
@@ -73,13 +73,10 @@ API_CALLABLE(N(CreateSticker)) {
     Bytecode* args = script->ptrReadPos;
     s32 itemID = evt_get_variable(script, *args++);
 
-    StickerData* sticker = (StickerData*) heap_malloc(sizeof(*sticker));
-    IMG_PTR iconImg = heap_malloc(0x200);
-    PAL_PTR iconPal = heap_malloc(0x20);
-
-    s32 iconBase = (s32) icon_ROM_START;
-    s32 iconImgEnd = iconBase + 0x200;
-    s32 iconPalEnd = iconBase + 0x20;
+    static StickerData stickerStorage;
+    StickerData* sticker = &stickerStorage;
+    IMG_PTR iconImg = (IMG_PTR) LOAD_ASSET((const char*)gItemIconRasterOffsets[itemID]);
+    PAL_PTR iconPal = (PAL_PTR) LOAD_ASSET((const char*)gItemIconPaletteOffsets[itemID]);
 
     sticker->pos.x = 0.0f;
     sticker->pos.y = 0.0f;
@@ -98,20 +95,12 @@ API_CALLABLE(N(CreateSticker)) {
     sticker->scale.z = 1.0f;
 
     sticker->duration = 0;
-    dma_copy(
-        (u8*) (iconBase + gItemIconRasterOffsets[itemID]),
-        (u8*) (iconImgEnd + gItemIconRasterOffsets[itemID]),
-        iconImg);
-    dma_copy(
-        (u8*) (iconBase + gItemIconPaletteOffsets[itemID]),
-        (u8*) (iconPalEnd + gItemIconPaletteOffsets[itemID]),
-        iconPal);
 
     sticker->imgfxIdx = imgfx_get_free_instances(1);
     sticker->workerID = create_worker_scene(nullptr, N(worker_render_sticker));
-    evt_set_variable(script, MV_StickerData, (s32) sticker);
-    evt_set_variable(script, MV_StickerImage, (s32) iconImg);
-    evt_set_variable(script, MV_StickerPalette, (s32) iconPal);
+    evt_set_variable(script, MV_StickerData, (Bytecode) sticker);
+    evt_set_variable(script, MV_StickerImage, (Bytecode) iconImg);
+    evt_set_variable(script, MV_StickerPalette, (Bytecode) iconPal);
     return ApiStatus_DONE2;
 }
 
@@ -206,13 +195,9 @@ API_CALLABLE(N(DeleteSticker)) {
 
     free_worker(data->workerID);
 
-    heap_free(data);
-    heap_free(img);
-    heap_free(pal);
-
-    evt_set_variable(script, MV_StickerData, nullptr);
-    evt_set_variable(script, MV_StickerImage, nullptr);
-    evt_set_variable(script, MV_StickerPalette, nullptr);
+    evt_set_variable(script, MV_StickerData, (Bytecode)nullptr);
+    evt_set_variable(script, MV_StickerImage, (Bytecode)nullptr);
+    evt_set_variable(script, MV_StickerPalette, (Bytecode)nullptr);
 
     return ApiStatus_DONE2;
 }

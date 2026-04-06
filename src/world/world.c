@@ -1,17 +1,24 @@
 #include "common.h"
 #include "ld_addrs.h"
 #include "npc.h"
+#include "camera.h"
 #include "hud_element.h"
 #include "rumble.h"
 #include "sprite.h"
 #include "model.h"
 #include <string.h>
+#include "port/Engine.h"
+#include "port/shape_loader.h"
 #include "world/surfaces.h"
+
+s32 WorldReverbModeMapping[] = { 0, 1, 2, 3 };
 
 #ifdef SHIFT
 #define ASSET_TABLE_ROM_START (s32) mapfs_ROM_START
 #elif VERSION_JP
 #define ASSET_TABLE_ROM_START 0x1E00000
+#elif VERSION_PAL
+#define ASSET_TABLE_ROM_START 0x2600000
 #else
 #define ASSET_TABLE_ROM_START 0x1E40000
 #endif
@@ -22,12 +29,14 @@
 BSS MapConfig* gMapConfig;
 BSS MapSettings gMapSettings;
 
+#if VERSION_JP || VERSION_IQUE
+char wMapHitName[0x14];
+#else
 char wMapHitName[0x18];
+#endif
 char wMapShapeName[0x18];
 char wMapTexName[0x18];
 char wMapBgName[0x14];
-
-s32 WorldReverbModeMapping[] = { 0, 1, 2, 3 };
 
 typedef struct {
     /* 0x00 */ char name[16];
@@ -97,9 +106,9 @@ void load_map_by_IDs(s16 areaID, s16 mapID, s16 loadType) {
     ASSERT_MSG(mapID < gAreas[areaID].mapCount, "Invalid map ID %d in %s", mapID, gAreas[areaID].id);
     mapConfig = &gAreas[areaID].maps[mapID];
 
-    #if DX_DEBUG_MENU
+#if DX_DEBUG_MENU
     dx_debug_set_map_info(mapConfig->id, gGameStatus.entryID);
-    #endif
+#endif
 
     sprintf(wMapShapeName, "%s_shape", mapConfig->id);
     sprintf(wMapHitName, "%s_hit", mapConfig->id);
@@ -126,10 +135,18 @@ void load_map_by_IDs(s16 areaID, s16 mapID, s16 loadType) {
 
     if (!skipLoadingAssets) {
         ShapeFile* shapeFile = &gMapShapeData;
-        void* yay0Asset = load_asset_by_name(wMapShapeName, &decompressedSize);
 
-        decode_yay0(yay0Asset, shapeFile);
-        general_heap_free(yay0Asset);
+        // Build OTR asset path for shape
+        char assetPath[64];
+        snprintf(assetPath, sizeof(assetPath), "__OTR__shapes/%s", wMapShapeName);
+
+        // Load pre-processed shape data (already decompressed and byte-swapped by factory)
+        u8* shapeData = (u8*)ResourceGetDataByName(assetPath);
+        size_t shapeSize = ResourceGetSizeByName(assetPath);
+
+        // Convert raw N64 shape data to native format with proper pointers
+        // Pass shape name for display list resource path building
+        Shape_LoadFromRawData(shapeFile, shapeData, shapeSize, wMapShapeName);
 
         mapSettings->modelTreeRoot = shapeFile->header.root;
         mapSettings->modelNameList = shapeFile->header.modelNames;
@@ -185,10 +202,13 @@ void load_map_by_IDs(s16 areaID, s16 mapID, s16 loadType) {
     sfx_reset_door_sounds();
 
     if (!skipLoadingAssets) {
-        s32 texturesOffset = get_asset_offset(wMapTexName, &decompressedSize);
+        char texAssetPath[64];
+        snprintf(texAssetPath, sizeof(texAssetPath), "__OTR__textures/%s", wMapTexName);
+        u8* textureData = ResourceGetDataByName(texAssetPath);
+        size_t textureSize = ResourceGetSizeByName(texAssetPath);
 
-        if (mapSettings->modelTreeRoot != nullptr) {
-            load_data_for_models(mapSettings->modelTreeRoot, texturesOffset, decompressedSize);
+        if (mapSettings->modelTreeRoot != nullptr && textureData != NULL) {
+            load_data_for_models(mapSettings->modelTreeRoot, textureData, textureSize);
         }
     }
 

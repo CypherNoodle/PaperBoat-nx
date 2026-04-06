@@ -1,6 +1,6 @@
 #include "kmr_23.h"
 #include "effects.h"
-#include "include_asset.h"
+#include "assets/world.h"
 
 void func_80240DA4_9087D4(void);
 

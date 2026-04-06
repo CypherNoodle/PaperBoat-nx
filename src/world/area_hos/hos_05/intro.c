@@ -3,6 +3,21 @@
 #include "model.h"
 #include "nu/nusys.h"
 #include "ld_addrs.h"
+#include "port/Engine.h"
+
+// Asset paths for story page images
+static const char* sStoryPageAssets[] = {
+    NULL,  // STORY_PAGE_BLANK handled specially with static palette
+    "__OTR__story_images/story_page_starry_sky",
+    "__OTR__story_images/story_page_shrine_ext",
+    "__OTR__story_images/story_page_star_rod",
+    "__OTR__story_images/story_page_shrine_int",
+};
+
+// Static palette and image for blank page (filled with off-white)
+static u16 sBlankPagePalette[256];
+static u8 sBlankPageImage[264 * 162];  // CI8 image filled with index 0
+static s32 sBlankPageInitialized = 0;
 
 enum {
     STORY_PAGE_BLANK        = 0,
@@ -265,7 +280,8 @@ API_CALLABLE(N(SetWorldColorParams)) {
 }
 
 void N(adjust_cam_vfov)(s32 camID, f32 fov) {
-    gCameras[camID].vfov = fov * 1.1;
+    Camera* camera = &gCameras[camID];
+    camera->vfov = fov * 1.1;
 }
 
 API_CALLABLE(N(AdjustCamVfov)) {
@@ -278,8 +294,9 @@ API_CALLABLE(N(AdjustCamVfov)) {
 }
 
 API_CALLABLE(N(ResumeIntro)) {
-    if (gGameStatus.introPart > INTRO_PART_NONE && gGameStatus.introPart < INTRO_PART_5) {
-        gGameStatus.introPart++;
+    GameStatus* gameStatus = gGameStatusPtr;
+    if (gameStatus->introPart > INTRO_PART_NONE && gameStatus->introPart < INTRO_PART_5) {
+        gameStatus->introPart++;
         state_init_intro();
     }
     return ApiStatus_DONE1;
@@ -306,6 +323,7 @@ API_CALLABLE(N(SetStarSpiritSparkleTrailPos)) {
 }
 
 API_CALLABLE(N(SetCardCaptureState1)) {
+    Bytecode* args = script->ptrReadPos;
     EffectInstance* effect = (EffectInstance*) evt_get_variable(script, ArrayVar(0));
 
     effect->data.somethingRotating[N(D_802495DC_A3381C) + 1].state = 1;
@@ -314,6 +332,7 @@ API_CALLABLE(N(SetCardCaptureState1)) {
 }
 
 API_CALLABLE(N(SetCardCaptureState3)) {
+    Bytecode* args = script->ptrReadPos;
     EffectInstance* effect = (EffectInstance*) evt_get_variable(script, ArrayVar(0));
 
     effect->data.somethingRotating[N(D_802495E0_A33820) + 1].state = 3;
@@ -322,6 +341,7 @@ API_CALLABLE(N(SetCardCaptureState3)) {
 }
 
 API_CALLABLE(N(SetLightRayPos)) {
+    Bytecode* args = script->ptrReadPos;
     EffectInstance* effect = (EffectInstance*) evt_get_variable(script, ArrayVar(16));
 
     effect->data.lightRays->pos.x = script->varTable[0];
@@ -788,8 +808,7 @@ BSS f32 N(StarSpiritsPosZ)[7];
 BSS f32 N(AnimBowser_FlyOff_InitialY);
 BSS f32 N(AnimKammy_FlyOff_InitialY);
 BSS char N(D_8024F37C)[0x4];
-BSS s32 N(D_8024F380);
-BSS char N(D_8024F384)[0x74];
+BSS Bytecode N(D_8024F380)[26];
 
 typedef struct UnkHos05Path {
     /* 0x00 */ Vec3f startPoint;
@@ -1061,7 +1080,7 @@ API_CALLABLE(func_802428C8_A2CB08) {
     }
 
     script->varTable[0] = pathTime;
-    script->varTablePtr[1] = path;
+    script->varTablePtr[1].p = path;
     script->varTable[2] = numPoints;
     return ApiStatus_DONE2;
 }
@@ -1428,7 +1447,8 @@ void N(worker_draw_story_graphics)(void) {
     N(draw_background_tape)();
 
     gSPDisplayList(gMainGfxPos++, N(gfx_setup_story_viewport));
-    gDPSetColorImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, nuGfxCfb_ptr);
+    // PORT: Use 1 as sentinel for valid framebuffer (nuGfxCfb_ptr may be NULL)
+    gDPSetColorImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, (u16*)1);
 
     if (N(StoryGraphicsPtr)->storyPageAlpha < 255) {
         gDPSetRenderMode(gMainGfxPos++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -1485,56 +1505,49 @@ void N(worker_draw_story_graphics)(void) {
 void N(load_story_image)(s32 loadBackImage, s32 imageIdx) {
     s32 i;
 
-    imageIdx--;
-    if (imageIdx < 0) {
-        u16* pal = N(StoryGraphicsPtr)->palFront;
-
-        // overwrite palette to fill entire frame with subtle off-white coloring
-        for (i = 0; i < 256; i++) {
-            *pal++ = GPACK_RGBA5551(212, 212, 212, 1);
+    if (imageIdx == STORY_PAGE_BLANK) {
+        // Initialize blank page palette and image (only need to do once)
+        if (!sBlankPageInitialized) {
+            for (i = 0; i < 256; i++) {
+                // Byte-swap to big-endian format for Fast3D interpreter
+                u16 color = GPACK_RGBA5551(212, 212, 212, 1);
+                sBlankPagePalette[i] = (color >> 8) | (color << 8);
+            }
+            // Image filled with 0 means all pixels use palette index 0 (off-white)
+            memset(sBlankPageImage, 0, sizeof(sBlankPageImage));
+            sBlankPageInitialized = 1;
+        }
+        if (!loadBackImage) {
+            N(StoryGraphicsPtr)->imgFront = sBlankPageImage;
+            N(StoryGraphicsPtr)->palFront = sBlankPagePalette;
+        } else {
+            N(StoryGraphicsPtr)->imgBack = sBlankPageImage;
+            N(StoryGraphicsPtr)->palBack = sBlankPagePalette;
         }
         return;
     }
 
-    if (!loadBackImage) {
-        dma_copy(
-            title_bg_1_ROM_START + imageIdx * (STORY_IMG_SIZE + PAL_256_SIZE),
-            title_bg_1_ROM_START + (imageIdx + 1) * (STORY_IMG_SIZE + PAL_256_SIZE),
-            N(StoryGraphicsPtr)->imgFront
-        );
-    } else {
-        dma_copy(
-            title_bg_1_ROM_START + imageIdx * (STORY_IMG_SIZE + PAL_256_SIZE),
-            title_bg_1_ROM_START + (imageIdx + 1) * (STORY_IMG_SIZE + PAL_256_SIZE),
-            N(StoryGraphicsPtr)->imgBack
-        );
+    // Load asset and point directly to it (no memcpy)
+    u8* assetData = (u8*)ResourceGetDataByName(sStoryPageAssets[imageIdx]);
+    if (assetData != NULL) {
+        if (!loadBackImage) {
+            N(StoryGraphicsPtr)->imgFront = assetData;
+            N(StoryGraphicsPtr)->palFront = (u16*)(assetData + STORY_IMG_SIZE);
+        } else {
+            N(StoryGraphicsPtr)->imgBack = assetData;
+            N(StoryGraphicsPtr)->palBack = (u16*)(assetData + STORY_IMG_SIZE);
+        }
     }
 }
 
 API_CALLABLE(N(InitializeStoryGraphicsData)) {
-    u8* dmaEnd;
-    u8* dmaStart;
-    s32 tapeOffset;
-    u8* it;
+    u8* tapeData;
+    u8* bowserData;
 
     N(StoryGraphicsPtr)->workerID = create_worker_frontUI(nullptr, N(worker_draw_story_graphics));
-    N(StoryGraphicsPtr)->imgFront = it = mdl_get_next_texture_address(
-        (STORY_IMG_SIZE + PAL_256_SIZE) +
-        (STORY_IMG_SIZE + PAL_256_SIZE) +
-        TAPE_IMG_SIZE +
-        (BOWSER_IMG_SIZE + PAL_256_SIZE));
-    it += STORY_IMG_SIZE;
-    N(StoryGraphicsPtr)->palFront = (u16*) it;
-    it += PAL_256_SIZE;
-    N(StoryGraphicsPtr)->imgBack = it;
-    it += STORY_IMG_SIZE;
-    N(StoryGraphicsPtr)->palBack = (u16*) it;
-    it += PAL_256_SIZE;
-    N(StoryGraphicsPtr)->imgTape = it;
-    it += TAPE_IMG_SIZE;
-    N(StoryGraphicsPtr)->imgBowser = it;
-    it += BOWSER_IMG_SIZE;
-    N(StoryGraphicsPtr)->palBowser = (u16*) it;
+
+    // No buffer allocation needed - we point directly to loaded assets
+
     N(StoryGraphicsPtr)->frontImgPosX = 0;
     N(StoryGraphicsPtr)->frontImgPosY = 0;
     N(StoryGraphicsPtr)->backImgPosX = 0;
@@ -1547,12 +1560,14 @@ API_CALLABLE(N(InitializeStoryGraphicsData)) {
     N(load_story_image)(false, STORY_PAGE_BLANK);
     N(load_story_image)(true, STORY_PAGE_STARRY_SKY);
 
-    // load the tape and bowser silhouette images
-    tapeOffset = TAPE_OFFSET;
-    dmaStart = title_bg_1_ROM_START + tapeOffset;
-    dmaEnd = title_bg_1_ROM_START + tapeOffset + TAPE_IMG_SIZE;
+    // Load tape and bowser - direct pointer assignment
+    tapeData = (u8*)ResourceGetDataByName("__OTR__story_images/story_tape");
+    N(StoryGraphicsPtr)->imgTape = tapeData;
 
-    dma_copy(dmaStart, dmaEnd + (BOWSER_IMG_SIZE + PAL_256_SIZE), N(StoryGraphicsPtr)->imgTape);
+    bowserData = (u8*)ResourceGetDataByName("__OTR__story_images/story_bowser_silhouette");
+    N(StoryGraphicsPtr)->imgBowser = bowserData;
+    N(StoryGraphicsPtr)->palBowser = (u16*)(bowserData + BOWSER_IMG_SIZE);
+
     N(StoryGraphicsPtr)->flipOrder = 0;
     N(StoryGraphicsPtr)->storyPageAlpha = 255;
     N(StoryGraphicsPtr)->tapeAlpha = 0;

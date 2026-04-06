@@ -1,13 +1,13 @@
 #include "kmr_04.h"
 #include "sprite/player.h"
-#include "include_asset.h"
+#include "assets/world.h"
+
+// hammer_block_message texture and palette extracted to OTR via world.yml
+// kmr_04_hammer_block_message_img, kmr_04_hammer_block_message_pal defined in assets/world.h
+#include "port/Engine.h"
 
 #include "foliage.h"
 #include "effects.h"
-
-#include "world/area_kmr/kmr_04/hammer_block_message.png.h"
-INCLUDE_IMG("world/area_kmr/kmr_04/hammer_block_message.png", kmr_04_hammer_block_message_img);
-INCLUDE_PAL("world/area_kmr/kmr_04/hammer_block_message.pal", kmr_04_hammer_block_message_pal);
 
 #include "world/common/complete/GiveReward.inc.c"
 
@@ -16,8 +16,8 @@ static MessageImageData MessageImage;
 API_CALLABLE(N(SetMessageImage_HammerBlock)) {
     MessageImage.raster = N(hammer_block_message_img);
     MessageImage.palette = N(hammer_block_message_pal);
-    MessageImage.width = N(hammer_block_message_img_width);
-    MessageImage.height = N(hammer_block_message_img_height);
+    MessageImage.width = LOAD_ASSET_TEX_WIDTH(N(hammer_block_message_img));
+    MessageImage.height = LOAD_ASSET_TEX_HEIGHT(N(hammer_block_message_img));
     MessageImage.format = G_IM_FMT_CI;
     MessageImage.bitDepth = G_IM_SIZ_4b;
     set_message_images(&MessageImage);
@@ -456,37 +456,37 @@ BombTrigger N(BombPos_Tree3) = {
 
 EvtScript N(EVS_SetupFoliage) = {
     Set(LVar0, Ref(N(SearchBush_Bush1)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o402, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o402, 1, 0)
     Set(LVar0, Ref(N(SearchBush_Bush2)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o415, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o415, 1, 0)
     Set(LVar0, Ref(N(SearchBush_Bush3)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o409, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o409, 1, 0)
     Set(LVar0, Ref(N(SearchBush_Bush4)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o412, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o412, 1, 0)
     Set(LVar0, Ref(N(SearchBush_Bush5)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o399, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o399, 1, 0)
     IfGe(GB_StoryProgress, STORY_CH0_FOUND_HAMMER)
         Set(LVar0, Ref(N(SearchBush_Bush6)))
-        BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o410, 1, 0)
+        BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o410, 1, 0)
         Set(LVar0, Ref(N(SearchBush_Bush6)))
-        BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o410_1, 1, 0)
+        BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o410_1, 1, 0)
     Else
         Set(LVar0, Ref(N(SearchBush_Bush7)))
-        BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o410, 1, 0)
+        BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o410, 1, 0)
         Set(LVar0, Ref(N(SearchBush_Bush8)))
-        BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o410_1, 1, 0)
+        BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o410_1, 1, 0)
     EndIf
     Set(LVar0, Ref(N(SearchBush_Bush9)))
-    BindTrigger(Ref(EVS_SearchBush), TRIGGER_WALL_PRESS_A, COLLIDER_o413, 1, 0)
+    BindTrigger(Ref(N(EVS_SearchBush)), TRIGGER_WALL_PRESS_A, COLLIDER_o413, 1, 0)
     Set(LVar0, Ref(N(ShakeTree_Tree1)))
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_WALL_HAMMER, COLLIDER_o407, 1, 0)
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree1)), 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_WALL_HAMMER, COLLIDER_o407, 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree1)), 1, 0)
     Set(LVar0, Ref(N(ShakeTree_Tree2)))
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_WALL_HAMMER, COLLIDER_o271, 1, 0)
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree2)), 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_WALL_HAMMER, COLLIDER_o271, 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree2)), 1, 0)
     Set(LVar0, Ref(N(ShakeTree_Tree3)))
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_WALL_HAMMER, COLLIDER_o341, 1, 0)
-    BindTrigger(Ref(EVS_ShakeTree), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree3)), 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_WALL_HAMMER, COLLIDER_o341, 1, 0)
+    BindTrigger(Ref(N(EVS_ShakeTree)), TRIGGER_POINT_BOMB, Ref(N(BombPos_Tree3)), 1, 0)
     Return
     End
 };

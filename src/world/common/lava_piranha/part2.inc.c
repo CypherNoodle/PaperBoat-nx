@@ -3,11 +3,11 @@
 BSS s32 N(VineRenderState);
 
 #define PIRANHA_DMA_ENTRY(name) \
-    (s32) world_model_anim_kzn_##name##_ROM_START,\
-    (s32) world_model_anim_kzn_##name##_ROM_END,\
-    (s32) world_model_anim_kzn_##name##_VRAM
+    (intptr_t) world_model_anim_kzn_##name##_ROM_START,\
+    (intptr_t) world_model_anim_kzn_##name##_ROM_END,\
+    (intptr_t) world_model_anim_kzn_##name##_VRAM
 
-s32 N(VineAnimationsDmaTable)[] = {
+intptr_t N(VineAnimationsDmaTable)[] = {
     PIRANHA_DMA_ENTRY(00),
     PIRANHA_DMA_ENTRY(01),
     PIRANHA_DMA_ENTRY(02),
@@ -110,6 +110,7 @@ API_CALLABLE(N(SetVineBoneScale)) {
     s32 sy = evt_get_variable(script, *args++);
     s32 sz = evt_get_variable(script, *args++);
     LavaPiranhaVine* vines = (LavaPiranhaVine*) evt_get_variable(nullptr, MV_VinesData);
+    LavaPiranhaVine* vine = &vines[vineIdx];
 
     // do nothing
     return ApiStatus_DONE2;
@@ -285,8 +286,9 @@ API_CALLABLE(N(MarkVineInterpolationDirty)) {
 }
 
 API_CALLABLE(N(CreateVineRenderer)) {
-    LavaPiranhaVine* data = heap_malloc(NUM_VINES * sizeof(*data));
-    evt_set_variable(script, MV_VinesData, (s32) data);
+    static LavaPiranhaVine vineStorage[NUM_VINES];
+    LavaPiranhaVine* data = vineStorage;
+    evt_set_variable(script, MV_VinesData, (Bytecode) data);
     N(VineRenderState) = -1;
     create_worker_scene(nullptr, &N(worker_render_piranha_vines));
     return ApiStatus_DONE2;
