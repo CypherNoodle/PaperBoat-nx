@@ -1,4 +1,9 @@
+:config:
+  segments:
+    - [0, 0]
+  virtual: [0x800745E0, 0x4F9E0]
 
+# --- Textures ---
 theater_walls:
   { type: TEXTURE, format: I4, offset: 0x4F9E0, width: 16, height: 32, symbol: theater_walls }
 
@@ -14,7 +19,17 @@ theater_floor:
 ui_no_controller:
   { type: TEXTURE, format: IA8, offset: 0x51540, width: 128, height: 32, symbol: ui_no_controller }
 
-# Vertices
+# --- Texture Setup DLs ---
+walls_tex_setup_gfx:
+  { type: GFX, offset: 0x4FAE0, symbol: walls_tex_setup_gfx }
+
+curtains_tex_setup_gfx:
+  { type: GFX, offset: 0x50B30, symbol: curtains_tex_setup_gfx }
+
+floor_tex_setup_gfx:
+  { type: GFX, offset: 0x50CA0, symbol: floor_tex_setup_gfx }
+
+# --- Vertices ---
 theater_left_wall_vtx:
   { type: VTX, offset: 0x50D20, count: 6, symbol: theater_left_wall_vtx }
 
@@ -35,3 +50,25 @@ theater_curtain_vtx:
 
 theater_wall_shadows_vtx:
   { type: VTX, offset: 0x511E0, count: 8, symbol: theater_wall_shadows_vtx }
+
+# --- Scene DLs ---
+theater_wall_shadows_gfx:
+  { type: GFX, offset: 0x51260, symbol: theater_wall_shadows_gfx }
+
+theater_curtain_gfx:
+  { type: GFX, offset: 0x512A0, symbol: theater_curtain_gfx }
+
+theater_inset_shadows_gfx:
+  { type: GFX, offset: 0x51320, symbol: theater_inset_shadows_gfx }
+
+theater_floor_gfx:
+  { type: GFX, offset: 0x51368, symbol: theater_floor_gfx }
+
+theater_right_wall_gfx:
+  { type: GFX, offset: 0x513F8, symbol: theater_right_wall_gfx }
+
+theater_left_wall_gfx:
+  { type: GFX, offset: 0x51438, symbol: theater_left_wall_gfx }
+
+theater_gfx:
+  { type: GFX, offset: 0x51478, symbol: theater_gfx }
