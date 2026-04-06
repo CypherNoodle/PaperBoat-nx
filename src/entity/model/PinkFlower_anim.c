@@ -1,10 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_PinkFlower_RenderNode1[];
-extern Gfx Entity_PinkFlower_RenderNode2[];
-extern Gfx Entity_PinkFlower_RenderNode3[];
-extern Gfx Entity_PinkFlower_RenderNode5[];
 
 StaticAnimatorNode Entity_PinkFlower_Node5 = {
     .displayList = Entity_PinkFlower_RenderNode5,

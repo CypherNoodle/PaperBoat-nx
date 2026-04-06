@@ -1,8 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_HitRedBlock_RenderBlock2[];
-extern Gfx Entity_HitRedBlock_RenderBlock1[];
 
 StaticAnimatorNode Entity_HitRedBlock_NodeBlock2 = {
     .displayList = Entity_HitRedBlock_RenderBlock2,

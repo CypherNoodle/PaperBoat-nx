@@ -1,13 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_SimpleSpring_RenderPart1[];
-extern Gfx Entity_SimpleSpring_RenderPart2[];
-extern Gfx Entity_SimpleSpring_RenderPart3[];
-extern Gfx Entity_SimpleSpring_RenderPart4[];
-extern Gfx Entity_SimpleSpring_RenderPart5[];
-extern Gfx Entity_SimpleSpring_RenderPart6[];
-extern Gfx Entity_SimpleSpring_RenderPart7[];
 
 StaticAnimatorNode Entity_SimpleSpring_NodePart9 = {
     .displayList = ENTITY_ANIM_NULL,

@@ -1,32 +1,12 @@
 #include "common.h"
 #include "vars_access.h"
 #include "effects.h"
-#include "ld_addrs.h"
 #include "entity.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_model_SuperBlockContent_ROM_END;
-extern Addr entity_model_SuperBlockContent_ROM_START;
-extern Addr entity_model_SuperBlock_ROM_END;
-extern Addr entity_model_SuperBlock_ROM_START;
-extern Addr entity_model_UltraBlockContent_ROM_END;
-extern Addr entity_model_UltraBlockContent_ROM_START;
-extern Addr entity_model_UltraBlock_ROM_END;
-extern Addr entity_model_UltraBlock_ROM_START;
-#endif
+#include "ld_addrs.h"
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern EntityBlueprint Entity_SuperBlockContent;
-
-extern Gfx Entity_SuperBlock_Render[];
-extern Gfx Entity_UltraBlock_Render[];
-extern Gfx Entity_SuperBlockContent_Render[];
-extern Gfx Entity_SuperBlockContent_Render2[];
-extern Gfx Entity_UltraBlockContent_Render[];
-extern Gfx Entity_UltraBlockContent_Render2[];
-extern unsigned char D_0A000200_E4A8A0[];
-extern unsigned char D_0A000220_E4A8C0[];
-extern unsigned char D_0A000240_E4A8E0[];
-extern unsigned char D_0A000260_E4A900[];
 
 f32 entity_SuperBlockContent_get_previous_yaw(SuperBlockContentData* data, s32 lagTime) {
     s32 bufIdx = data->yawBufferPos - lagTime;
@@ -105,7 +85,7 @@ EntityScript Entity_SuperBlock_Script = {
     es_End
 };
 
-unsigned char* Entity_SuperBlock_Palettes[] = {
+const char* Entity_SuperBlock_Palettes[] = {
     D_0A000200_E4A8A0,
     D_0A000220_E4A8C0,
     D_0A000240_E4A8E0,
@@ -145,8 +125,8 @@ void entity_SuperBlockContent_setupGfx(s32 entityIndex) {
         data->paletteTimer--;
     }
 
-    palette = ENTITY_ADDR(entity, u8*, Entity_SuperBlock_Palettes[Entity_SuperBlock_PalData[data->paletteArrOffset + 1]]);
-    dlist = data->gfx2;
+    palette = (u8*) Entity_SuperBlock_Palettes[Entity_SuperBlock_PalData[data->paletteArrOffset + 1]];
+    dlist = (Gfx*) data->gfx2;
 
     gDPPipeSync(gfxPos++);
     guRotateF(sp18, entity_SuperBlockContent_get_previous_yaw(data, 1), 0.0f, 1.0f, 0.0f);
@@ -221,16 +201,16 @@ void entity_SuperBlockContent_idle(Entity* entity) {
 void entity_init_SuperBlockContent(Entity* entity) {
     SuperBlockContentData* data = entity->dataBuf.superBlockContent;
 
-    data->gfx1 = Entity_SuperBlockContent_Render;
-    data->gfx2 = Entity_SuperBlockContent_Render2;
+    data->gfx1 = (Gfx*) Entity_SuperBlockContent_Render;
+    data->gfx2 = (Gfx*) Entity_SuperBlockContent_Render;
     entity->renderSetupFunc = entity_SuperBlockContent_setupGfx;
 }
 
 void entity_init_UltraBlockContent(Entity* entity) {
     SuperBlockContentData* data = entity->dataBuf.superBlockContent;
 
-    data->gfx1 = Entity_UltraBlockContent_Render;
-    data->gfx2 = Entity_UltraBlockContent_Render2;
+    data->gfx1 = (Gfx*) Entity_UltraBlockContent_Render;
+    data->gfx2 = (Gfx*) Entity_UltraBlockContent_Render2;
     entity->renderSetupFunc = entity_SuperBlockContent_setupGfx;
 }
 

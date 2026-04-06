@@ -1,11 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_BellbellPlant_RenderNode1[];
-extern Gfx Entity_BellbellPlant_RenderNode2[];
-extern Gfx Entity_BellbellPlant_RenderNode3[];
-extern Gfx Entity_BellbellPlant_RenderNode4[];
-extern Gfx Entity_BellbellPlant_RenderNode5[];
 
 StaticAnimatorNode Entity_BellbellPlant_Node5 = {
     .displayList = Entity_BellbellPlant_RenderNode5,

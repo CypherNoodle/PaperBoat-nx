@@ -1,8 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_TrumpetPlant_RenderNode1[];
-extern Gfx Entity_TrumpetPlant_RenderNode2[];
 
 StaticAnimatorNode Entity_TrumpetPlant_Node2 = {
     .displayList = Entity_TrumpetPlant_RenderNode2,

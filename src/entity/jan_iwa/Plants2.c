@@ -1,8 +1,8 @@
 #include "common.h"
 #include "effects.h"
 #include "entity.h"
-#include "animation_script.h"
 #include "ld_addrs.h"
+#include "animation_script.h"
 #include "sprite/player.h"
 
 extern EntityBlueprint Entity_MunchlesiaReset;

@@ -1,17 +1,11 @@
 #include "common.h"
 #include "effects.h"
-#include "inventory.h"
 #include "vars_access.h"
 #include "message_ids.h"
-#include "ld_addrs.h"
 #include "entity.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_model_HeartBlockContent_ROM_END;
-extern Addr entity_model_HeartBlockContent_ROM_START;
-extern Addr entity_model_HeartBlock_ROM_END;
-extern Addr entity_model_HeartBlock_ROM_START;
-#endif
+#include "ld_addrs.h"
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern EntityModelScript Entity_HeartBlockContent_RenderScriptIdle;
 extern EntityModelScript Entity_HeartBlockContent_RenderScriptAfterHit;
@@ -19,12 +13,7 @@ extern EntityModelScript Entity_HeartBlockContent_RenderScriptHit;
 
 extern EntityBlueprint Entity_HeartBlockContent;
 
-extern Gfx Entity_HeartBlock_Render[];
-extern Gfx Entity_HeartBlockContent_RenderHeartSleeping[];
-extern Gfx Entity_HeartBlockContent_RenderHeartAwake[];
-extern Gfx Entity_HeartBlockContent_RenderHeartHappy[];
-
-BSS u32 HeartBlockPrinterClosed;
+BSS bool HeartBlockPrinterClosed;
 
 f32 entity_HeartBlockContent_get_previous_yaw(HeartBlockContentData* data, s32 lagTime) {
     s32 bufIdx = data->yawBufferPos - lagTime;
@@ -34,7 +23,7 @@ f32 entity_HeartBlockContent_get_previous_yaw(HeartBlockContentData* data, s32 l
     return data->yawBuffer[bufIdx];
 }
 
-void entity_HeartBlockContent__setupGfx(s32 entityIndex, Gfx* arg1) {
+void entity_HeartBlockContent__setupGfx(s32 entityIndex, void* arg1) {
     Entity* entity = get_entity_by_index(entityIndex);
     HeartBlockContentData* data = entity->dataBuf.heartBlockContent;
     Gfx* gfxPos = gMainGfxPos;
@@ -42,7 +31,7 @@ void entity_HeartBlockContent__setupGfx(s32 entityIndex, Gfx* arg1) {
     Matrix4f sp18;
     Gfx* dlist;
 
-    dlist = ENTITY_ADDR(entity, Gfx*, arg1);
+    dlist = LOAD_ASSET(arg1);
 
     gDPSetCombineMode(gfxPos++, PM_CC_01, PM_CC_02);
     gDPSetPrimColor(gfxPos++, 0, 0, 0, 0, 0, entity->alpha);

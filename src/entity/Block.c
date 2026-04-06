@@ -1,36 +1,10 @@
 #include "common.h"
 #include "effects.h"
 #include "vars_access.h"
-#include "ld_addrs.h"
 #include "entity.h"
-
-#if VERSION_JP // TODO remove once segments are split
-extern Addr entity_model_BrickBlock_ROM_END;
-extern Addr entity_model_BrickBlock_ROM_START;
-extern Addr entity_model_Hammer1Block_ROM_END;
-extern Addr entity_model_Hammer1Block_ROM_START;
-extern Addr entity_model_Hammer2Block_ROM_END;
-extern Addr entity_model_Hammer2Block_ROM_START;
-extern Addr entity_model_Hammer3Block_ROM_END;
-extern Addr entity_model_Hammer3Block_ROM_START;
-extern Addr entity_model_InertRedBlock_ROM_END;
-extern Addr entity_model_InertRedBlock_ROM_START;
-extern Addr entity_model_InertYellowBlock_ROM_END;
-extern Addr entity_model_InertYellowBlock_ROM_START;
-extern Addr entity_model_PowBlock_ROM_END;
-extern Addr entity_model_PowBlock_ROM_START;
-extern Addr entity_model_PushBlock_ROM_END;
-extern Addr entity_model_PushBlock_ROM_START;
-#endif
-
-extern Gfx Entity_InertYellowBlock_Render[];
-extern Gfx Entity_InertRedBlock_Render[];
-extern Gfx Entity_BrickBlock_Render[];
-extern Gfx Entity_Hammer1Block_Render[];
-extern Gfx Entity_Hammer2Block_Render[];
-extern Gfx Entity_Hammer3Block_Render[];
-extern Gfx Entity_PushBlock_Render[];
-extern Gfx Entity_PowBlock_Render[];
+#include "ld_addrs.h"
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern EntityScript Entity_CreatedInertBlock_Script;
 extern EntityScript Entity_BreakingBlock_Script;

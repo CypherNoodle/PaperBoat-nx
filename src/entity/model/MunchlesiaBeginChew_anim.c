@@ -1,8 +1,8 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
 extern Vtx D_0A000000_E815F0[];
-extern Gfx Entity_MunchlesiaBeginChew_Render[];
 
 AnimScript Entity_MunchlesiaBeginChew_Animation = {
     as_SetRotation(1, 0.0, 0.0, 0.0)

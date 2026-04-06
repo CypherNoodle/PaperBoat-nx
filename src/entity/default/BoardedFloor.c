@@ -1,28 +1,29 @@
 #include "common.h"
-#include "ld_addrs.h"
 #include "entity.h"
+#include "ld_addrs.h"
+#include "assets/entities.h"
+#include "Engine.h"
 
 extern Gfx Entity_RenderNone[];
-extern Gfx* Entity_BoardedFloor_FragmentsRender[];
-extern Mtx Entity_BoardedFloor_FragmentMatrices[];
+extern void* Entity_BoardedFloor_FragmentsRender[];
 
 void Entity_BoardedFloor_setupGfx(s32);
 
-void Entity_BoardedFloor_init_fragments(Entity* entity, Gfx** dlists, Mtx* matrices) {
+void Entity_BoardedFloor_init_fragments(Entity* entity, void** dlists, Mtx* matrices) {
     BoardedFloorData* data = entity->dataBuf.boardedFloor;
     Matrix4f mtxFragment;
     Matrix4f mtxTrans;
     s32 i;
     s32 rotationSpeed;
 
-    data->fragmentsGfx = ENTITY_ADDR(entity, Gfx**, dlists);
+    data->fragmentsGfx = dlists;
     entity->renderSetupFunc = Entity_BoardedFloor_setupGfx;
     entity->alpha = 255;
     entity->pos.y = data->inititalY;
     guTranslateF(mtxTrans, entity->pos.x, entity->pos.y, entity->pos.z);
 
     for (i = 0; i < FRAGMENT_BUF_SIZE - 1; i++) {
-        guMtxL2F(mtxFragment, ENTITY_ADDR(entity, Mtx*, matrices++));
+        guMtxL2F(mtxFragment, matrices++);
         guMtxCatF(mtxTrans, mtxFragment, mtxFragment);
         data->fragmentPosX[i] = mtxFragment[3][0];
         data->fragmentPosY[i] = mtxFragment[3][1];
@@ -45,8 +46,23 @@ void Entity_BoardedFloor_init_fragments(Entity* entity, Gfx** dlists, Mtx* matri
 }
 
 void Entity_BoardedFloor_init(Entity* entity) {
+    Mtx matrices[12];
+
+    matrices[0]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx0);
+    matrices[1]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx1);
+    matrices[2]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx2);
+    matrices[3]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx3);
+    matrices[4]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx4);
+    matrices[5]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx5);
+    matrices[6]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx6);
+    matrices[7]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx7);
+    matrices[8]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx8);
+    matrices[9]  = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx9);
+    matrices[10] = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx10);
+    matrices[11] = *(Mtx*) LOAD_ASSET(Entity_BoardedFloor_FragmentMtx11);
+
     entity->dataBuf.boardedFloor->inititalY = entity->pos.y;
-    Entity_BoardedFloor_init_fragments(entity, Entity_BoardedFloor_FragmentsRender, Entity_BoardedFloor_FragmentMatrices);
+    Entity_BoardedFloor_init_fragments(entity, Entity_BoardedFloor_FragmentsRender, matrices);
 }
 
 void Entity_BoardedFloor_update_fragments(Entity* entity) {
@@ -170,7 +186,7 @@ void Entity_BoardedFloor_setupGfx(s32 entityIndex) {
     Entity* entity = get_entity_by_index(entityIndex);
     BoardedFloorData* data = entity->dataBuf.boardedFloor;
     Gfx* fragmentDlist;
-    Gfx** gfx = data->fragmentsGfx;
+    void** gfx = data->fragmentsGfx;
 
     x_inv = -entity->pos.x;
     y_inv = -entity->pos.y;
@@ -195,7 +211,7 @@ void Entity_BoardedFloor_setupGfx(s32 entityIndex) {
         guMtxF2L(mtx, &gDisplayContext->matrixStack[gMatrixListPos]);
 
         gSPMatrix(gfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        fragmentDlist = ENTITY_ADDR(entity, Gfx*, *gfx++);
+        { void* _dl = *gfx++; fragmentDlist = LOAD_ASSET(_dl); }
         gSPDisplayList(gfxPos++, fragmentDlist);
         gSPPopMatrix(gfxPos++, G_MTX_MODELVIEW);
     }

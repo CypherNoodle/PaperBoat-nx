@@ -1,7 +1,7 @@
 #include "common.h"
 #include "animation_script.h"
+#include "assets/entities.h"
 
-extern Gfx Entity_MunchlesiaReset_Render[];
 extern Vtx D_0A000000_E6E660[];
 
 AnimScript Entity_MunchlesiaReset_AnimationIdle = {
