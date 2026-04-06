@@ -3,10 +3,16 @@
 
 #include "types.h"
 
-#define BSS __attribute__ ((nocommon, section (".bss")))
-#define TRANSPARENT_UNION __attribute__ ((__transparent_union__))
+#define SHIFT_BSS
+#define BSS
 
+#ifdef _MSC_VER
+#define TRANSPARENT_UNION
+#define ALIGNED(x) __declspec(align(x))
+#else
+#define TRANSPARENT_UNION __attribute__ ((__transparent_union__))
 #define ALIGNED(x) __attribute__((aligned(x)))
+#endif
 
 #ifndef BBPLAYER
 # define OSALIGNED(x) ALIGNED(x)
@@ -27,46 +33,37 @@
 
 #define NAME_SUFFIX
 #define NAME_PREFIX
-#ifdef _LANGUAGE_C_PLUS_PLUS
-// use C++ namespaces instead of these macros!
-#define A(sym) sym
-#define N(sym) sym
-#else
 #define A(sym) NS(AREA, NAME_PREFIX, sym, NAME_SUFFIX)
 #define N(sym) NS(NAMESPACE, NAME_PREFIX, sym, NAME_SUFFIX)
-#endif
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
 #define PTR_LIST_END ((void*) -1)
 
-#define API_CALLABLE(name) ApiStatus name(Evt* script, b32 isInitialCall)
+#define API_CALLABLE(name) ApiStatus name(Evt* script, bool isInitialCall)
 
-#define PHYSICAL_TO_VIRTUAL(addr) (void*)((u32)(addr) + 0x80000000)
-#define VIRTUAL_TO_PHYSICAL(addr) (u32)((u8*)(addr) - 0x80000000)
+// Identity on port — no KSEG0 translation needed
+#define PHYSICAL_TO_VIRTUAL(addr) ((void*)(uintptr_t)(addr))
+#define VIRTUAL_TO_PHYSICAL(addr) ((uintptr_t)(addr))
 
-//#ifdef DEBUG
-#define IS_DEBUG_PANIC(statement) is_debug_panic(statement)
-/*#else
-#define IS_DEBUG_PANIC(statement) do {} while(true)
-#endif*/
+#define IS_DEBUG_PANIC(statement, file, line) is_debug_panic(statement, file, line)
 
-#define PANIC() IS_DEBUG_PANIC("Panic")
+#define PANIC() IS_DEBUG_PANIC("Panic", __FILE__, __LINE__)
 #define PANIC_MSG(msg, args...) \
     do { \
         char panicMsg[0x40]; \
         sprintf(panicMsg, msg, ##args); \
-        IS_DEBUG_PANIC(msg); \
+        IS_DEBUG_PANIC(panicMsg, __FILE__, __LINE__); \
     } while (0)
 #define ASSERT(condition) \
     if (!(condition)) { \
-        IS_DEBUG_PANIC("Assertion failed: " #condition); \
+        IS_DEBUG_PANIC("Assertion failed: " #condition, __FILE__, __LINE__); \
     }
 #define ASSERT_MSG(condition, msg, args...) \
     if (!(condition)) { \
         char assertMsg[0x40]; \
         sprintf(assertMsg, msg, ##args); \
-        IS_DEBUG_PANIC(assertMsg); \
+        IS_DEBUG_PANIC(assertMsg, __FILE__, __LINE__); \
     }
 
 #define BADGE_MENU_PAGE(index) (&gPauseBadgesPages[index])
@@ -119,10 +116,11 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 #define LAST_DEMO_SCENE_IDX 18
 
 #define WORLD_ENTITY_HEAP_SIZE 0x17FF0
-#define COLLISION_HEAP_SIZE 0x18000
+// Doubled for 64-bit struct growth
+#define COLLISION_HEAP_SIZE 0x30000
 #define GENERAL_HEAP_SIZE 0x54000
-#define SPRITE_HEAP_SIZE 0x60000
-#define BATTLE_HEAP_SIZE 0x25800
+#define SPRITE_HEAP_SIZE 0x80000
+#define BATTLE_HEAP_SIZE 0x4B000
 #define FRAME_BUFFER_SIZE 0x25800
 
 #define CAM_NEAR_CLIP 16
@@ -138,6 +136,9 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 #define PI_D    3.141592
 #define TAU     6.28318f
 #define PI_S    3.14159f // Shorter PI
+#ifndef M_PI
+#define M_PI    3.141592653589793
+#endif
 
 // Angle conversion macros
 #define DEG_TO_BINANG(x) ((x) * (0x8000 / 180.0f))
@@ -224,10 +225,10 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 
 #define INTEGER_LOG2(x) ((x) <= 2 ? 1 : (x) <= 4 ? 2 : (x) <= 8 ? 3 : (x) <= 16 ? 4 : (x) <= 32 ? 5 : (x) <= 64 ? 6 : (x) <= 128 ? 7 : (x) <= 256 ? 8 : (x) <= 512 ? 9 : 10)
 
-#define FOLIAGE_MODEL_LIST(names...) \
+#define FOLIAGE_MODEL_LIST(...) \
 { \
-    .count = __NARG__(names), \
-    .models = {  names } \
+    .count = __NARG__(__VA_ARGS__), \
+    .models = {  __VA_ARGS__ } \
 }
 
 #define STATUS_KEY_IGNORE_RES 0xFE
@@ -235,6 +236,24 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 #define DMG_STATUS_KEY(typeFlag, duration, chance) (STATUS_FLAG_USE_DURATION | typeFlag | (duration << 8) | chance)
 #define DMG_STATUS_ALWAYS(typeFlag, duration) (STATUS_FLAG_USE_DURATION | STATUS_FLAG_RIGHT_ON | typeFlag | (duration << 8))
 #define DMG_STATUS_IGNORE_RES(typeFlag, duration) (STATUS_KEY_IGNORE_RES | typeFlag | (duration << 8))
+
+#ifdef GBI_FLOATS
+
+#define RDP_MATRIX(  \
+    Ax, Bx, Cx, Dx, \
+    Ay, By, Cy, Dy, \
+    Az, Bz, Cz, Dz, \
+    Aw, Bw, Cw, Dw ) \
+{ \
+    .mf = { \
+        { Ax, Ay, Az, Aw }, \
+        { Bx, By, Bz, Bw }, \
+        { Cx, Cy, Cz, Cw }, \
+        { Dx, Dy, Dz, Dw }, \
+    } \
+};
+
+#else
 
 #define _RDP_WHOLE(x) (((s32)(x * 65536.0) >> 16) & 0xFFFF)
 #define _RDP_FRAC(x) ((s32)(x * 65536.0) & 0xFFFF)
@@ -275,12 +294,17 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
     } \
 };
 
-#define UNPACK_PAL_R(color) (((color) >> 11) & 0x1F)
-#define UNPACK_PAL_G(color) (((color) >> 6) & 0x1F)
-#define UNPACK_PAL_B(color) (((color) >> 1) & 0x1F)
-#define UNPACK_PAL_A(color) ((color) & 1)
+#endif
 
-#define PACK_PAL_RGBA(r, g, b, a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a));
+// Palette RGBA5551 is stored BE in OTR blobs; byte-swap for LE host
+#define _PAL_BSWAP16(x) ((u16)(((u16)(x) >> 8) | ((u16)(x) << 8)))
+
+#define UNPACK_PAL_R(color) ((_PAL_BSWAP16(color) >> 11) & 0x1F)
+#define UNPACK_PAL_G(color) ((_PAL_BSWAP16(color) >> 6) & 0x1F)
+#define UNPACK_PAL_B(color) ((_PAL_BSWAP16(color) >> 1) & 0x1F)
+#define UNPACK_PAL_A(color) (_PAL_BSWAP16(color) & 1)
+
+#define PACK_PAL_RGBA(r, g, b, a) _PAL_BSWAP16(((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
 
 #define PM_RM_SHROUD    GBL_c1(G_BL_CLR_BL, G_BL_A_FOG, G_BL_CLR_IN, G_BL_1MA)
 
@@ -529,9 +553,9 @@ typedef s32 Difficulty2D[AC_DIFFICULTY_LEN][2];
 #endif
 
 #if VERSION_PAL
-#define DT (50.0f/60.0f)
+#define DT (50.0/60.0)
 #else
-#define DT (1.0f)
+#define DT (1.0)
 #endif
 
 #define DMA_COPY_SEGMENT(segment) dma_copy(segment##_ROM_START, segment##_ROM_END, segment##_VRAM)

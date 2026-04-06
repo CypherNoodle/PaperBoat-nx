@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-typedef s32 EntityScript[];
-typedef s32 EntityModelScript[];
+typedef const intptr_t EntityScript[];
+typedef const intptr_t EntityModelScript[];
 
-extern s32 CreateEntityVarArgBuffer[];
+extern uintptr_t CreateEntityVarArgBuffer[];
 
 enum {
     ENTITY_SCRIPT_OP_End,
@@ -33,9 +33,9 @@ enum {
 };
 
 #define es_End ENTITY_SCRIPT_OP_End,
-#define es_Jump(script) ENTITY_SCRIPT_OP_Jump, (s32)script,
-#define es_Call(func) ENTITY_SCRIPT_OP_Call, (s32)func,
-#define es_SetCallback(func, time) ENTITY_SCRIPT_OP_SetCallback, time, (s32)func,
+#define es_Jump(script) ENTITY_SCRIPT_OP_Jump, (intptr_t)script,
+#define es_Call(func) ENTITY_SCRIPT_OP_Call, (intptr_t)func,
+#define es_SetCallback(func, time) ENTITY_SCRIPT_OP_SetCallback, time, (intptr_t)func,
 #define es_Goto(labelId) ENTITY_SCRIPT_OP_Goto, labelId,
 #define es_Restart ENTITY_SCRIPT_OP_Goto, 0,
 #define es_Label(labelId) ENTITY_SCRIPT_OP_Label, labelId,
@@ -45,13 +45,13 @@ enum {
 #define es_PlaySound(soundId) ENTITY_SCRIPT_OP_PlaySound, soundId,
 
 #define ems_End ENTITY_MODEL_SCRIPT_OP_End,
-#define ems_Draw(dlist, holdTime) ENTITY_MODEL_SCRIPT_OP_Draw, holdTime, (s32)dlist,
+#define ems_Draw(dlist, holdTime) ENTITY_MODEL_SCRIPT_OP_Draw, holdTime, (intptr_t)dlist,
 #define ems_Restart ENTITY_MODEL_SCRIPT_OP_Restart,
 #define ems_Loop ENTITY_MODEL_SCRIPT_OP_Loop,
 #define ems_SetRenderMode(mode) ENTITY_MODEL_SCRIPT_OP_SetRenderMode, mode,
 #define ems_SetFlags(flags) ENTITY_MODEL_SCRIPT_OP_SetFlags, flags,
 #define ems_ClearFlags(flags) ENTITY_MODEL_SCRIPT_OP_ClearFlags, flags,
-#define ems_DrawImage(raster, palette, width, height, holdTime) ENTITY_MODEL_SCRIPT_OP_DrawImage, holdTime, (s32)raster, (s32)palette, width, height,
+#define ems_DrawImage(raster, palette, width, height, holdTime) ENTITY_MODEL_SCRIPT_OP_DrawImage, holdTime, (intptr_t)raster, (intptr_t)palette, width, height,
 
 #define STANDARD_ENTITY_MODEL_SCRIPT(gfx, renderMode) \
     { \
@@ -61,7 +61,6 @@ enum {
         ems_End \
     }
 
-#define ENTITY_ADDR(entity, type, data) (type)((s32)(entity->gfxBaseAddr) + ((s32)(data) & 0xFFFF))
 #define ENTITY_ROM(name) { entity_model_##name##_ROM_START, entity_model_##name##_ROM_END }
 
 #define BLOCK_GRID_SIZE 25
@@ -91,7 +90,7 @@ typedef struct SwitchData {
 
 typedef struct ShatteringBlockData {
     /* 0x000 */ u16 fragmentFlags[25];
-    /* 0x034 */ Gfx** fragmentDisplayLists;
+    /* 0x034 */ void** fragmentDisplayLists;
     /* 0x038 */ f32 originalPosY;
     /* 0x03C */ s16 alpha;
     /* 0x03E */ s16 fadeOutCounter;
@@ -174,7 +173,7 @@ typedef struct WoodenCrateData {
     /* 0x000 */ s32 itemID;
     /* 0x004 */ u16 globalFlagIndex;
     /* 0x006 */ u8 unk_06[2];
-    /* 0x008 */ Gfx** fragmentsGfx;
+    /* 0x008 */ void** fragmentsGfx;
     /* 0x00C */ f32 basePosY;
     /* 0x010 */ s8 fragmentRebounds[36];
     /* 0x034 */ u8 fragmentMoveAngle[36]; // X,Z plane -- scaled to map [0,255] -> [0,360], also used as fragment alpha
@@ -266,7 +265,7 @@ typedef struct PadlockData {
 #define FRAGMENT_BUF_SIZE 13
 
 typedef struct BoardedFloorData {
-    /* 0x000 */ Gfx** fragmentsGfx;
+    /* 0x000 */ void** fragmentsGfx;
     /* 0x004 */ f32 inititalY;
     /* 0x008 */ s8 fragmentRebounds[FRAGMENT_BUF_SIZE];
     /* 0x015 */ u8 fragmentMoveAngle[FRAGMENT_BUF_SIZE];
@@ -281,7 +280,7 @@ typedef struct BoardedFloorData {
 } BoardedFloorData; // size = 0x150
 
 typedef struct BombableRockData {
-    /* 0x00 */ Gfx** fragmentsGfx;
+    /* 0x00 */ void** fragmentsGfx;
     /* 0x04 */ f32 inititalY;
     /* 0x08 */ s8 fragmentRebounds[6];
     /* 0x0E */ u8 fragmentMoveAngle[6];

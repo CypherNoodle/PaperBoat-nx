@@ -1,8 +1,9 @@
 #ifndef _COMMON_STRUCTS_H_
 #define _COMMON_STRUCTS_H_
 
+#undef __MACTYPES__
 #include "macros.h"
-#include "ultra64.h"
+#include <libultraship/libultraship.h>
 #include "types.h"
 #include "evt.h"
 #include "enums.h"
@@ -12,6 +13,11 @@ struct Evt;
 typedef ApiStatus(*ApiFunc)(struct Evt*, s32);
 
 typedef Bytecode EvtScript[];
+
+// Padded union types for 64-bit stride alignment in Evt varTable overlays
+typedef union { f32 f; intptr_t _pad; } EvtTempFloat;
+typedef union { bool b; intptr_t _pad; } EvtTempBool;
+typedef union { void* p; intptr_t _pad; } EvtVarPtr;
 
 typedef void NoArgCallback(void*);
 typedef void (*AuCallback)(void);
@@ -383,7 +389,7 @@ typedef struct Trigger {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s32 varIndex;
     /* 0x08 */ union {
-    /*      */     s32 colliderID;
+    /*      */     intptr_t colliderID;
     /*      */     struct BombTrigger* blast;
     /*      */ } location;
     /* 0x0C */ s32 (*onActivateFunc)(struct Trigger*);
@@ -391,8 +397,8 @@ typedef struct Trigger {
     /* 0x14 */ struct Evt* runningScript;
     /* 0x18 */ s32 priority;
     /* 0x1C */ union {
-    /*      */     s32 varTable[3];
-    /*      */     f32 varTableF[3];
+    /*      */     intptr_t varTable[3];
+    /*      */     EvtTempFloat varTableF[3];
     /*      */     void* varTablePtr[3];
     /*      */ };
     /* 0x28 */ s32* itemList;
@@ -408,7 +414,7 @@ typedef struct TriggerBlueprint {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 varIndex;
     /* 0x06 */ char unk_06[2];
-    /* 0x08 */ s32 colliderID;
+    /* 0x08 */ intptr_t colliderID;
     /* 0x0C */ s32 (*onActivateFunc)(struct Trigger*);
     /* 0x10 */ char unk_10[4];
     /* 0x14 */ s32 tattleMsg;
@@ -434,23 +440,24 @@ typedef struct Evt {
     /* 0x068 */ struct Evt* childScript;
     /* 0x06C */ struct Evt* parentScript; /* brother? */
     /* 0x070 */ union {
-    /*       */     s32 functionTemp[4];
-    /*       */     f32 functionTempF[4];
+    /*       */     intptr_t functionTemp[4];
+    /*       */     EvtTempFloat functionTempF[4];
     /*       */     void* functionTempPtr[4];
+    /*       */     EvtTempBool functionTempBool[4];
     /*       */ };
     /* 0x080 */ ApiFunc callFunction;
     /* 0x084 */ union {
-    /*       */     s32 varTable[16];
+    /*       */     Bytecode varTable[16];
     /*       */     f32 varTableF[16];
-    /*       */     void* varTablePtr[16];
+    /*       */     EvtVarPtr varTablePtr[16];
     /*       */ };
     /* 0x0C4 */ s32 varFlags[3];
-    /* 0x0D0 */ s32 loopStartTable[8];
-    /* 0x0F0 */ s32 loopCounterTable[8];
+    /*       */ Bytecode loopStartTable[8];
+    /*       */ Bytecode loopCounterTable[8];
     /* 0x110 */ s8 switchBlockState[8];
-    /* 0x118 */ s32 switchBlockValue[8];
+    /*       */ Bytecode switchBlockValue[8];
     /* 0x138 */ s32* buffer;
-    /* 0x13C */ s32* array;
+    /* 0x13C */ Bytecode* array;
     /* 0x140 */ s32* flagArray;
     /* 0x144 */ s32 id;
     /* 0x148 */ union {
@@ -566,12 +573,12 @@ typedef struct Entity {
     /* 0x12 */ s16 vertexSegment;
     /* 0x14 */ s16 virtualModelIndex;
     /* 0x16 */ s16 shadowIndex;
-    /* 0x18 */ s32* scriptReadPos;
+    /* 0x18 */ intptr_t* scriptReadPos;
     /* 0x1C */ EntityCallback updateScriptCallback;
     /* 0x20 */ EntityCallback updateMatrixOverride;
     /* 0x24 */ Evt* boundScript;
     /* 0x28 */ EvtScript* boundScriptBytecode;
-    /* 0x2C */ s32* savedReadPos[3];
+    /* 0x2C */ intptr_t* savedReadPos[3];
     /* 0x38 */ EntityBlueprint* blueprint;
     /* 0x3C */ void (*renderSetupFunc)(s32);
     /* 0x40 */ EntityData dataBuf;
@@ -864,7 +871,7 @@ typedef struct BattleStatus {
     /* 0x008 */ union {
     /*       */     s32 varTable[16];
     /*       */     f32 varTableF[16];
-    /*       */     void* varTablePtr[16];
+    /*       */     EvtVarPtr varTablePtr[16];
     /*       */ };
     /* 0x048 */ s8 curSubmenu;
     /* 0x049 */ s8 lastSelectedAbility;
@@ -1155,8 +1162,8 @@ typedef struct ItemEntity {
     /* 0x1E */ s16 spawnAngle; /* if < 0, a random screen-relative angle is chosen: left or right */
     /* 0x20 */ s16 shadowIndex;
     /* 0x22 */ char unk_22[2];
-    /* 0x24 */ s32* readPos;
-    /* 0x28 */ s32* savedReadPos;
+    /* 0x24 */ intptr_t* readPos;
+    /* 0x28 */ intptr_t* savedReadPos;
     /* 0x2C */ u8 lookupRasterIndex;
     /* 0x2D */ u8 lookupPaletteIndex;
     /* 0x2E */ u8 nextUpdate;
@@ -1165,9 +1172,9 @@ typedef struct ItemEntity {
     /* 0x34 */ Vec3s lastPos;
     /* 0x3A */ char unk_3A[2];
     /* 0x3C */ s32 sparkleNextUpdate;
-    /* 0x40 */ s32* sparkleReadPos;
+    /* 0x40 */ intptr_t* sparkleReadPos;
     /* 0x44 */ s32 sparkleUnk44;
-    /* 0x48 */ s32* sparkleSavedPos;
+    /* 0x48 */ intptr_t* sparkleSavedPos;
     /* 0x4C */ IMG_PTR sparkleRaster;
     /* 0x50 */ PAL_PTR sparklePalette;
     /* 0x54 */ s32 sparkleWidth;
@@ -1184,7 +1191,7 @@ typedef struct MessagePrintState {
     /* 0x000 */ u8* srcBuffer;
     /* 0x004 */ u16 printBufferPos;
     /* 0x006 */ char unk_06[2];
-    /* 0x008 */ s32 msgID;
+    /* 0x008 */ intptr_t msgID;
     /* 0x00C */ u16 srcBufferPos;
     /* 0x00E */ u16 curPrintDelay;
     /* 0x010 */ u8 printBuffer[PRINT_BUFFER_SIZE];
@@ -1234,7 +1241,7 @@ typedef struct MessagePrintState {
     /* 0x4FC */ s32 stateFlags;
     /* 0x500 */ s16 delayFlags; // ?
     /* 0x502 */ char unk_502[0x2];
-    /* 0x504 */ s32* closedWritebackBool; // if not null, writes 1 here when message closes
+    /* 0x504 */ bool* closedWritebackBool; // if not null, writes 1 here when message closes
     /* 0x508 */ u8 style;
     /* 0x509 */ u8 fadeInCounter;
     /* 0x50A */ Vec2s initOpenPos; // where the message originates from, in screen-space coords
@@ -1506,7 +1513,7 @@ typedef struct ItemEntityPhysicsData {
     /* 0x14 */ f32 velZ;
     /* 0x18 */ f32 moveAngle;
     /* 0x1C */ s32 timeLeft;
-    /* 0x20 */ b32 useSimplePhysics;
+    /* 0x20 */ bool useSimplePhysics;
 } ItemEntityPhysicsData; // size = 0x24
 
 typedef struct RenderTask {
@@ -1514,7 +1521,10 @@ typedef struct RenderTask {
     /* 0x04 */ s32 dist; /* value between 0 and -10k */
     /* 0x08 */ void* appendGfxArg;
     /* 0x0C */ void (*appendGfx)(void*);
-} RenderTask; // size = 0x10
+    /* 0x10 */ bool needsInterpolation;
+    /* 0x14 */ char* interpolationName;
+    /* 0x18 */ u32 interpolationTag;
+} RenderTask; // size = 0x38
 
 typedef struct SelectableTarget {
     /* 0x00 */ s16 actorID;
@@ -1543,7 +1553,7 @@ typedef struct ActorPartMovement {
     /* 0x4C */ union {
     /*      */     s32 varTable[16];
     /*      */     f32 varTableF[16];
-    /*      */     void* varTablePtr[16];
+    /*      */     EvtVarPtr varTablePtr[16];
     /*      */ };
 
 } ActorPartMovement; // size = 0x8C
@@ -1847,12 +1857,12 @@ typedef struct ActorState { // TODO: Make the first field of this an ActorMoveme
     /* 0x6C */ union {
     /*      */     s32 functionTemp[4];
     /*      */     f32 functionTempF[4];
-    /*      */     void* functionTempPtr[4];
+    /*      */     EvtVarPtr functionTempPtr[4];
     /*      */ };
     /* 0x7C */ union {
     /*      */     s32 varTable[16];
     /*      */     f32 varTableF[16];
-    /*      */     void* varTablePtr[16];
+    /*      */     EvtVarPtr varTablePtr[16];
     /*      */ };
 } ActorState; // size = 0xBC;
 
@@ -2055,6 +2065,53 @@ typedef struct PlayerStatus {
     /* 0x281 */ char unk_281[7];
 } PlayerStatus; // size = 0x288
 
+typedef struct SaveGlobals {
+    /* 0x00 */ char magicString[16];
+    /* 0x10 */ s8 pad[32];
+    /* 0x30 */ s32 crc1;
+    /* 0x34 */ s32 crc2;
+    /* 0x38 */ s32 useMonoSound;
+    /* 0x3C */ u32 lastFileSelected;
+    /* 0x40 */ u32 language;
+    /* 0x44 */ s8 reserved[60];
+} SaveGlobals; // size = 0x80
+
+typedef struct SaveMetadata {
+    /* 0x00 */ s32 timePlayed;
+    /* 0x04 */ u8 spiritsRescued;
+    /* 0x05 */ char unk_05[1];
+    /* 0x06 */ s8 level;
+    /* 0x07 */ unsigned char filename[8];
+    /* 0x0F */ char unk_0F[9];
+} SaveMetadata; // size = 0x18
+
+typedef struct SaveData {
+    /* 0x0000 */ char magicString[16];
+    /* 0x0010 */ s8 pad[32];
+    /* 0x0030 */ s32 crc1;
+    /* 0x0034 */ s32 crc2;
+    /* 0x0038 */ s32 saveSlot;
+    /* 0x003C */ s32 saveCount;
+    /* 0x0040 */ PlayerData player;
+    /* 0x0468 */ s16 areaID;
+    /* 0x046A */ s16 mapID;
+    /* 0x046C */ s16 entryID;
+    /* 0x046E */ char unk_46E[2];
+    /* 0x0470 */ s32 enemyDefeatFlags[60][12];
+    /* 0x0FB0 */ s32 globalFlags[64];
+    /* 0x10B0 */ s8 globalBytes[512];
+    /* 0x12B0 */ s32 areaFlags[8];
+    /* 0x12D0 */ s8 areaBytes[16];
+    /* 0x12E0 */ s8 debugEnemyContact;
+    /* 0x12E1 */ b8 debugUnused1;
+    /* 0x12E2 */ b8 debugUnused2;
+    /* 0x12E3 */ b8 musicEnabled;
+    /* 0x12E4 */ char unk_12E4[0x2];
+    /* 0x12E6 */ Vec3s savePos;
+    /* 0x12EC */ SaveMetadata metadata;
+    /* 0x1304 */ char unk_1304[0x7C];
+} SaveData; // size = 0x1380
+
 typedef struct Path {
     /* 0x00 */ s32 numVectors;
     /* 0x04 */ f32* lengths;
@@ -2131,12 +2188,12 @@ typedef struct WindowStyleCustom {
 } WindowStyleCustom; // size = 0x38;
 
 typedef union {
-    int defaultStyleID;
+    intptr_t defaultStyleID;
     WindowStyleCustom* customStyle;
 } WindowStyle TRANSPARENT_UNION;
 
 typedef union {
-    int i;
+    intptr_t i;
     void (*func)(s32 windowIndex, s32* flags, s32* posX, s32* posY, s32* posZ, f32* scaleX, f32* scaleY,
                                  f32* rotX, f32* rotY, f32* rotZ, s32* darkening, s32* opacity);
 } WindowUpdateFunc TRANSPARENT_UNION;
@@ -2177,7 +2234,7 @@ typedef struct {
 
 #if VERSION_JP
 #define DISPLAYCONTEXT_GFX_COUNT 0x2000
-#elif VERSION_IQUE
+#elif VERSION_IQUE || VERSION_PAL
 #define DISPLAYCONTEXT_GFX_COUNT 0x2200
 #else
 #define DISPLAYCONTEXT_GFX_COUNT 0x2080
@@ -2189,10 +2246,6 @@ typedef struct {
     /* 0x00030 */ Mtx camPerspMatrix[8]; // could only be length 4, unsure
     /* 0x00230 */ Gfx mainGfx[DISPLAYCONTEXT_GFX_COUNT];
     /* 0x10630 */ Gfx backgroundGfx[0x200]; // used by gfx_task_background
-#if VERSION_PAL
-    // TODO: find where this space belongs to
-    s32 pad[0x300];
-#endif
     /* 0x11630 */ Mtx matrixStack[0x200];
 } DisplayContext; // size = 0x19630
 
@@ -2447,12 +2500,12 @@ typedef struct CreditsPairOffset {
 } CreditsPairOffset; // size = 0x4
 
 typedef struct PartnerDMAData {
-    /* 0x00 */ u32 dmaStart;
-    /* 0x04 */ u32 dmaEnd;
-    /* 0x08 */ void* dmaDest;
-    /* 0x0C */ struct ActorBlueprint* ActorBlueprint;
-    /* 0x10 */ s32 y;
-} PartnerDMAData; // size = 0x14
+    /* 0x00 */ uintptr_t dmaStart;
+    /* 0x08 */ uintptr_t dmaEnd;
+    /* 0x10 */ void* dmaDest;
+    /* 0x18 */ struct ActorBlueprint* ActorBlueprint;
+    /* 0x20 */ s32 y;
+} PartnerDMAData; // size = 0x28
 
 typedef struct MsgVoice {
     /* 0x00 */ s32 voiceA;

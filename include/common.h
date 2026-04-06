@@ -1,19 +1,37 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include <string.h>
+#include <math.h>
+
 #include "ultra64.h"
 #include "gbi_custom.h"
 #include "types.h"
 #include "common_structs.h"
 #include "functions.h"
+#ifndef NO_EXTERN_VARIABLES
 #include "variables.h"
+#endif
 #include "macros.h"
 #include "enums.h"
 #include "evt.h"
 #include "messages.h"
+#include "effect_aliases.h"
 #include "battle/battle_names.h"
 #include "battle/stage_names.h"
 #include "battle/actor_types.h"
 #include "dx/debug_menu.h"
+#include "port/hooks/Events.h"
+#include <libultraship/bridge.h>
+#include "port/ui/cvar_prefixes.h"
+#include "port/interpolation/FrameInterpolation.h"
+
+#ifdef PERMUTER
+extern int TEXEL0, TEXEL1, PRIMITIVE, PRIMITIVE_ALPHA;
+#endif
+
+#ifdef _WIN32
+void bcopy(const void* src, void* dest, size_t n);
+#endif
 
 #endif

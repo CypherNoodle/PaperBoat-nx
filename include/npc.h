@@ -10,12 +10,12 @@ extern "C" {
 #endif
 
 // battle and stage are optional in overloaded NPC_GROUP macros
-#define NPC_GROUP(args...) VFUNC(NPC_GROUP, args)
+#define NPC_GROUP(...) VFUNC(NPC_GROUP, __VA_ARGS__)
 #define NPC_GROUP1(npcs)                { sizeof(npcs) / sizeof(NpcData), (NpcData*) &npcs, 0, 0 }
 #define NPC_GROUP2(npcs, battle)        { sizeof(npcs) / sizeof(NpcData), (NpcData*) &npcs, battle, 0 }
 #define NPC_GROUP3(npcs, battle, stage) { sizeof(npcs) / sizeof(NpcData), (NpcData*) &npcs, battle, stage + 1 }
 
-#define NPC_GROUP_EXPLICIT_SIZE(args...) VFUNC(NPC_GROUP_EXPLICIT_SIZE, args)
+#define NPC_GROUP_EXPLICIT_SIZE(...) VFUNC(NPC_GROUP_EXPLICIT_SIZE, __VA_ARGS__)
 #define NPC_GROUP_EXPLICIT_SIZE3(npcs, start, count)                { count, (NpcData*) &npcs[start], 0, 0 }
 #define NPC_GROUP_EXPLICIT_SIZE4(npcs, start, count, battle)        { count, (NpcData*) &npcs[start], battle, 0 }
 #define NPC_GROUP_EXPLICIT_SIZE5(npcs, start, count, battle, stage) { count, (NpcData*) &npcs[start], battle, stage + 1 }
@@ -325,7 +325,7 @@ typedef struct Enemy {
     /* 0x6C */ union {
     /*      */      s32 varTable[16];
     /*      */      f32 varTableF[16];
-    /*      */      void* varTablePtr[16];
+    /*      */      EvtVarPtr varTablePtr[16];
     /*      */ };
     /* 0xAC */ u8 aiDetectFlags; // detect player flags: 1 = require line of sight | 2 = adjust hitbox for moving player
     /* 0xAD */ char unk_AD[3];
