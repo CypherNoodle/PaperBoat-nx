@@ -91,10 +91,7 @@ BSS s32 D_8029FBD8_pad[2];
 BSS ActionCommandStatus gActionCommandStatus;
 
 API_CALLABLE(LoadActionCommand) {
-    Bytecode* args = script->ptrReadPos;
-    s32 cmd = evt_get_variable(script, *args++);
-
-    dma_copy(actionCommandDmaTable[cmd * 3 + 0], actionCommandDmaTable[cmd * 3 + 1], actionCommandDmaTable[cmd * 3 + 2]);
+    // DMA loading not needed on port — action commands are compiled in
     return ApiStatus_DONE2;
 }
 

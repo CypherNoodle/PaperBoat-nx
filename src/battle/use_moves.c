@@ -102,8 +102,8 @@ API_CALLABLE(LoadMoveScript) {
     BattleStatus* battleStatus = &gBattleStatus;
     BattleMoveEntry* moveTableEntry = &gMoveScriptTable[battleStatus->selectedMoveID];
 
-    dma_copy(moveTableEntry->romStart, moveTableEntry->romEnd, moveTableEntry->vramStart);
-    script->varTablePtr[0] = moveTableEntry->mainScript;
+    // DMA loading not needed on port — move scripts are compiled in
+    script->varTablePtr[0].p = moveTableEntry->mainScript;
 
     deduct_current_move_fp();
 

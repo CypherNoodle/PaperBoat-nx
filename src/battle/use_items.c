@@ -154,9 +154,8 @@ API_CALLABLE(LoadItemScript) {
         }
     }
 
-    dma_copy(gBattleItemTable[i].romStart, gBattleItemTable[i].romEnd, gBattleItemTable[i].vramStart);
-
-    script->varTablePtr[0] = gBattleItemTable[i].mainScript;
+    // DMA loading not needed on port — item scripts are compiled in
+    script->varTablePtr[0].p = gBattleItemTable[i].mainScript;
     script->varTable[1] = false;
 
     return ApiStatus_DONE2;
@@ -194,8 +193,8 @@ API_CALLABLE(LoadMysteryItemScript) {
         }
     }
 
-    dma_copy(gBattleItemTable[i].romStart, gBattleItemTable[i].romEnd, gBattleItemTable[i].vramStart);
-    script->varTablePtr[0] = gBattleItemTable[i].mainScript;
+    // DMA loading not needed on port — item scripts are compiled in
+    script->varTablePtr[0].p = gBattleItemTable[i].mainScript;
     script->varTable[1] = true;
     return ApiStatus_DONE2;
 }

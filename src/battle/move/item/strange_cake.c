@@ -3,7 +3,7 @@
 #include "effects.h"
 #include "hud_element.h"
 #include "sprite/player.h"
-#include "include_asset.h"
+#include "assets/battle.h"
 
 #define NAMESPACE battle_item_strange_cake
 
@@ -11,17 +11,7 @@
 #include "battle/common/move/UseItem.inc.c"
 
 
-#include "battle/move/item/strange_cake1.png.h"
-INCLUDE_IMG("battle/move/item/strange_cake1.png", battle_item_strange_cake1_png);
-INCLUDE_PAL("battle/move/item/strange_cake1.pal", battle_item_strange_cake1_pal);
-
-#include "battle/move/item/strange_cake2.png.h"
-INCLUDE_IMG("battle/move/item/strange_cake2.png", battle_item_strange_cake2_png);
-INCLUDE_PAL("battle/move/item/strange_cake2.pal", battle_item_strange_cake2_pal);
-
-#include "battle/move/item/strange_cake3.png.h"
-INCLUDE_IMG("battle/move/item/strange_cake3.png", battle_item_strange_cake3_png);
-INCLUDE_PAL("battle/move/item/strange_cake3.pal", battle_item_strange_cake3_pal);
+// strange_cake textures loaded from OTR via assets/battle.h
 
 HudScript N(D_802A27D0) = HES_TEMPLATE_CI_ENUM_SIZE(battle_item_strange_cake1, 32, 32);
 HudScript N(D_802A27F8) = HES_TEMPLATE_CI_ENUM_SIZE(battle_item_strange_cake2, 32, 32);

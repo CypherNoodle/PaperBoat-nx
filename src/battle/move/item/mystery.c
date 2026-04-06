@@ -3,7 +3,7 @@
 #include "effects.h"
 #include "entity.h"
 #include "ld_addrs.h"
-#include "include_asset.h"
+#include "assets/battle.h"
 
 #define NAMESPACE battle_item_mystery
 
@@ -12,9 +12,7 @@
 #include "battle/common/move/UseItem.inc.c"
 
 
-#include "battle/move/item/mystery.png.h"
-INCLUDE_IMG("battle/move/item/mystery.png", battle_item_mystery_png);
-INCLUDE_PAL("battle/move/item/mystery.pal", battle_item_mystery_pal);
+// mystery textures loaded from OTR via assets/battle.h
 
 Vtx N(model)[] = {
     { .v = {{ -16, -16, 0 }, false, { 0,    0    }, { 0, 0, 0, 255 }}},
@@ -35,7 +33,8 @@ Gfx N(displayList)[] = {
     gsDPSetTextureConvert(G_TC_FILT),
     gsDPSetTextureLUT(G_TT_RGBA16),
     gsDPLoadTLUT_pal16(0, battle_item_mystery_pal),
-    gsDPLoadTextureTile_4b(battle_item_mystery_png, G_IM_FMT_CI, battle_item_mystery_png_width, battle_item_mystery_png_height, 0, 0, battle_item_mystery_png_width - 1, battle_item_mystery_png_height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD),
+    // dimensions are overridden at runtime by the interpreter using OTR texture metadata
+    gsDPLoadTextureTile_4b(battle_item_mystery_png, G_IM_FMT_CI, 32, 32, 0, 0, 31, 31, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD),
     gsSPClearGeometryMode(G_LIGHTING),
     gsSPClearGeometryMode(G_SHADING_SMOOTH),
     gsSPVertex(N(model), ARRAY_COUNT(N(model)), 0),

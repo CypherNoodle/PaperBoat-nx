@@ -556,6 +556,7 @@ void btl_render_actors(void) {
     Actor* actor;
     s32 i;
 
+    renderTaskPtr->needsInterpolation = true;
     renderTaskPtr->interpolationName = "render_actors";
 
     if (gBattleState != BATTLE_STATE_NONE) {

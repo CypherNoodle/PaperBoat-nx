@@ -704,7 +704,9 @@ void deduct_current_move_fp(void) {
         }
     }
 
-    playerData->curFP -= fpCost;
+    CALL_CANCELLABLE_EVENT(PlayerFPDeduct, fpCost) {
+        playerData->curFP -= fpCost;
+    }
 }
 
 void reset_actor_turn_info(void) {
@@ -1415,7 +1417,8 @@ Actor* create_actor(Formation formation) {
     DecorationTable* decorations;
     s32 i, j, k;
 
-    if (formation->home.index >= EVT_LIMIT) {
+    // 64-bit: pointer values in home.vec read as large integers via home.index, so bounds-check instead of >= EVT_LIMIT
+    if (formation->home.index >= 0 && formation->home.index <= BTL_POS_CENTER) {
         x = StandardActorHomePositions[formation->home.index].x;
         y = StandardActorHomePositions[formation->home.index].y;
         z = StandardActorHomePositions[formation->home.index].z;

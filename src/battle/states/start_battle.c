@@ -1,6 +1,8 @@
 #include "states.h"
 #include "model.h"
 #include "script_api/battle.h"
+#include "port/Engine.h"
+#include "port/shape_loader.h"
 
 extern ShapeFile gMapShapeData;
 extern StageListRow* gCurrentStagePtr;
@@ -23,21 +25,25 @@ enum {
 BSS s32 BattleEnemiesCreated;
 
 void load_stage_assets(Stage* stage) {
-    void* compressedAsset;
     ModelNode* rootModel;
-    s32 texturesOffset;
-    s32 size;
 
-    compressedAsset = load_asset_by_name(stage->shape, &size);
-    decode_yay0(compressedAsset, &gMapShapeData);
-    general_heap_free(compressedAsset);
-
-    ASSERT(size <= 0x8000);
+    {
+        char shapeAssetPath[64];
+        snprintf(shapeAssetPath, sizeof(shapeAssetPath), "__OTR__shapes/%s", stage->shape);
+        u8* shapeData = (u8*)ResourceGetDataByName(shapeAssetPath);
+        size_t shapeSize = ResourceGetSizeByName(shapeAssetPath);
+        Shape_LoadFromRawData(&gMapShapeData, shapeData, shapeSize, stage->shape);
+    }
 
     rootModel = gMapShapeData.header.root;
-    texturesOffset = get_asset_offset(stage->texture, &size);
-    if (rootModel != nullptr) {
-        load_data_for_models(rootModel, texturesOffset, size);
+    {
+        char texAssetPath[64];
+        snprintf(texAssetPath, sizeof(texAssetPath), "__OTR__textures/%s", stage->texture);
+        u8* textureData = (u8*)ResourceGetDataByName(texAssetPath);
+        size_t textureSize = ResourceGetSizeByName(texAssetPath);
+        if (rootModel != nullptr) {
+            load_data_for_models(rootModel, textureData, textureSize);
+        }
     }
     load_battle_hit_asset(stage->hit);
 
