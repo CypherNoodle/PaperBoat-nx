@@ -26,7 +26,7 @@
 #define DX_SKIP_STORY 1
 
 /// Skips the demo reel playing while waiting for the player to 'Press Start'.
-#define DX_SKIP_DEMO 1
+#define DX_SKIP_DEMO 0
 
 /// Map to load when starting a new game.
 #define NEW_GAME_MAP_ID "kmr_20"
@@ -39,7 +39,8 @@
 
 /// Enables the profiler, which shows lots of performance info on screen.
 /// Press L + D-Pad Up to show/hide the profiler.
-#define USE_PROFILER 1
+/// Disabled on port — relies on N64 hardware cycle counters and RDP registers.
+#define USE_PROFILER 0
 
 /// Skip laggy blur operations when opening the pause menu on emulator
 #define DX_PAUSE_LAG_FIX 1

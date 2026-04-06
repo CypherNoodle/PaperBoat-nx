@@ -45,7 +45,8 @@ extern CollisionData gCollisionData;
 extern CollisionData gZoneCollisionData;
 extern EncounterStatus gCurrentEncounter;
 
-// Save Data (from main_post_bss.c)
+// Save Data (types defined in dx/versioning.h)
+#include "dx/versioning.h"
 extern SaveData gCurrentSaveFile;
 extern SaveGlobals gSaveGlobals;
 
@@ -54,7 +55,7 @@ extern Window gWindows[64];
 extern ScreenOverlay ScreenOverlays[2];
 extern TextureHandle TextureHandles[128];
 extern MusicControlData gMusicControlData[2];
-extern DisplayContext D_80164000[2];
+extern DisplayContext DisplayContexts[2];
 
 // Camera (from main_post_bss.c)
 extern Camera gCameras[4];
@@ -146,7 +147,7 @@ void init_game_globals(void) {
   mem_clear(ScreenOverlays, sizeof(ScreenOverlays));
   mem_clear(TextureHandles, sizeof(TextureHandles));
   mem_clear(gMusicControlData, sizeof(gMusicControlData));
-  mem_clear(D_80164000, sizeof(D_80164000));
+  mem_clear(DisplayContexts, sizeof(DisplayContexts));
 
   // Camera
   mem_clear(gCameras, sizeof(gCameras));

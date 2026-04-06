@@ -14,7 +14,7 @@ EventID EventSystem::RegisterEvent(const char *name) {
 }
 
 ListenerID EventSystem::RegisterListener(EventID id, EventCallback callback,
-                                         EventPriority priority,
+                                         PortEventPriority priority,
                                          const char *file, int line) {
   if (id == -1) {
     throw std::runtime_error(
@@ -71,7 +71,7 @@ extern "C" EventID EventSystem_RegisterEvent(const char *name) {
 
 extern "C" ListenerID EventSystem_RegisterListener(EventID id,
                                                    EventCallback callback,
-                                                   EventPriority priority,
+                                                   PortEventPriority priority,
                                                    const char *file, int line) {
   return EventSystem::Instance->RegisterListener(id, callback, priority, file,
                                                  line);

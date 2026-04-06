@@ -14,7 +14,10 @@
 #endif
 
 /// Toggle this define to enable verbose graphics profiling.
+/// Requires USE_PROFILER — relies on MIPS mfc0 asm for cycle counting.
+#if USE_PROFILER
 #define GFX_PROFILING
+#endif
 
 #define OS_GET_COUNT_INLINE(x) asm volatile("mfc0 %0, $9" : "=r"(x): )
 
@@ -115,7 +118,7 @@ enum ProfilerDeltaTime {
 #define PROFILER_DELTA_PUPPYPRINT2 0
 #endif
 
-#ifdef USE_PROFILER
+#if USE_PROFILER
 typedef struct {
     u32 counts[PROFILING_BUFFER_SIZE];
     u32 total;
@@ -162,6 +165,8 @@ static ALWAYS_INLINE void profiler_rsp_yielded() {
 #define profiler_rsp_resumed()
 #define profiler_audio_started()
 #define profiler_audio_completed()
+#define profiler_gfx_started()
+#define profiler_gfx_completed()
 #define profiler_rsp_yielded()
 #define profiler_collision_reset()
 #define profiler_collision_completed()
