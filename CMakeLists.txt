@@ -9,6 +9,7 @@ project(Paperboat
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_EXTENSIONS ON)  # Enable GNU extensions (gnu99)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 include(cmake/paperboat-cvars.cmake)
 include(cmake/lus-cvars.cmake)
