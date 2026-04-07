@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern Addr action_cmd_air_lift_BSS_END;
 extern Addr action_cmd_air_lift_BSS_SIZE;
 extern Addr action_cmd_air_lift_BSS_START;
@@ -17352,5 +17356,9 @@ extern Addr world_use_item_TEXT_START;
 extern Addr world_use_item_VRAM;
 extern Addr world_use_item_VRAM_END;
 extern Addr world_use_item_bss_VRAM;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,6 +9,11 @@
 #include "../common.h"
 #include "macros.h"
 
+// battle.cpp is pulling windows.h and conflicting with PlaySound
+#ifdef _WIN32
+#undef PlaySound
+#endif
+
 #ifdef _LANGUAGE_C_PLUS_PLUS
 extern "C" {
 #endif

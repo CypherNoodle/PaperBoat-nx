@@ -6,7 +6,7 @@
 #define SHIFT_BSS
 #define BSS
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 #define TRANSPARENT_UNION
 #define ALIGNED(x) __declspec(align(x))
 #else

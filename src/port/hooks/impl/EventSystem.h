@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stddef.h>
 
 typedef int32_t EventID;
 typedef uint32_t ListenerID;
