@@ -433,6 +433,7 @@ void spr_draw_component(s32 drawOpts, SpriteComponent* component, SpriteAnimComp
     f32 rotX, rotY, rotZ;
     f32 inX, inY, inZ;
 
+    FrameInterpolation_RecordOpenChild("sprite_component", (uintptr_t)component);
     if (component->initialized && component->curRaster != -1) {
         rotX = SpriteCurBaseRot[0];
         rotY = SpriteCurBaseRot[1];
@@ -463,6 +464,7 @@ void spr_draw_component(s32 drawOpts, SpriteComponent* component, SpriteAnimComp
         );
         component->imgfxIdx = CurSpriteImgFX;
     }
+    FrameInterpolation_RecordCloseChild();
 }
 
 s32 spr_unpack_signed_12bit(u16 val) {

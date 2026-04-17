@@ -46,9 +46,6 @@ void guMtxCatF(float m[4][4], float n[4][4], float r[4][4]) {
       }
     }
   }
-
-  // @port: Review this
-  FrameInterpolation_RecordMatrixMtxFToMtx(m, (Mtx *)m);
 }
 
 void guScaleF(float mf[4][4], float x, float y, float z) {

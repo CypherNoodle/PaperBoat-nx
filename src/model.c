@@ -4722,6 +4722,9 @@ RenderTask* queue_render_task(RenderTask* task) {
     ret->appendGfxArg = task->appendGfxArg;
     ret->appendGfx = task->appendGfx;
     ret->dist = dist;
+    ret->needsInterpolation = task->needsInterpolation;
+    ret->interpolationName = task->interpolationName;
+    ret->interpolationTag = task->interpolationTag;
 
     return ret;
 }
@@ -4765,9 +4768,11 @@ OPTIMIZE_OFAST void execute_render_tasks(void) {
         Mtx* dispMtx;
         Gfx* savedGfxPos = nullptr;
 
+        FrameInterpolation_RecordOpenChild("floor_reflection_flipY", 0);
         guScaleF(mtxFlipY, 1.0f, -1.0f, 1.0f);
         guMtxF2L(mtxFlipY, &gDisplayContext->matrixStack[gMatrixListPos]);
         dispMtx = &gDisplayContext->matrixStack[gMatrixListPos++];
+        FrameInterpolation_RecordCloseChild();
         for (j = 0; j < NUM_RENDER_TASK_LISTS; j++) {
             for (i = 0; i < RenderTaskCount[j]; i++) {
                 task = &RenderTaskLists[j][sorteds[j][i]];
@@ -4777,7 +4782,9 @@ OPTIMIZE_OFAST void execute_render_tasks(void) {
                     savedGfxPos = gMainGfxPos++;
                 }
 
+                FrameInterpolation_RecordOpenChild("render_task", (uintptr_t)task->appendGfxArg);
                 appendGfx(task->appendGfxArg);
+                FrameInterpolation_RecordCloseChild();
 
                 if (task->renderMode & RENDER_TASK_FLAG_REFLECT_FLOOR) {
                     gSPEndDisplayList(gMainGfxPos++);
@@ -4794,7 +4801,9 @@ OPTIMIZE_OFAST void execute_render_tasks(void) {
             for (i = 0; i < RenderTaskCount[j]; i++) {
                 task = &RenderTaskLists[j][sorteds[j][i]];
                 appendGfx = task->appendGfx;
+                FrameInterpolation_RecordOpenChild("render_task", (uintptr_t)task->appendGfxArg);
                 appendGfx(task->appendGfxArg);
+                FrameInterpolation_RecordCloseChild();
             }
         }
     }

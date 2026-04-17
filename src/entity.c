@@ -341,6 +341,7 @@ void render_entities(void) {
             }
 
             if (!(entity->flags & ENTITY_FLAG_HIDDEN)) {
+                FrameInterpolation_RecordOpenChild("entity", (uintptr_t)entity);
                 if (entity->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL) {
                     if (D_8014AFB0 == 255) {
                         if (entity->renderSetupFunc != nullptr) {
@@ -391,6 +392,7 @@ void render_entities(void) {
                                                entity->gfxBaseAddr);
                     }
                 }
+                FrameInterpolation_RecordCloseChild();
             }
         }
     }
@@ -413,6 +415,7 @@ void render_shadows(void) {
                     }
                 }
             } else if (shadow->flags & ENTITY_FLAG_HAS_ANIMATED_MODEL) {
+                FrameInterpolation_RecordOpenChild("shadow", (uintptr_t)shadow);
                 if (shadow->vertexArray == nullptr) {
                     render_animated_model(shadow->entityModelID, &shadow->transformMatrix, TAG_SHADOW(i, shadow));
                 } else {
@@ -422,7 +425,9 @@ void render_shadows(void) {
                                   shadow->vertexArray,
                                   TAG_SHADOW(i, shadow));
                 }
+                FrameInterpolation_RecordCloseChild();
             } else {
+                FrameInterpolation_RecordOpenChild("shadow", (uintptr_t)shadow);
                 if (shadow->flags & ENTITY_FLAG_FADING_AWAY) {
                     shadow->alpha -= 20;
                     if (shadow->alpha <= 20) {
@@ -440,6 +445,7 @@ void render_shadows(void) {
                                            shadow->vertexSegment,
                                            shadow->vertexArray);
                 }
+                FrameInterpolation_RecordCloseChild();
             }
         }
     }
