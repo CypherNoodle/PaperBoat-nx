@@ -30,7 +30,7 @@ typedef struct MapSettings {
     /* 0x34 */ char unk_34[4];
     /* 0x38 */ BackgroundHeader* background;
     /* 0x3C */ union {
-        s32 msgID;
+        intptr_t msgID;
         s32 (*get)(void);
     } tattle;
 } MapSettings; // size = 0x40

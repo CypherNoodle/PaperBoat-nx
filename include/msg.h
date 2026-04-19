@@ -2,6 +2,11 @@
 
 #include "common.h"
 
+// True if the value is a pointer to inline message bytes (or a function
+// pointer to a tattle lookup) rather than a packed section/index msgID.
+// MsgIDs fit in (section << 16) | index, well below 0x01000000.
+#define MSG_ID_IS_PTR(id) ((uintptr_t)(id) > 0x01000000)
+
 #ifdef _LANGUAGE_C_PLUS_PLUS
 extern "C" {
 #endif
