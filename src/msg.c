@@ -2065,6 +2065,8 @@ void msg_update_rewind_arrow(s32 printerIndex) {
         }
     }
 
+    FrameInterpolation_RecordOpenChild("msg_star", (uintptr_t)printer);
+
     guTranslateF(sp18, printer->rewindArrowPos.x + 12, -(printer->rewindArrowPos.y + 12), 0);
     if (angle != 0.0) {
         guRotateF(sp58, angle, 0, 0, 1.0f);
@@ -2081,6 +2083,8 @@ void msg_update_rewind_arrow(s32 printerIndex) {
     gDPLoadMultiTile_4b(gMainGfxPos++, ui_msg_star_silhouette_png, 0x0100, 1, G_IM_FMT_I, 16, 0, 0, 0, 15, 18, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 4, 5, G_TX_NOLOD, G_TX_NOLOD);
     gSPVertex(gMainGfxPos++, gRewindArrowQuad, 4, 0);
     gSP2Triangles(gMainGfxPos++, 0, 2, 1, 0, 1, 2, 3, 0);
+
+    FrameInterpolation_RecordCloseChild();
 }
 
 void msg_draw_rewind_arrow(s32 printerIndex) {
