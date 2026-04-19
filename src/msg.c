@@ -1,18 +1,13 @@
 #include "common.h"
 #include "ld_addrs.h"
 #include "message_ids.h"
+#include "msg.h"
 #include "sprite.h"
 
 #include "port/Engine.h"
 #include "assets/charset.h"
 #include "assets/messages.h"
 #include "assets/ui.h"
-
-// On N64, KSEG0 pointers (0x80xxxxxx) are negative as s32, so the original code
-// used sign checks to distinguish message IDs from buffer pointers passed as intptr_t.
-// On 64-bit, heap pointers are always positive, breaking that convention.
-// Valid message IDs are (section << 16 | index) and never exceed 0x01000000.
-#define MSG_ID_IS_PTR(id) ((uintptr_t)(id) > 0x01000000)
 
 enum RewindArrowStates {
     REWIND_ARROW_STATE_INIT = 0,

@@ -3,6 +3,7 @@
 #include "goombario.h"
 #include "world/partners.h"
 #include "message_ids.h"
+#include "msg.h"
 #include "entity.h"
 
 #define NAMESPACE world_goombario
@@ -216,7 +217,7 @@ s32 N(can_open_menus)(Npc* goombario) {
 API_CALLABLE(N(SelectTattleMsg)) {
     PlayerStatus* playerStatus = &gPlayerStatus;
     Npc* goombario = script->owner2.npc;
-    s32 msgID;
+    intptr_t msgID;
     s32 entityType;
     s32 npcMsgID;
     s32 enemyTattleMsg;
@@ -399,7 +400,7 @@ API_CALLABLE(N(SelectTattleMsg)) {
             if (msgID == MSG_NONE) {
                 msgID = get_current_map_settings()->tattle.msgID;
                 if (msgID != 0) {
-                    if (msgID < EVT_LIMIT) {
+                    if (MSG_ID_IS_PTR(msgID)) {
                         // map uses a get_tattle function
                         script->VAR_MSG = ((s32(*)(void))msgID)();
                     } else {
@@ -418,7 +419,7 @@ API_CALLABLE(N(SelectTattleMsg)) {
         case USE_TATTLE_FORCE_MAP:
             msgID = get_current_map_settings()->tattle.msgID;
             if (msgID != 0) {
-                if (msgID < EVT_LIMIT) {
+                if (MSG_ID_IS_PTR(msgID)) {
                     script->VAR_MSG = ((s32(*)(void))msgID)();
                 } else {
                     script->VAR_MSG = msgID;
