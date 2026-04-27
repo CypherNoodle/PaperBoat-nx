@@ -2014,7 +2014,7 @@ void make_flash_palettes(ActorPart* part) {
             dest = decorations->copiedPalettes[1][i];
 
             for (j = 0; j < SPR_PAL_SIZE; j++) {
-                *dest = *src | 0xFFFE; // pure white, not affecting alpha bit
+                *dest = *src | 0xFEFF; // pure white, preserve alpha bit (BE RGBA5551 read as LE u16 → alpha at bit 8)
                 src++;
                 dest++;
 
