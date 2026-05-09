@@ -41,6 +41,24 @@ enum MseqCommand {
     MSEQ_CMD_SUB_69_SET_RESUMABLE   = 0x69,
 };
 
+// Build/compare AmbVoiceStateInfo via its struct fields. The original code
+// packed `info.all` with shifts (trackIdx << 16, tune << 8) that assume BE
+// byte ordering of the union; on the LE port host those shifts land in the
+// wrong fields, which corrupts trackIndex/tune on save/restore and breaks the
+// (info.all & 0xFFFF0000) == voiceSelector player+track masks.
+static inline s32 amb_voice_id(u8 playerIndex, u8 trackIndex, u8 tune) {
+    AmbVoiceStateInfo v;
+    v.all = 0;
+    v.playerIndex = playerIndex;
+    v.trackIndex = trackIndex;
+    v.tune = tune;
+    return v.all;
+}
+
+static inline bool amb_voice_match_pt(AmbVoiceStateInfo info, u8 playerIndex, u8 trackIndex) {
+    return info.playerIndex == playerIndex && info.trackIndex == trackIndex;
+}
+
 void au_mseq_manager_init(AmbienceManager* manager, s8 priority, s8 busID, AuGlobals* globals) {
     AmbiencePlayer* player;
     s32 i;
@@ -401,11 +419,10 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                 track->tuneLerp.current = track->tuneLerp.goal << 16;
             }
 
-            voiceSelector = player->id.all + (trackIdx << 16);
             for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                 voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
                 // update all voices belonging to current track
-                if ((voiceState->info.all & 0xFFFF0000) == voiceSelector) {
+                if (amb_voice_match_pt(voiceState->info, player->id.playerIndex, trackIdx)) {
                     voice = &globals->voices[i];
                     if (voice->priority == manager->priority && trackIdx != TRACK_ID_DRUM) {
                         voice->pitchRatio = au_compute_pitch_ratio(voiceState->pitch + (track->tuneLerp.current >> 16)) * track->instrument->pitchRatio;
@@ -428,11 +445,10 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                 track->volumeLerp.current = track->volumeLerp.goal << 16;
             }
 
-            voiceSelector = player->id.all + (trackIdx << 16);
             for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                 voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
                 // update all voices belonging to current track
-                if ((voiceState->info.all & 0xFFFF0000) == voiceSelector) {
+                if (amb_voice_match_pt(voiceState->info, player->id.playerIndex, trackIdx)) {
                     voice = &globals->voices[i];
                     if (voice->priority == manager->priority) {
                         track = &player->tracks[voiceState->info.trackIndex];
@@ -478,7 +494,7 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                 case MSEQ_CMD_80_STOP_SOUND:
                     // arg1: sound index
                     if (player->playState == MSEQ_PLAYER_PLAYING) {
-                        voiceSelector = player->id.all + (trackIdx << 16) + (arg1 << 8);
+                        voiceSelector = amb_voice_id(player->id.playerIndex, trackIdx, arg1);
                         for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                             if (manager->voiceStates[i - player->firstVoiceIdx].info.all == voiceSelector) {
                                 manager->voiceStates[i - player->firstVoiceIdx].info.released = true;
@@ -527,7 +543,7 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                             isPitchChanged[i - player->firstVoiceIdx] = true;
                             voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
                             // set playerIndex, trackIndex and tune
-                            voiceState->info.all = player->id.all + (trackIdx << 16) + (arg1 << 8);
+                            voiceState->info.all = amb_voice_id(player->id.playerIndex, trackIdx, arg1);
                             if (track->flags & MSEQ_TRACK_RESUMABLE) {
                                 voiceState->isResumable = true;
                             } else {
@@ -574,10 +590,9 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                     // lower 7 bits: value
                     if (arg1 & 0x80) {
                         track->pan = arg1 & 0x7F;
-                        voiceSelector = player->id.all + (trackIdx << 16);
                         for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                             voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
-                            if ((voiceState->info.all & 0xFFFF0000) == voiceSelector) {
+                            if (amb_voice_match_pt(voiceState->info, player->id.playerIndex, trackIdx)) {
                                 voice = &globals->voices[i];
                                 if (voice->priority == manager->priority && trackIdx != TRACK_ID_DRUM) {
                                     voice->pan = track->pan;
@@ -590,10 +605,9 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                         if (track->volumeLerp.current != 0) {
                             track->volumeLerp.current |= 0xFFFFFF;
                         }
-                        voiceSelector = player->id.all + (trackIdx << 16);
                         for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                             voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
-                            if ((voiceState->info.all & 0xFFFF0000) == voiceSelector) {
+                            if (amb_voice_match_pt(voiceState->info, player->id.playerIndex, trackIdx)) {
                                 voice = &globals->voices[i];
                                 if (voice->priority == manager->priority) {
                                     voice->clientVolume = VOL_MULT_3(player->fadeVolume >> 24, track->volumeLerp.current >> 16, voiceState->volume);
@@ -660,10 +674,9 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
                     // arg1: coarse tune
                     // arg2: fine tune
                     track->tuneLerp.current = (arg1 << 24) + (au_mseq_read_next(player) << 16);
-                    voiceSelector = player->id.all + (trackIdx << 16);
                     for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
                         voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
-                        if ((voiceState->info.all & 0xFFFF0000) == voiceSelector) {
+                        if (amb_voice_match_pt(voiceState->info, player->id.playerIndex, trackIdx)) {
                             voice = &globals->voices[i];
                             if (voice->priority == manager->priority && trackIdx != TRACK_ID_DRUM) {
                                 voice->pitchRatio = au_compute_pitch_ratio(voiceState->pitch + (track->tuneLerp.current >> 16)) * track->instrument->pitchRatio;
@@ -682,7 +695,7 @@ void au_mseq_player_update(AmbienceManager* manager, AmbiencePlayer* player) {
         for (i = player->firstVoiceIdx; i < player->lastVoiceIdx; i++) {
             voiceState = &manager->voiceStates[i - player->firstVoiceIdx];
             // update all voices belonging to this player
-            if ((voiceState->info.all & 0xFF000000) == player->id.all) {
+            if (voiceState->info.playerIndex == player->id.playerIndex) {
                 voice = &globals->voices[i];
                 if (voice->priority == manager->priority && !isVolumeChanged[i - player->firstVoiceIdx]) {
                     track = &player->tracks[voiceState->info.trackIndex];
@@ -776,7 +789,7 @@ void au_mseq_restore_voices(AmbienceManager* manager, AmbiencePlayer* player) {
 
                 if (j < player->lastVoiceIdx) {
                     voiceState = &manager->voiceStates[j - player->firstVoiceIdx];
-                    voiceState->info.all = player->id.all + (savedVoice->trackIndex << 16) + (savedVoice->tune << 8);
+                    voiceState->info.all = amb_voice_id(player->id.playerIndex, savedVoice->trackIndex, savedVoice->tune);
                     voiceState->pitch = (savedVoice->tune & 0x7F) * 100 - track->instrument->keyBase;
                     voiceState->volume = savedVoice->volume & 0x7F;
                     voice->clientVolume = VOL_MULT_3(player->fadeVolume >> 24, track->volumeLerp.current >> 16, voiceState->volume);
