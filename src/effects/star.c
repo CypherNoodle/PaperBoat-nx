@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/Engine.h"
 
 
 void star_init(EffectInstance* effect);
@@ -239,6 +240,7 @@ void star_appendGfx(void* effect) {
     // draw trail
     if (data->bounceTime <= 1.0f) {
         s32 baseIdx = (data->trailMatrixPos + 5) % ARRAY_COUNT(data->trailMatrices);
+        Vtx* trailVtx = (Vtx*)LOAD_ASSET(D_09001400_333AA0);
         guPositionF(sp20, 0.0f, -gCameras[gCurrentCameraID].curYaw, 0.0f, scale, data->pos.x, data->pos.y, data->pos.z);
         guRotateF(sp60, data->trailAngle, 0.0f, 0.0f, 1.0f);
         guMtxCatF(sp60, sp20, sp20);
@@ -249,7 +251,7 @@ void star_appendGfx(void* effect) {
             gDisplayContext->matrixStack[gMatrixListPos] = data->trailMatrices[idx];
 
             gSPMatrix(gMainGfxPos++, &gDisplayContext->matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPVertex(gMainGfxPos++, &D_09001400_333AA0[i * 2], 2, i * 2);
+            gSPVertex(gMainGfxPos++, &trailVtx[i * 2], 2, i * 2);
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
         }
 
