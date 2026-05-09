@@ -1,4 +1,6 @@
 #include "common.h"
+#include "model.h"
+#include "port/Engine.h"
 
 static Vtx_t* N(TriNormVertexBuffer)[32]; // unk length
 
@@ -30,19 +32,40 @@ void N(GetFirstTriangleNormal)(Gfx* inGfx, f32* outNx, f32* outNy, f32* outNz) {
 
     while (true) {
         u32 w0 = gfx->words.w0;
-        u32 w1 = gfx->words.w1;
-        s32 op = w0 >> 24;
+        uintptr_t w1 = gfx->words.w1;
+        s32 op = (s32)(s8)(w0 >> 24);
         readState = READ_STATE_CONTINUE;
         switch (op) {
             case G_ENDDL:
                 readState = READ_STATE_DONE;
                 break;
             case G_DL:
-                N(GetFirstTriangleNormal)((Gfx* ) w1, outNx, outNy, outNz);
+                N(GetFirstTriangleNormal)((Gfx*)w1, outNx, outNy, outNz);
                 break;
+            case G_DL_OTR_HASH: {
+                uint64_t hash = ((uint64_t)(uint32_t)gfx[1].words.w0 << 32) | (uint32_t)gfx[1].words.w1;
+                Gfx* subDl = (Gfx*)ResourceGetDataByCrc(hash);
+                if (subDl != NULL) {
+                    N(GetFirstTriangleNormal)(subDl, outNx, outNy, outNz);
+                }
+                gfx++;
+                break;
+            }
+            case G_VTX_OTR_HASH: {
+                Vtx* resolved = mdl_resolve_otr_vtx(gfx);
+                vtxCount = (w0 >> 0xC) & 0xFF;
+                if (resolved != NULL) {
+                    for (i = 0; i < vtxCount; i++) {
+                        vtxEnd = (w0 >> 1) & 0x7F;
+                        N(TriNormVertexBuffer)[(vtxEnd - vtxCount) + i] = &resolved[i].v;
+                    }
+                }
+                gfx++;
+                break;
+            }
             case G_VTX:
                 vtxCount = (w0 >> 0xC) & 0xFF;
-                vtxArray = (Vtx_t*) w1;
+                vtxArray = (Vtx_t*)w1;
                 for (i = 0; i < vtxCount; i++) {
                     vtxEnd = (w0 >> 1) & 0x7F;
                     N(TriNormVertexBuffer)[(vtxEnd - vtxCount) + i] = &(vtxArray)[i];
@@ -76,6 +99,11 @@ void N(GetFirstTriangleNormal)(Gfx* inGfx, f32* outNx, f32* outNy, f32* outNz) {
 
         if (readState != READ_STATE_CONTINUE) {
             break;
+        }
+        if (mdl_is_otr_expanded_opcode((u32)op)
+            && op != G_VTX_OTR_HASH
+            && op != G_DL_OTR_HASH) {
+            gfx++; // skip extra hash entry for other expanded OTR commands
         }
         gfx++;
     }

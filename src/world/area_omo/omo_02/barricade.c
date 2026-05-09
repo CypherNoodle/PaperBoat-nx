@@ -1,6 +1,7 @@
 #include "omo_02.h"
 #include "model.h"
 #include "effects.h"
+#include "port/Engine.h"
 
 s32 N(BarricadeModels)[] = {
     MODEL_t2, MODEL_t3, MODEL_t4, MODEL_t5,
@@ -43,15 +44,28 @@ void N(DetermineSphericalSize)(Gfx* displayList, s32* outDist) {
 
     do {
         u32 w0 = dlist->words.w0;
-        u32 w1 = dlist->words.w1;
+        uintptr_t w1 = dlist->words.w1;
+        Vtx* vtx = NULL;
+        s32 numVertices = 0;
 
         cmd = w0 >> 0x18;
         if (cmd == G_DL) {
-            N(DetermineSphericalSize)((Gfx*) w1, outDist);
+            N(DetermineSphericalSize)((Gfx*)w1, outDist);
+        } else if (cmd == G_DL_OTR_HASH) {
+            uint64_t hash = ((uint64_t)(uint32_t)dlist[1].words.w0 << 32) | (uint32_t)dlist[1].words.w1;
+            Gfx* subDl = (Gfx*)ResourceGetDataByCrc(hash);
+            if (subDl != NULL) {
+                N(DetermineSphericalSize)(subDl, outDist);
+            }
+        } else if (cmd == G_VTX) {
+            numVertices = (w0 >> 0xC) & 0xFF;
+            vtx = (Vtx*)w1;
+        } else if (cmd == G_VTX_OTR_HASH) {
+            numVertices = (w0 >> 0xC) & 0xFF;
+            vtx = mdl_resolve_otr_vtx(dlist);
         }
-        if (cmd == G_VTX) {
-            s32 numVertices = (w0 >> 0xC) & 0xFF;
-            Vtx* vtx = (Vtx*) w1;
+
+        if (vtx != NULL) {
             f32 subX, subY, subZ;
             s32 i;
 
@@ -69,6 +83,10 @@ void N(DetermineSphericalSize)(Gfx* displayList, s32* outDist) {
                     *outDist = dist;
                 }
             }
+        }
+
+        if (mdl_is_otr_expanded_opcode(cmd)) {
+            dlist++;
         }
         dlist++;
     } while (cmd != G_ENDDL);
