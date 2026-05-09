@@ -2,6 +2,7 @@
 #include "effects_internal.h"
 #include "assets/effects.h"
 #include "nu/nusys.h"
+#include "port/patches/Patches.h"
 
 typedef struct FlamePreset {
     /* 0x00 */ Color_RGB8 colorScale;
@@ -221,7 +222,7 @@ void flame_render(EffectInstance* effect) {
         outDist = 0;
     }
 
-    renderTaskPtr->appendGfx = flame_appendGfx;
+    renderTaskPtr->appendGfx = port_flame_appendGfx;
     renderTaskPtr->dist = -outDist;
     renderTaskPtr->appendGfxArg = effect;
     renderTaskPtr->renderMode = RENDER_MODE_SURFACE_XLU_LAYER1;
@@ -229,6 +230,7 @@ void flame_render(EffectInstance* effect) {
     queue_render_task(renderTaskPtr);
 }
 
+// DEPRECATED: port_flame_appendGfx
 void flame_appendGfx(void* effect) {
     FlameFXData* data = ((EffectInstance*)effect)->data.flame;
     Camera* camera = &gCameras[gCurrentCameraID];
