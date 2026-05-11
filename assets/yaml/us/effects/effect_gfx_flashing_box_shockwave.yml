@@ -24,7 +24,7 @@ dlist_950:
   { type: GFX, offset: 0x09000950, symbol: D_09000950_3939F0 }
 
 vtx_9F8:
-  { type: VTX, offset: 0x090009F8, count: 18, symbol: D_090009F8_393A98 }
+  { type: VTX, offset: 0x090009F8, count: 30, symbol: D_090009F8_393A98 }
 
 vtx_B18:
   { type: VTX, offset: 0x09000B18, count: 10, symbol: D_09000B18_393BB8 }
@@ -33,7 +33,7 @@ vtx_BB8:
   { type: VTX, offset: 0x09000BB8, count: 20, symbol: D_09000BB8_393C58 }
 
 vtx_CF8:
-  { type: VTX, offset: 0x09000CF8, count: 18, symbol: D_09000CF8_393D98 }
+  { type: VTX, offset: 0x09000CF8, count: 30, symbol: D_09000CF8_393D98 }
 
 vtx_E18:
   { type: VTX, offset: 0x09000E18, count: 10, symbol: D_09000E18_393EB8 }

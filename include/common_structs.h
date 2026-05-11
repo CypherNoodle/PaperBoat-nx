@@ -1854,7 +1854,7 @@ typedef struct ActorState { // TODO: Make the first field of this an ActorMoveme
     /*      */     EvtVarPtr functionTempPtr[4];
     /*      */ };
     /* 0x7C */ union {
-    /*      */     s32 varTable[16];
+    /*      */     Bytecode varTable[16];
     /*      */     f32 varTableF[16];
     /*      */     EvtVarPtr varTablePtr[16];
     /*      */ };

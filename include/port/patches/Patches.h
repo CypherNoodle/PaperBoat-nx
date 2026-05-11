@@ -14,6 +14,8 @@ void port_emitCaptureCurrentFrameIfRequested(Gfx** gfxP);
 
 // Static Gfx[] with VTXs
 void port_patch_dl(Gfx* dl);
+struct StaticAnimatorNode;
+void port_patch_animator_tree(struct StaticAnimatorNode** tree);
 
 // Sprite shading (SpritePatches.c)
 void port_appendGfx_shading_palette(
@@ -25,6 +27,23 @@ void port_appendGfx_shading_palette(
 
 // Flame effect (FlamePatches.c)
 void port_flame_appendGfx(void* effect);
+
+// Bulb glow effect (BulbGlowPatches.c)
+void port_bulb_glow_appendGfx(void* effect);
+
+// Energy in/out effect (EnergyInOutPatches.c)
+void port_energy_in_out_appendGfx(void* effect);
+
+// Flashing box shockwave effect (FlashingBoxShockwavePatches.c)
+void port_flashing_box_shockwave_appendGfx(void* effect);
+
+// Darkness stencil (DarknessStencilPatches.c)
+void port_appendGfx_darkness_stencil(b32 isWorld, s32 posX, s32 posY, f32 alpha, f32 progress);
+
+// EVT (EvtPatches.c) — pointer-safe replacement for `UseBuf(Ref(T*[])) +
+// BufRead1`.
+ApiStatus LoadPtrFromArray(Evt* script, bool isInitialCall);
+
 
 #ifdef __cplusplus
 }

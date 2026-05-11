@@ -2,6 +2,7 @@
 #include "nu/nusys.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/patches/Patches.h"
 
 typedef struct UnkBulbGlow {
     /* 0x00 */ s32 unk_00;
@@ -131,7 +132,7 @@ void bulb_glow_render(EffectInstance* effect) {
     RenderTask* retTask;
 
     renderTask.appendGfxArg = effect;
-    renderTask.appendGfx = bulb_glow_appendGfx;
+    renderTask.appendGfx = port_bulb_glow_appendGfx;
     if (data->type == 5) {
         renderTask.dist = 0;
         renderTaskPtr->renderMode = RENDER_MODE_SURFACE_OPA;
@@ -149,6 +150,7 @@ void func_E0078274(void) {
 
 #define TMEM_ADDR(x) (x / sizeof(u64))
 
+// DEPRECATED: see port_bulb_glow_appendGfx in src/port/patches/BulbGlowPatches.c.
 void bulb_glow_appendGfx(void* effect) {
     BulbGlowFXData* data = ((EffectInstance*)effect)->data.bulbGlow;
     f32 centerX;
@@ -171,10 +173,6 @@ void bulb_glow_appendGfx(void* effect) {
     s32 i;
     s32 j;
     u8 r, g, b;
-
-    // TODO: This effect samples from the framebuffer (nuGfxCfb_ptr) to create a
-    // screen-space distortion/glow. We need a framebuffer readback here.
-    return;
 
     brightness = data->brightness;
     type = data->type;

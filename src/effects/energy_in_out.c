@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/patches/Patches.h"
 
 
 const char* D_E00D6E40[] = {
@@ -220,7 +221,7 @@ void energy_in_out_render(EffectInstance* effect) {
     RenderTask renderTask;
     RenderTask* retTask;
 
-    renderTask.appendGfx = energy_in_out_appendGfx;
+    renderTask.appendGfx = port_energy_in_out_appendGfx;
     renderTask.appendGfxArg = effect;
     renderTask.dist = 10;
     renderTask.renderMode = RENDER_MODE_CLOUD_NO_ZCMP;
@@ -231,6 +232,7 @@ void energy_in_out_render(EffectInstance* effect) {
 void func_E00D6978(void) {
 }
 
+// DEPRECATED: see port_energy_in_out_appendGfx
 void energy_in_out_appendGfx(void* effect) {
     EnergyInOutFXData* part = ((EffectInstance*)effect)->data.energyInOut;
     s32 unk_24 = part->unk_24;

@@ -1,9 +1,11 @@
 #include "dgb_01.h"
 #include "ld_addrs.h"
 #include "sprite/player.h"
+#include "port/patches/Patches.h"
 
 API_CALLABLE(N(LoadSmashBridgesGraphics)) {
     DMA_COPY_SEGMENT(dgb_01_smash_bridges);
+    port_patch_animator_tree(N(SmashBridgesSkeleton));
     return ApiStatus_DONE2;
 }
 

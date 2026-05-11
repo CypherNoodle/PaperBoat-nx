@@ -1224,7 +1224,7 @@ API_CALLABLE(SetActorVar) {
     Bytecode* args = script->ptrReadPos;
     s32 actorID = evt_get_variable(script, *args++);
     s32 index;
-    s32 val;
+    Bytecode val;
 
     if (actorID == ACTOR_SELF) {
         actorID = script->owner1.actorID;
@@ -1242,7 +1242,7 @@ API_CALLABLE(AddActorVar) {
     Bytecode* args = script->ptrReadPos;
     s32 actorID = evt_get_variable(script, *args++);
     s32 index;
-    s32 val;
+    Bytecode val;
     ActorState* state;
 
     if (actorID == ACTOR_SELF) {

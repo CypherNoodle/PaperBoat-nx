@@ -338,14 +338,14 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             break;
         case OVERLAY_WORLD_DARKNESS:
             gSPDisplayList(gMainGfxPos++, Gfx_LoadStencilTex_BlurryCircle);
-            appendGfx_darkness_stencil(true, x2, y2, alpha, progress);
+            port_appendGfx_darkness_stencil(true, x2, y2, alpha, progress);
             break;
         case OVERLAY_BLUR:
             draw_prev_frame_buffer_at_screen_pos(x1, y1, x2, y2, progress);
             break;
         case OVERLAY_BATTLE_DARKNESS:
             gSPDisplayList(gMainGfxPos++, Gfx_LoadStencilTex_BlurryCircle);
-            appendGfx_darkness_stencil(false, x1, y1, alpha, progress);
+            port_appendGfx_darkness_stencil(false, x1, y1, alpha, progress);
             break;
         case OVERLAY_INTRO_1:
         case OVERLAY_INTRO_2:
