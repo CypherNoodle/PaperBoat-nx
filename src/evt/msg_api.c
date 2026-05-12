@@ -189,7 +189,7 @@ API_CALLABLE(ShowMessageAtScreenPos) {
     Bytecode* args = script->ptrReadPos;
 
     if (isInitialCall) {
-        s32 msgID = evt_get_variable(script, *args++);
+        intptr_t msgID = evt_get_variable(script, *args++);
         s32 x = evt_get_variable(script, *args++);
         s32 y = evt_get_variable(script, *args++);
         s32* temp802DB264 = &D_802DB264;
@@ -217,7 +217,7 @@ API_CALLABLE(ShowMessageAtWorldPos) {
     s32* currentCameraID = &gCurrentCameraID;
 
     if (isInitialCall) {
-        s32 msgID = evt_get_variable(script, *args++);
+        intptr_t msgID = evt_get_variable(script, *args++);
         s32 x = evt_get_variable(script, *args++);
         s32 y = evt_get_variable(script, *args++);
         s32 z = evt_get_variable(script, *args++);
@@ -282,7 +282,7 @@ API_CALLABLE(ShowChoice) {
     MessagePrintState** temp802DB268;
 
     if (isInitialCall) {
-        s32 msgID = evt_get_variable(script, *args++);
+        intptr_t msgID = evt_get_variable(script, *args++);
 
         script->functionTemp[1] = 0;
         D_802DB268 = msg_get_printer_for_msg(msgID, &script->functionTemp[1]);
@@ -333,7 +333,7 @@ API_CALLABLE(func_802D0C94) {
 
 API_CALLABLE(SetMessageText) {
     Bytecode* args = script->ptrReadPos;
-    s32 msg = evt_get_variable(script, *args++);
+    intptr_t msg = evt_get_variable(script, *args++);
     s32 index = evt_get_variable(script, *args++);
 
     set_message_text_var(msg, index);

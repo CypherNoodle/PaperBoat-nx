@@ -5,6 +5,18 @@
 lights_0:
   { type: LIGHTS, offset: 0x09000000, symbol: D_09000000_398BC0 }
 
+mtx_4148:
+  { type: MTX, offset: 0x09004148, symbol: D_09004148_39CD08 }
+
+mtx_4188:
+  { type: MTX, offset: 0x09004188, symbol: D_09004188_39CD48 }
+
+mtx_41C8:
+  { type: MTX, offset: 0x090041C8, symbol: D_090041C8_39CD88 }
+
+mtx_4208:
+  { type: MTX, offset: 0x09004208, symbol: D_09004208_39CDC8 }
+
 tex_18:
   { type: TEXTURE, format: IA4, offset: 0x09000018, width: 64, height: 16, symbol: D_09000018_398BD8 }
 

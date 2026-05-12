@@ -1146,6 +1146,10 @@ static const ALIGN_ASSET(2) char D_090030D8_3AA878[] = "__OTR__effects/effect_gf
 static const ALIGN_ASSET(2) char D_09003110_3AA8B0[] = "__OTR__effects/effect_gfx_quizmo_audience/dlist_3110";
 
 // effect_gfx_quizmo_stage
+static const ALIGN_ASSET(2) char D_09004148_39CD08[] = "__OTR__effects/effect_gfx_quizmo_stage/mtx_4148";
+static const ALIGN_ASSET(2) char D_09004188_39CD48[] = "__OTR__effects/effect_gfx_quizmo_stage/mtx_4188";
+static const ALIGN_ASSET(2) char D_090041C8_39CD88[] = "__OTR__effects/effect_gfx_quizmo_stage/mtx_41C8";
+static const ALIGN_ASSET(2) char D_09004208_39CDC8[] = "__OTR__effects/effect_gfx_quizmo_stage/mtx_4208";
 static const ALIGN_ASSET(2) char D_09000018_398BD8[] = "__OTR__effects/effect_gfx_quizmo_stage/tex_18";
 static const ALIGN_ASSET(2) char D_09000218_398DD8[] = "__OTR__effects/effect_gfx_quizmo_stage/dlist_218";
 static const ALIGN_ASSET(2) char D_09000288_398E48[] = "__OTR__effects/effect_gfx_quizmo_stage/tex_288";
