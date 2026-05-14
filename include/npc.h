@@ -323,7 +323,7 @@ typedef struct Enemy {
     /* 0x64 */ UNK_PTR unk_64;
     /* 0x68 */ char unk_68[4];
     /* 0x6C */ union {
-    /*      */      s32 varTable[16];
+    /*      */      intptr_t varTable[16];
     /*      */      f32 varTableF[16];
     /*      */      EvtVarPtr varTablePtr[16];
     /*      */ };

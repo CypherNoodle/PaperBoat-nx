@@ -1,7 +1,12 @@
+#include "port/patches/Patches.h"
+
 API_CALLABLE(N(LoadAnimationFromTable)) {
     Bytecode* args = script->ptrReadPos;
     s32 type = evt_get_variable(script, *args++);
     s32 index = evt_get_variable(script, *args++);
+
+    port_lava_piranha_set_script(type, index);
+    (void) N(VineAnimationsDmaTable);
 
     switch (type) {
         case VINE_0:

@@ -44,6 +44,15 @@ void port_appendGfx_darkness_stencil(b32 isWorld, s32 posX, s32 posY, f32 alpha,
 // BufRead1`.
 ApiStatus LoadPtrFromArray(Evt* script, bool isInitialCall);
 
+// Lava piranha vines (LavaPiranhaPatches.c)
+extern u8 PortLavaPiranhaVineBase[4][16];
+void port_lava_piranha_set_script(s32 vine, s32 index);
+s16* port_lava_piranha_translate(s16* addr);
+#define VINE_0_BASE ((intptr_t) PortLavaPiranhaVineBase[0])
+#define VINE_1_BASE ((intptr_t) PortLavaPiranhaVineBase[1])
+#define VINE_2_BASE ((intptr_t) PortLavaPiranhaVineBase[2])
+#define VINE_3_BASE ((intptr_t) PortLavaPiranhaVineBase[3])
+
 
 #ifdef __cplusplus
 }

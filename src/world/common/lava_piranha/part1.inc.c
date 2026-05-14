@@ -6,6 +6,16 @@ enum {
     NUM_VINES   = 4
 };
 
+// See src/port/patches/LavaPiranhaPatches.c.
+#include "port/patches/Patches.h"
+#if 0
+#define VINE_0_BASE (intptr_t) PortLavaPiranhaVineBase[0]
+#define VINE_1_BASE (intptr_t) PortLavaPiranhaVineBase[1]
+#define VINE_2_BASE (intptr_t) PortLavaPiranhaVineBase[2]
+#define VINE_3_BASE (intptr_t) PortLavaPiranhaVineBase[3]
+#endif
+
+#if 0
 #ifdef SHIFT
 extern Addr D_80200000;
 extern Addr D_80204000;
@@ -20,6 +30,7 @@ extern Addr D_8020A000;
 #define VINE_1_BASE 0x80204000
 #define VINE_2_BASE 0x80207000
 #define VINE_3_BASE 0x8020A000
+#endif
 #endif
 
 #include "world/common/lava_piranha/skele1.c"

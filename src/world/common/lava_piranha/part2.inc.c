@@ -50,13 +50,13 @@ intptr_t N(VineAnimationsDmaTable)[] = {
 void N(make_vine_interpolation)(LavaPiranhaVine* vine) {
     Evt dummyEvt;
     Evt* dummyEvtPtr = &dummyEvt;
-    s32 args[4];
+    Bytecode args[4];
     s32 count;
 
     // setup dummy call to LoadPath
-    args[0] = 3 * vine->boneCount;      // generate three output samples per input
-    args[1] = (s32) &vine->bonePos;     // points
-    args[2] = vine->boneCount;          // num vectors
+    args[0] = 3 * vine->boneCount;          // generate three output samples per input
+    args[1] = (intptr_t) &vine->bonePos;    // points
+    args[2] = vine->boneCount;              // num vectors
     args[3] = EASING_LINEAR;
     dummyEvtPtr->ptrReadPos = args;
     LoadPath(dummyEvtPtr, 1);
