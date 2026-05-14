@@ -209,7 +209,7 @@ StaticAnimatorNode Entity_MunchlesiaSpitOut_Node1 = {
     .displayList = ENTITY_ANIM_NULL,
     .sibling = ENTITY_ANIM_NULL,
     .child = &Entity_MunchlesiaSpitOut_Node2,
-    .vertexStartOffset = (s32)ENTITY_ANIM_NULL,
+    .vertexStartOffset = -1,
     .vtxList = ENTITY_ANIM_NULL,
 };
 
