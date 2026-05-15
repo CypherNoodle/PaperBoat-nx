@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/patches/Patches.h"
 
 
 void flashing_box_shockwave_init(EffectInstance* effect);
@@ -121,7 +122,7 @@ void flashing_box_shockwave_render(EffectInstance* effect) {
     RenderTask renderTask;
     RenderTask* retTask;
 
-    renderTask.appendGfx = flashing_box_shockwave_appendGfx;
+    renderTask.appendGfx = port_flashing_box_shockwave_appendGfx;
     renderTask.appendGfxArg = effect;
     renderTask.dist = 10;
     renderTask.renderMode = RENDER_MODE_SURFACE_XLU_LAYER3;
@@ -129,6 +130,7 @@ void flashing_box_shockwave_render(EffectInstance* effect) {
     retTask = queue_render_task(&renderTask);
 }
 
+// DEPRECATED: see port_flashing_box_shockwave_appendGfx
 void flashing_box_shockwave_appendGfx(void* effect) {
     ShockOverlayFXData* data = ((EffectInstance*)effect)->data.flashingBoxShockwave;
     s32 type = data->type;

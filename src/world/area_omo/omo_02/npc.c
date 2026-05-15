@@ -1,4 +1,5 @@
 #include "omo_02.h"
+#include "port/patches/Patches.h"
 
 #include "world/common/enemy/ShyGuy_Wander.inc.c"
 #include "world/common/enemy/ShyGuy_Guard.inc.c"
@@ -222,10 +223,7 @@ EvtScript N(EVS_NpcIdle_ShyGuy_Crowd) = {
             CaseEq(CROWD_STATE_RUN_AWAY)
                 Call(SetSelfEnemyFlagBits, ENEMY_FLAG_IGNORE_WORLD_COLLISION, true)
                 Call(GetSelfNpcID, LVar0)
-                UseBuf(Ref(N(CrowdFleeScripts)))
-                Loop(LVar0)
-                    BufRead1(LVar1)
-                EndLoop
+                Call(LoadPtrFromArray, Ref(N(CrowdFleeScripts)), LVar0, ARRAY_COUNT(N(CrowdFleeScripts)), LVar1)
                 UseBuf(LVar1)
                 Label(10)
                     BufRead1(LVar2) // get cmd

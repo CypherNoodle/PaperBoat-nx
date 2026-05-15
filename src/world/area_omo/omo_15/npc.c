@@ -1,4 +1,5 @@
 #include "omo_15.h"
+#include "port/patches/Patches.h"
 
 #include "world/common/enemy/ShyGuy_Stationary.inc.c"
 
@@ -275,8 +276,7 @@ EvtScript N(EVS_BossDefeated_RunAway) = {
     Call(GetSelfNpcID, LVar9)
     IfEq(LVar9, NPC_GeneralGuy)
         Call(PlaySound, SOUND_LOOP_SHY_GUY_CROWD_2)
-        UseBuf(Ref(N(GeneralGuyFleeScripts)))
-        BufRead1(LVar1)
+        Call(LoadPtrFromArray, Ref(N(GeneralGuyFleeScripts)), 0, ARRAY_COUNT(N(GeneralGuyFleeScripts)), LVar1)
         UseBuf(LVar1)
         Call(SetNpcAnimation, LVar9, ANIM_GeneralGuy_Anim0E)
         Loop(0)
@@ -299,11 +299,7 @@ EvtScript N(EVS_BossDefeated_RunAway) = {
         Call(StopTrackingSoundPos, SOUND_LRAW_SHY_GUY_CROWD_2)
     Else
         Set(LVar0, LVar9)
-        Sub(LVar0, 0)
-        UseBuf(Ref(N(CrowdFleeScripts)))
-        Loop(LVar0)
-            BufRead1(LVar1)
-        EndLoop
+        Call(LoadPtrFromArray, Ref(N(CrowdFleeScripts)), LVar0, ARRAY_COUNT(N(CrowdFleeScripts)), LVar1)
         UseBuf(LVar1)
         Loop(0)
             BufRead1(LVar2)

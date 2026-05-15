@@ -1,6 +1,7 @@
 #include "sam_04.h"
 #include "effects.h"
 #include "sprite/player.h"
+#include "port/patches/Patches.h"
 
 #include "common/SetAngleClamped.inc.c"
 
@@ -39,11 +40,7 @@ s32* N(SnowmanModelSets)[] = {
 
 EvtScript N(EVS_SetSnowmanPosition) = {
     Call(SetNpcPos, LVar0, LVar1, LVar2, LVar3)
-    UseBuf(Ref(N(SnowmanModelSets)))
-    Add(LVar0, 1)
-    Loop(LVar0)
-        BufRead1(LVar4)
-    EndLoop
+    Call(LoadPtrFromArray, Ref(N(SnowmanModelSets)), LVar0, ARRAY_COUNT(N(SnowmanModelSets)), LVar4)
     UseBuf(LVar4)
     BufRead1(LVar4)
     Call(TranslateModel, LVar4, LVar1, LVar2, LVar3)
@@ -60,11 +57,7 @@ EvtScript N(EVS_SetSnowmanPosition) = {
 EvtScript N(EVS_SnowmanJump) = {
     Thread
         Set(LVarA, LVar0)
-        UseBuf(Ref(N(SnowmanModelSets)))
-        Add(LVarA, 1)
-        Loop(LVarA)
-            BufRead1(LVarB)
-        EndLoop
+        Call(LoadPtrFromArray, Ref(N(SnowmanModelSets)), LVarA, ARRAY_COUNT(N(SnowmanModelSets)), LVarB)
         UseBuf(LVarB)
         BufRead4(LVarC, LVarD, LVarE, LVarF)
         Add(LVar4, 1)
