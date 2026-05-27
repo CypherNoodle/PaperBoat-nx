@@ -979,7 +979,10 @@ BKFileBuffer* au_load_BK_to_bank(s32 bkFileOffset, BKFileBuffer* bkFile, s32 ban
                     u16 instOffset = header->instruments[i];
                     if (instOffset != 0) {
                         InstrumentBinary* binInst = (InstrumentBinary*)AU_FILE_RELATIVE(bkFile, instOffset);
-                        Instrument* newInst = alHeapAlloc(heap, 1, sizeof(Instrument));
+                        Instrument* newInst = *inst;
+                        if (newInst == nullptr || newInst == gSoundGlobals->defaultInstrument) {
+                            newInst = alHeapAlloc(heap, 1, sizeof(Instrument));
+                        }
                         newInst->wavData = (u8*)(uintptr_t)binInst->wavData;
                         newInst->wavDataLength = binInst->wavDataLength;
                         newInst->loopState = (ADPCM_STATE*)(uintptr_t)binInst->loopState;
@@ -1110,7 +1113,11 @@ BKFileBuffer* au_load_static_BK_to_bank(s32* inAddr, void* outAddr, s32 bankInde
                     u16 instOffset = header->instruments[i];
                     if (instOffset != 0) {
                         InstrumentBinary* binInst = (InstrumentBinary*)AU_FILE_RELATIVE(bkFile, instOffset);
-                        Instrument* newInst = alHeapAlloc(heap, 1, sizeof(Instrument));
+                        // See au_load_BK_to_bank: reuse to avoid bump-heap leak on reload.
+                        Instrument* newInst = *inst;
+                        if (newInst == nullptr || newInst == gSoundGlobals->defaultInstrument) {
+                            newInst = alHeapAlloc(heap, 1, sizeof(Instrument));
+                        }
                         newInst->wavData = (u8*)(uintptr_t)binInst->wavData;
                         newInst->wavDataLength = binInst->wavDataLength;
                         newInst->loopState = (ADPCM_STATE*)(uintptr_t)binInst->loopState;
