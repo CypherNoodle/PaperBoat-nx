@@ -26,20 +26,23 @@ API_CALLABLE(MakeLerp) {
 }
 
 API_CALLABLE(UpdateLerp) {
-    // Store as integer — many consumers read varTable[0] directly (e.g. TitlePrimAlpha,
-    // boomPitch). evt_set_float_variable encodes as EVT fixed-point which breaks them.
-    script->varTable[LERP_VAR_0] = (s32) update_lerp(
-        script->varTable[LERP_VAR_B],
-        script->varTable[LERP_VAR_C],
-        script->varTable[LERP_VAR_D],
-        script->varTable[LERP_VAR_E],
-        script->varTable[LERP_VAR_F]
-    );
+    Bytecode elapsed = script->varTable[LERP_VAR_E];
+    Bytecode duration = script->varTable[LERP_VAR_F];
 
-    if (script->varTable[LERP_VAR_E] >= script->varTable[LERP_VAR_F]) {
-        script->varTable[LERP_VAR_1] = false; // finished
+    // PlayEffect clobbers LVarF (our duration) with a 64-bit pointer, so the lerp
+    // never ends and the script hangs. Snap to end state on an out-of-range duration.
+    if (elapsed >= duration || duration <= 0 || (uintptr_t)duration > 1000000U) {
+        script->varTable[LERP_VAR_0] = (s32) script->varTable[LERP_VAR_D];
+        script->varTable[LERP_VAR_1] = false;
     } else {
-        script->varTable[LERP_VAR_1] = true; // lerping
+        script->varTable[LERP_VAR_0] = (s32) update_lerp(
+            script->varTable[LERP_VAR_B],
+            script->varTable[LERP_VAR_C],
+            script->varTable[LERP_VAR_D],
+            elapsed,
+            duration
+        );
+        script->varTable[LERP_VAR_1] = true;
     }
     script->varTable[LERP_VAR_E]++;
 
