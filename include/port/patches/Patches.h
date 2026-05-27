@@ -43,6 +43,7 @@ void port_appendGfx_darkness_stencil(b32 isWorld, s32 posX, s32 posY, f32 alpha,
 // EVT (EvtPatches.c) — pointer-safe replacement for `UseBuf(Ref(T*[])) +
 // BufRead1`.
 ApiStatus LoadPtrFromArray(Evt* script, bool isInitialCall);
+ApiStatus StepTaggedAIWaveBuf(Evt* script, bool isInitialCall);
 
 // Lava piranha vines (LavaPiranhaPatches.c)
 extern u8 PortLavaPiranhaVineBase[4][16];

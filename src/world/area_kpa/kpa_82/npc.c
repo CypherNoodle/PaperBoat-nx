@@ -1,4 +1,5 @@
 #include "kpa_82.h"
+#include "port/patches/Patches.h"
 
 #include "world/common/enemy/Goomba.h"
 #include "world/common/enemy/KoopaTroopa.h"
@@ -710,31 +711,21 @@ intptr_t N(QS_Withdraw_Wave_6)[] = {
 
 EvtScript N(EVS_Release_Wave) = {
     Switch(AB_KPA82_QuizRound)
-        CaseEq(0)
-            UseBuf(Ref(N(QS_Release_Wave_0)))
-        CaseEq(1)
-            UseBuf(Ref(N(QS_Release_Wave_1)))
-        CaseEq(2)
-            UseBuf(Ref(N(QS_Release_Wave_2)))
-        CaseEq(3)
-            UseBuf(Ref(N(QS_Release_Wave_3)))
-        CaseEq(4)
-            UseBuf(Ref(N(QS_Release_Wave_4)))
-        CaseEq(5)
-            UseBuf(Ref(N(QS_Release_Wave_5)))
-        CaseEq(6)
-            UseBuf(Ref(N(QS_Release_Wave_6)))
+        CaseEq(0) Set(LVar7, Ref(N(QS_Release_Wave_0)))
+        CaseEq(1) Set(LVar7, Ref(N(QS_Release_Wave_1)))
+        CaseEq(2) Set(LVar7, Ref(N(QS_Release_Wave_2)))
+        CaseEq(3) Set(LVar7, Ref(N(QS_Release_Wave_3)))
+        CaseEq(4) Set(LVar7, Ref(N(QS_Release_Wave_4)))
+        CaseEq(5) Set(LVar7, Ref(N(QS_Release_Wave_5)))
+        CaseEq(6) Set(LVar7, Ref(N(QS_Release_Wave_6)))
     EndSwitch
+    Set(LVar8, 0)
     Loop(0)
-        BufRead2(LVarA, LVarB)
+        Call(StepTaggedAIWaveBuf, LVar7, LVar8, LVarA)
         IfEq(LVarA, -1)
             BreakLoop
         EndIf
-        IfEq(LVarA, -2)
-            Wait(LVarB)
-        Else
-            Call(BindNpcAI, LVarA, LVarB)
-        EndIf
+        Wait(LVarA)
     EndLoop
     Return
     End
@@ -742,31 +733,21 @@ EvtScript N(EVS_Release_Wave) = {
 
 EvtScript N(EVS_Withdraw_Wave) = {
     Switch(AB_KPA82_QuizRound)
-        CaseEq(0)
-            UseBuf(Ref(N(QS_Withdraw_Wave_0)))
-        CaseEq(1)
-            UseBuf(Ref(N(QS_Withdraw_Wave_1)))
-        CaseEq(2)
-            UseBuf(Ref(N(QS_Withdraw_Wave_2)))
-        CaseEq(3)
-            UseBuf(Ref(N(QS_Withdraw_Wave_3)))
-        CaseEq(4)
-            UseBuf(Ref(N(QS_Withdraw_Wave_4)))
-        CaseEq(5)
-            UseBuf(Ref(N(QS_Withdraw_Wave_5)))
-        CaseEq(6)
-            UseBuf(Ref(N(QS_Withdraw_Wave_6)))
+        CaseEq(0) Set(LVar7, Ref(N(QS_Withdraw_Wave_0)))
+        CaseEq(1) Set(LVar7, Ref(N(QS_Withdraw_Wave_1)))
+        CaseEq(2) Set(LVar7, Ref(N(QS_Withdraw_Wave_2)))
+        CaseEq(3) Set(LVar7, Ref(N(QS_Withdraw_Wave_3)))
+        CaseEq(4) Set(LVar7, Ref(N(QS_Withdraw_Wave_4)))
+        CaseEq(5) Set(LVar7, Ref(N(QS_Withdraw_Wave_5)))
+        CaseEq(6) Set(LVar7, Ref(N(QS_Withdraw_Wave_6)))
     EndSwitch
+    Set(LVar8, 0)
     Loop(0)
-        BufRead2(LVarA, LVarB)
+        Call(StepTaggedAIWaveBuf, LVar7, LVar8, LVarA)
         IfEq(LVarA, -1)
             BreakLoop
         EndIf
-        IfEq(LVarA, -2)
-            Wait(LVarB)
-        Else
-            Call(BindNpcAI, LVarA, LVarB)
-        EndIf
+        Wait(LVarA)
     EndLoop
     Return
     End
