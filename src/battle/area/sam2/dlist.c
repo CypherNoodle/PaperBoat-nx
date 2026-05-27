@@ -1,3 +1,4 @@
+// Excluded from build (CMakeLists.txt). The real DL is in the OTR resource sam2_monstar.yml.
 #include "area.h"
 
 #define NAMESPACE A(monstar)

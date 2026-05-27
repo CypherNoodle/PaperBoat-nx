@@ -402,11 +402,7 @@ static const ALIGN_ASSET(2) char D_09000400_3D15E0[] = "__OTR__effects/effect_gf
 // effect_gfx_effect_75
 static const ALIGN_ASSET(2) char D_09000000_3E2960[] = "__OTR__effects/effect_gfx_effect_75/tex_0";
 static const ALIGN_ASSET(2) char D_09000800_3E3160[] = "__OTR__effects/effect_gfx_effect_75/tex_800";
-static const ALIGN_ASSET(2) char D_09001000_3E3960[] = "__OTR__effects/effect_gfx_effect_75/vtx_1000";
-static const ALIGN_ASSET(2) char D_09001070_3E39D0[] = "__OTR__effects/effect_gfx_effect_75/vtx_1070";
-static const ALIGN_ASSET(2) char D_09001190_3E3AF0[] = "__OTR__effects/effect_gfx_effect_75/vtx_1190";
-static const ALIGN_ASSET(2) char D_090012D0_3E3C30[] = "__OTR__effects/effect_gfx_effect_75/vtx_12D0";
-static const ALIGN_ASSET(2) char D_090014D0_3E3E30[] = "__OTR__effects/effect_gfx_effect_75/vtx_14D0";
+static const ALIGN_ASSET(2) char D_09001000_3E3960[] = "__OTR__effects/effect_gfx_effect_75/D_09001000_3E3960";
 static const ALIGN_ASSET(2) char D_090016D0_3E4030[] = "__OTR__effects/effect_gfx_effect_75/dlist_16D0";
 static const ALIGN_ASSET(2) char D_09001738_3E4098[] = "__OTR__effects/effect_gfx_effect_75/dlist_1738";
 static const ALIGN_ASSET(2) char D_090017A0_3E4100[] = "__OTR__effects/effect_gfx_effect_75/dlist_17A0";

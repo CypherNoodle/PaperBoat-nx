@@ -75,6 +75,8 @@ unk_23.gfx:
   { type: GFX, offset: 0xD84400, symbol: pra_31_unk_23_gfx }
 unk_24.gfx:
   { type: GFX, offset: 0xD84478, symbol: pra_31_unk_24_gfx }
+pra_31_dl_5750:
+  { type: GFX, offset: 0xD844B0, symbol: pra_31_dl_5750 }
 unk_25.gfx:
   { type: GFX, offset: 0xD84528, symbol: pra_31_unk_25_gfx }
 unk_26.gfx:
@@ -93,6 +95,35 @@ unk_32.gfx:
   { type: GFX, offset: 0xD84790, symbol: pra_31_unk_32_gfx }
 unk_33.gfx:
   { type: GFX, offset: 0xD847B8, symbol: pra_31_unk_33_gfx }
+pra_31_unk_30_mtx:
+  { type: MTX, offset: 0xD864A0, symbol: pra_31_unk_30_mtx }
+pra_31_unk_26_mtx:
+  { type: MTX, offset: 0xD864E0, symbol: pra_31_unk_26_mtx }
+pra_31_unk_24_mtx:
+  { type: MTX, offset: 0xD86520, symbol: pra_31_unk_24_mtx }
+pra_31_unk_22_mtx:
+  { type: MTX, offset: 0xD86560, symbol: pra_31_unk_22_mtx }
+pra_31_unk_20_mtx:
+  { type: MTX, offset: 0xD865A0, symbol: pra_31_unk_20_mtx }
+pra_31_unk_18_mtx:
+  { type: MTX, offset: 0xD865E0, symbol: pra_31_unk_18_mtx }
+pra_31_unk_16_mtx:
+  { type: MTX, offset: 0xD86620, symbol: pra_31_unk_16_mtx }
+pra_31_unk_14_mtx:
+  { type: MTX, offset: 0xD86660, symbol: pra_31_unk_14_mtx }
+pra_31_unk_12_mtx:
+  { type: MTX, offset: 0xD866A0, symbol: pra_31_unk_12_mtx }
+pra_31_unk_10_mtx:
+  { type: MTX, offset: 0xD866E0, symbol: pra_31_unk_10_mtx }
+pra_31_unk_08_mtx:
+  { type: MTX, offset: 0xD86720, symbol: pra_31_unk_08_mtx }
+pra_31_unk_06_mtx:
+  { type: MTX, offset: 0xD86760, symbol: pra_31_unk_06_mtx }
+pra_31_unk_04_mtx:
+  { type: MTX, offset: 0xD867A0, symbol: pra_31_unk_04_mtx }
+pra_31_unk_02_mtx:
+  { type: MTX, offset: 0xD867E0, symbol: pra_31_unk_02_mtx }
+
 # --- Stairs vertices (28 verts) ---
-stairs.vtx:
+pra_31_stairs_vtx:
   { type: VTX, offset: 0xD86820, count: 28, symbol: pra_31_stairs_vtx }
