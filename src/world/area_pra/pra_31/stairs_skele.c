@@ -46,7 +46,7 @@ StaticAnimatorNode N(D_80245B98_D848F8) = {
 
 StaticAnimatorNode N(D_80245BC4_D84924) = {
     .pos = { 0.0f, 0.0f, 0.0f },
-    .displayList = (void*) pra_31_unk_25_gfx,
+    .displayList = (void*) pra_31_dl_5750,
 };
 
 StaticAnimatorNode N(D_80245BF0_D84950) = {
