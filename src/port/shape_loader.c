@@ -168,20 +168,11 @@ void Shape_LoadFromRawData(ShapeFile *shapeFile, const u8 *rawData,
     return;
   }
 
-  // Copy raw shape data into the persistent shapeFile buffer.
-  // Raw data (offsets, matrices, vertices, strings) goes at the start.
-  // Native structs (ModelNode, etc.) are bump-allocated from the end.
-  if (rawSize > sizeof(shapeFile->data)) {
-    rawSize = sizeof(shapeFile->data);
-  }
-  memcpy(shapeFile->data, rawData, rawSize);
-
-  u8 *base = shapeFile->data;
+  (void)rawSize;
+  u8 *base = (u8 *)rawData;
   RawShapeFileHeader *rawHeader = (RawShapeFileHeader *)base;
 
-  // Initialize bump allocator in the unused tail of shapeFile->data
-  size_t arenaStart = (rawSize + 15) & ~15; // align up
-  shape_arena_init(base + arenaStart, sizeof(shapeFile->data) - arenaStart);
+  shape_arena_init(shapeFile->data, sizeof(shapeFile->data));
 
   gCurrentShapeName = shapeName;
 

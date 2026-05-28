@@ -655,7 +655,7 @@ API_CALLABLE(SetNpcVar) {
     Enemy* npc = script->owner1.enemy;
     s32 npcID = evt_get_variable(script, *args++);
     s32 varIdx = evt_get_variable(script, *args++);
-    s32 val = evt_get_variable(script, *args++);
+    intptr_t val = evt_get_variable(script, *args++);
 
     if (npcID == NPC_SELF) {
         npcID = npc->npcID;

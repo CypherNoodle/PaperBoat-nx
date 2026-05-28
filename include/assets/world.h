@@ -98,6 +98,7 @@ static const ALIGN_ASSET(2) char pra_31_unk_22_gfx[] = "__OTR__world/world_pra_3
 static const ALIGN_ASSET(2) char pra_31_unk_23_gfx[] = "__OTR__world/world_pra_31/unk_23.gfx";
 static const ALIGN_ASSET(2) char pra_31_unk_24_gfx[] = "__OTR__world/world_pra_31/unk_24.gfx";
 static const ALIGN_ASSET(2) char pra_31_unk_25_gfx[] = "__OTR__world/world_pra_31/unk_25.gfx";
+static const ALIGN_ASSET(2) char pra_31_dl_5750[] = "__OTR__world/world_pra_31/pra_31_dl_5750";
 static const ALIGN_ASSET(2) char pra_31_unk_26_gfx[] = "__OTR__world/world_pra_31/unk_26.gfx";
 static const ALIGN_ASSET(2) char pra_31_unk_27_gfx[] = "__OTR__world/world_pra_31/unk_27.gfx";
 static const ALIGN_ASSET(2) char pra_31_unk_28_gfx[] = "__OTR__world/world_pra_31/unk_28.gfx";

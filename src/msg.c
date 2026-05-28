@@ -548,9 +548,14 @@ s32 _update_message(MessagePrintState* printer) {
 void render_messages(void) {
     Mtx* matrix = &gMessageWindowProjMatrix[gCurrentDisplayContextIndex];
     s32 i;
+    bool msgInterpScopeOpen = false;
 
     for (i = 0; i < ARRAY_COUNT(gMessagePrinters); i++) {
         if (gMessagePrinters[i].stateFlags & MSG_STATE_FLAG_2) {
+            if (!msgInterpScopeOpen) {
+                FrameInterpolation_RecordOpenChild("render_messages", 0);
+                msgInterpScopeOpen = true;
+            }
             CALL_CANCELLABLE_CONTINUE_EVENT(MessageDrawSetup, &gMessagePrinters[i]);
             gSPViewport(gMainGfxPos++, &D_8014C280);
             guOrtho(matrix, 0.0f, 319.0f, -240.0f, 0.0f, -500.0f, 500.0f, 1.0f);
@@ -588,6 +593,10 @@ void render_messages(void) {
 
             CALL_EVENT(MessagePostDraw, &gMessagePrinters[i]);
         }
+    }
+
+    if (msgInterpScopeOpen) {
+        FrameInterpolation_RecordCloseChild();
     }
 }
 
@@ -1989,7 +1998,9 @@ void draw_msg(intptr_t msgID, s32 posX, s32 posY, s32 opacity, s32 palette, u8 s
         }
 
         msg_copy_to_print_buffer(printer, 10000, 1);
+        FrameInterpolation_RecordOpenChild("draw_msg", 0);
         appendGfx_message(printer, (s16)posX, (s16)posY, 0, 0, flags, opacity & 0xFF);
+        FrameInterpolation_RecordCloseChild();
 
     }
 }

@@ -530,7 +530,7 @@ void imgfx_update(u32 idx, ImgFXType type, intptr_t imgfxArg1, s32 imgfxArg2, s3
         case IMGFX_OVERLAY:
         case IMGFX_OVERLAY_XLU:
             if (type == state->lastColorCmd
-                && imgfxArg1 == (s32) state->ints.overlay.pattern
+                && (ImgFXOverlayTexture*)imgfxArg1 == state->ints.overlay.pattern
                 && imgfxArg2 == state->ints.overlay.alpha
             ) {
                 // no paramaters have changed
@@ -673,6 +673,9 @@ void imgfx_update(u32 idx, ImgFXType type, intptr_t imgfxArg1, s32 imgfxArg2, s3
             break;
         case IMGFX_OVERLAY:
         case IMGFX_OVERLAY_XLU:
+            // store the full pointer. args.color[0] only captured the low 32 bits
+            state->ints.overlay.pattern = (ImgFXOverlayTexture*)imgfxArg1;
+            state->ints.overlay.alpha = imgfxArg2;
             state->meshType = IMGFX_MESH_STRIP;
             if (imgfxArg2 >= 255) {
                 state->renderType = IMGFX_RENDER_OVERLAY_RGB;
@@ -1813,7 +1816,10 @@ void imgfx_appendGfx_mesh_strip(ImgFXState* state, Matrix4f mtx) {
     state->floats.overlay.posX = (s32)(state->floats.overlay.posX + ufs->offsetX) % (ufs->width * 4);
     state->floats.overlay.posY = (s32)(state->floats.overlay.posY + ufs->offsetY) % (ufs->height * 4);
     //TODO: no need for LOAD_ASSET here.
+    // Enable strict (depth-equal) decal compare for this overlay pass.
+    gSPSetStrictDecal(gMainGfxPos++, 1);
     gSPDisplayList(gMainGfxPos++, (Gfx*) LOAD_ASSET(ufs->displayList));
+    gSPSetStrictDecal(gMainGfxPos++, 0);
     gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
 }
 

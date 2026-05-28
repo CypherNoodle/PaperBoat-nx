@@ -56,6 +56,10 @@ API_CALLABLE(SetCamPerspective) {
     camera->vfov = vfov;
     camera->farClip = farClip;
     camera->nearClip = nearClip;
+
+    if (mode == CAM_UPDATE_FROM_ZONE) {
+        camera->params.world.zoomPercent = 100;
+    }
     return ApiStatus_DONE2;
 }
 

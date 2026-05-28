@@ -12,7 +12,7 @@ dlist_1000:
   { type: GFX, offset: 0x09001000, symbol: D_09001000_3A6BE0 }
 
 vtx_10F8:
-  { type: VTX, offset: 0x090010F8, count: 25, symbol: D_090010F8_3A6CD8 }
+  { type: VTX, offset: 0x090010F8, count: 31 }
 
 vtx_1288:
   { type: VTX, offset: 0x09001288, count: 2, symbol: D_09001288_3A6E68 }

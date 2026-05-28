@@ -1,5 +1,6 @@
 #include "battle/battle.h"
 #include "vars_access.h"
+#include "port/patches/Patches.h"
 
 BSS char D_8029F660[0x400]; // unused?
 
@@ -318,6 +319,16 @@ API_CALLABLE(LoadBattleDmaData) {
 
     if (dmaEntry == nullptr) {
         return ApiStatus_DONE2;
+    }
+
+    // The lava piranha battle uses OverrideBattleDmaDest(VINE_*_BASE) +
+    // LoadBattleDmaData(VINE_ANIM_*) instead of the world's LoadAnimationFromTable
+    // helper.
+    for (s32 i = 0; i < 4; i++) {
+        if (gBattleDmaDest == (u8*)PortLavaPiranhaVineBase[i]) {
+            port_lava_piranha_set_script(i, dmaIndex);
+            break;
+        }
     }
 
     if (gBattleDmaDest == nullptr) {

@@ -2,6 +2,7 @@
 #include "animation_script.h"
 #include "model.h"
 #include "port/Engine.h"
+#include "port/patches/Patches.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -1169,6 +1170,7 @@ void clear_animator_flags(s32 index, s32 bits) {
 void play_model_animation(s32 index, s16* animPos) {
     ModelAnimator* animator = (*gCurrentAnimMeshListPtr)[index & ~BATTLE_ID_BIT];
 
+    animPos = port_lava_piranha_translate(animPos);
     if (animator->animationBuffer != nullptr) {
         animPos = (s16*) (((s32)animPos & 0xFFFFFF) + (s32)animator->animationBuffer); // TODO: array access? / cleanup
     }
@@ -1183,6 +1185,7 @@ void play_model_animation_starting_from(s32 index, s16* animPos, s32 framesToSki
     ModelAnimator* animator = (*gCurrentAnimMeshListPtr)[indexMasked];
     s32 i;
 
+    animPos = port_lava_piranha_translate(animPos);
     if (animator->animationBuffer != nullptr) {
         animPos = (s16*) (((s32)animPos & 0xFFFFFF) + (s32)animator->animationBuffer); // TODO: array access? / cleanup
     }

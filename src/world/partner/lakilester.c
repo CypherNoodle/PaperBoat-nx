@@ -1176,7 +1176,6 @@ API_CALLABLE(N(EnterMap)) {
     PlayerStatus* playerStatus = &gPlayerStatus;
     Npc* lakilester = get_npc_unsafe(NPC_PARTNER);
     f32 temp_f0, temp_f2, temp_f4;
-    f32* temp_s0_2;
 
     if (isInitialCall) {
         script->functionTemp[0] = 0;
@@ -1204,7 +1203,6 @@ API_CALLABLE(N(EnterMap)) {
             }
 
             script->functionTemp[1] = script->varTable[4];
-            temp_s0_2 = (f32*)&script->varTable[5];
             temp_f2 = atan2(lakilester->pos.x, lakilester->pos.z, script->varTable[1], script->varTable[3]);
             lakilester->yaw = temp_f2;
 
@@ -1222,7 +1220,7 @@ API_CALLABLE(N(EnterMap)) {
             N(offset_player_from_camera)(2.0f);
             gGameStatusPtr->keepUsingPartnerOnMapChange = true;
             lakilester->flags |= NPC_FLAG_IGNORE_PLAYER_COLLISION;
-            lakilester->moveSpeed = *temp_s0_2;
+            lakilester->moveSpeed = script->varTableF[5];
             lakilester->jumpScale = 0.0f;
             N(UpdatePushingWall) = false;
             N(PlayerBounceOffset) = 0;

@@ -19,5 +19,5 @@ monstar.pal:
 # Monstar display list and vertices
 monstar.gfx:
   { type: GFX, offset: 0xD1F780, size: 0x110, symbol: sam_05_monstar_gfx }
-monstar.vtx:
+sam_05_monstar_vtx:
   { type: VTX, offset: 0xD1F890, count: 66, symbol: sam_05_monstar_vtx }

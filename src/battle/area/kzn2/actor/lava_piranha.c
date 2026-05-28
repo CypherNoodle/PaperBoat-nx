@@ -12,6 +12,10 @@
 #include "assets/battle.h"
 #include "port/Engine.h"
 
+// VINE_*_BASE come from here so the battle actor uses the same
+// identity buffers as the world cutscene (see src/port/patches/Patches.h).
+#include "port/patches/Patches.h"
+
 #define NAMESPACE A(lava_piranha)
 
 enum N(ActorPartIDs) {
@@ -298,10 +302,12 @@ extern Addr Vine0Base;
 #define VINE_2_BASE (s32) Vine2Base
 #define VINE_3_BASE (s32) Vine3Base
 #else
+#if 0
 #define VINE_0_BASE 0x80234000
 #define VINE_1_BASE 0x80231000
 #define VINE_2_BASE 0x8022E000
 #define VINE_3_BASE 0x8022C000
+#endif
 #endif
 
 BSS LavaPiranhaVine N(VineData)[NUM_VINES];
@@ -310,13 +316,13 @@ BSS s32 N(VineRenderState);
 void N(make_vine_interpolation)(LavaPiranhaVine* vine) {
     Evt dummyEvt;
     Evt* dummyEvtPtr = &dummyEvt;
-    s32 args[4];
+    Bytecode args[4];
     s32 count;
 
     // setup dummy call to LoadPath
-    args[0] = 3 * vine->boneCount;      // generate three output samples per input
-    args[1] = (s32) &vine->bonePos;     // points
-    args[2] = vine->boneCount;          // num vectors
+    args[0] = 3 * vine->boneCount;          // generate three output samples per input
+    args[1] = (intptr_t) &vine->bonePos;    // points
+    args[2] = vine->boneCount;              // num vectors
     args[3] = EASING_LINEAR;
     dummyEvtPtr->ptrReadPos = args;
     LoadPath(dummyEvtPtr, 1);

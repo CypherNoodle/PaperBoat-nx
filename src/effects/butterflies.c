@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effects_internal.h"
 #include "assets/effects.h"
+#include "port/Engine.h"
 
 
 const char* D_E00AA6C0[11] = {
@@ -154,6 +155,7 @@ void butterflies_appendGfx(void* effect) {
 
     s32 primColor = data->unk_24;
     s32 type = data->unk_00;
+    Vtx* vtxBase = (Vtx*)LOAD_ASSET(D_09002D40_3ADD70);
 
     gDPPipeSync(gMainGfxPos++);
     gSPSegment(gMainGfxPos++, 0x09, VIRTUAL_TO_PHYSICAL(effectTemp->shared->graphics));
@@ -169,7 +171,7 @@ void butterflies_appendGfx(void* effect) {
     gDPSetPrimColor(gMainGfxPos++, 0, 0, primColor, primColor, primColor, 255);
     gSPDisplayList(gMainGfxPos++, D_09003880_3AE8B0);
     gSPDisplayList(gMainGfxPos++, D_E00AA6C0[type]);
-    gSPVertex(gMainGfxPos++, &D_09002D40_3ADD70[data->unk_2C], 6, 0);
+    gSPVertex(gMainGfxPos++, &vtxBase[data->unk_2C], 6, 0);
     gSPDisplayList(gMainGfxPos++, D_09003DC8_3AEDF8);
     gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
     gDPPipeSync(gMainGfxPos++);

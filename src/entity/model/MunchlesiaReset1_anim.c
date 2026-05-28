@@ -209,7 +209,7 @@ StaticAnimatorNode Entity_MunchlesiaReset1_Node1 = {
     .displayList = ENTITY_ANIM_NULL,
     .sibling = ENTITY_ANIM_NULL,
     .child = &Entity_MunchlesiaReset1_Node2,
-    .vertexStartOffset = (s32)ENTITY_ANIM_NULL,
+    .vertexStartOffset = -1,
     .vtxList = ENTITY_ANIM_NULL,
 };
 
