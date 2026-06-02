@@ -2014,7 +2014,7 @@ void msg_update_rewind_arrow(s32 printerIndex) {
     f32 colorB = 255.0f;
     Matrix4f sp18;
     Matrix4f sp58;
-    f32 temp;
+    f32 temp = 0;
 
     gDPPipeSync(gMainGfxPos++);
     gSPDisplayList(gMainGfxPos++, D_8014C2D8);
