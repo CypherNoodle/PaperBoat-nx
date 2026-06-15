@@ -4,6 +4,7 @@
 #include "model.h"
 #include "entity.h"
 #include "sprite/player.h"
+#include "port/Engine.h"
 
 void delete_entity(s32);
 void partner_enable_input(void);
@@ -155,18 +156,20 @@ void N(appendGfx_score_display)(void* renderData) {
         }
     }
 
+    s32 hiddenX = OTRGetRectDimensionFromRightEdge(0);
+    s32 shownX = OTRGetRectDimensionFromRightEdge(95);
     if (scorekeeper->varTable[3] == 0) {
-        if (data->windowB_posX < SCREEN_WIDTH) {
+        if (data->windowB_posX < hiddenX) {
             data->windowB_posX += 10;
-            if (data->windowB_posX > SCREEN_WIDTH) {
-                data->windowB_posX = SCREEN_WIDTH;
+            if (data->windowB_posX > hiddenX) {
+                data->windowB_posX = hiddenX;
             }
         }
     } else {
-        if (data->windowB_posX > 225) {
+        if (data->windowB_posX > shownX) {
             data->windowB_posX -= 10;
-            if (data->windowB_posX < 225) {
-                data->windowB_posX = 225;
+            if (data->windowB_posX < shownX) {
+                data->windowB_posX = shownX;
             }
         }
     }

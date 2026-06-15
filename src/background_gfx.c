@@ -5,6 +5,7 @@
 #include "sprite.h"
 #include "overlay.h"
 #include "dx/config.h"
+#include "port/Engine.h"
 
 extern s32 gPauseBackgroundFade;
 
@@ -460,36 +461,31 @@ void gfx_draw_background(void) {
                 backgroundMaxY = SCREEN_HEIGHT;
             }
 
-            if (!(gGameStatusPtr->backgroundFlags & BACKGROUND_FLAG_TEXTURE)) {
-                gDPFillRectangle(gMainGfxPos++, backgroundMinX, backgroundMinY, backgroundMaxX - 1, backgroundMaxY - 1);
-            } else {
-                appendGfx_background_texture();
-            }
+            {
+                s32 wsLeft = OTRGetRectDimensionFromLeftEdge(0);
+                s32 wsRight = OTRGetRectDimensionFromRightEdge(0);
 
-            gDPPipeSync(gMainGfxPos++);
-            gDPSetCycleType(gMainGfxPos++, G_CYC_FILL);
-            gDPSetRenderMode(gMainGfxPos++, G_RM_NOOP, G_RM_NOOP2);
-            gDPSetFillColor(gMainGfxPos++, PACK_FILL_COLOR(0, 0, 0, 1));
-            gDPPipeSync(gMainGfxPos++);
+                if (!(gGameStatusPtr->backgroundFlags & BACKGROUND_FLAG_TEXTURE)) {
+                    gDPFillWideRectangle(gMainGfxPos++, wsLeft, backgroundMinY, wsRight - 1, backgroundMaxY - 1);
+                } else {
+                    appendGfx_background_texture();
+                }
 
-            if (backgroundMinY > 0) {
-                gDPFillRectangle(gMainGfxPos++, 0, 0, SCREEN_WIDTH - 1, backgroundMinY - 1);
-                gDPNoOp(gMainGfxPos++);
-            }
+                gDPPipeSync(gMainGfxPos++);
+                gDPSetCycleType(gMainGfxPos++, G_CYC_FILL);
+                gDPSetRenderMode(gMainGfxPos++, G_RM_NOOP, G_RM_NOOP2);
+                gDPSetFillColor(gMainGfxPos++, PACK_FILL_COLOR(0, 0, 0, 1));
+                gDPPipeSync(gMainGfxPos++);
 
-            if (backgroundMinX > 0) {
-                gDPFillRectangle(gMainGfxPos++, 0, backgroundMinY, backgroundMinX - 1, backgroundMaxY - 1);
-                gDPNoOp(gMainGfxPos++);
-            }
-
-            if (backgroundMaxX < SCREEN_WIDTH) {
-                gDPFillRectangle(gMainGfxPos++, backgroundMaxX, backgroundMinY, SCREEN_WIDTH - 1, backgroundMaxY - 1);
-                gDPNoOp(gMainGfxPos++);
-            }
-
-            if (backgroundMaxY < SCREEN_HEIGHT) {
-                gDPFillRectangle(gMainGfxPos++, 0, backgroundMaxY, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
-                gDPNoOp(gMainGfxPos++);
+                // Black letterbox above/below the play area, full visible width.
+                if (backgroundMinY > 0) {
+                    gDPFillWideRectangle(gMainGfxPos++, wsLeft, 0, wsRight - 1, backgroundMinY - 1);
+                    gDPNoOp(gMainGfxPos++);
+                }
+                if (backgroundMaxY < SCREEN_HEIGHT) {
+                    gDPFillWideRectangle(gMainGfxPos++, wsLeft, backgroundMaxY, wsRight - 1, SCREEN_HEIGHT - 1);
+                    gDPNoOp(gMainGfxPos++);
+                }
             }
             break;
     }

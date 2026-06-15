@@ -615,6 +615,8 @@ s32 create_status_icon_set(void);
 s32 find_item(s32);
 
 void enable_background_wave(void);
+void enable_background_solid_fill(void);
+void disable_background_solid_fill(void);
 
 void set_map_change_fade_rate(s16);
 void load_map_by_IDs(s16 areaID, s16 mapID, s16 loadType);

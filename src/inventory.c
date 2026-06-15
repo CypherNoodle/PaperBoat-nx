@@ -1,6 +1,7 @@
 #include "inventory.h"
 #include "hud_element.h"
 #include "dx/config.h"
+#include "port/Engine.h"
 
 #define FULLY_EXTENDED_Y  18
 #define FULLY_RETRACTED_Y -100
@@ -896,10 +897,12 @@ void update_status_bar(void) {
     }
 
     gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, SCREEN_XMIN, SCREEN_YMIN, SCREEN_XMAX, SCREEN_YMAX);
+    statusBar->drawPosX = OTRGetRectDimensionFromLeftEdge(12);
     x = statusBar->drawPosX;
     y = statusBar->drawPosY;
     draw_box(0, WINDOW_STYLE_5, x,       y, 0, 174, 35, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, nullptr, nullptr, nullptr, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
-    draw_box(0, WINDOW_STYLE_6, x + 174, y, 0, 122, 25, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, nullptr, nullptr, nullptr, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
+    // Widescreen: stretch the right portion of the bar out to the screen's right
+    draw_box(0, WINDOW_STYLE_6, x + 174, y, 0, OTRGetRectDimensionFromRightEdge(12) - (x + 174), 25, 255, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, nullptr, nullptr, nullptr, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
 
     if (statusBar->hpBlinkTimeLeft > 0) {
         statusBar->hpBlinkTimeLeft--;
@@ -993,18 +996,18 @@ void update_status_bar(void) {
 
     if (showStat) {
         id = statusBar->spIconHID;
-        x = statusBar->drawPosX + 195;
+        x = OTRGetRectDimensionFromRightEdge(113); // native x 207, 113px from right
         y = statusBar->drawPosY + 14;
         hud_element_set_render_pos(id, x, y);
         hud_element_draw_next(id);
 
         id = statusBar->spShineHID;
-        x = statusBar->drawPosX + 195;
+        x = OTRGetRectDimensionFromRightEdge(113);
         y = statusBar->drawPosY + 9;
         hud_element_set_render_pos(id, x, y);
         hud_element_draw_next(id);
 
-        x = statusBar->drawPosX + 200;
+        x = OTRGetRectDimensionFromRightEdge(108); // native x 212, 108px from right
         y = statusBar->drawPosY + 8;
         status_bar_draw_number(statusBar->spTimesHID, x, y, playerData->starPoints, 2);
     }
@@ -1030,18 +1033,18 @@ void update_status_bar(void) {
 
     if (showStat) {
         id = statusBar->coinIconHID;
-        x = statusBar->drawPosX + 244;
+        x = OTRGetRectDimensionFromRightEdge(64); // native x 256, 64px from right
         y = statusBar->drawPosY + 14;
         hud_element_set_render_pos(id, x, y);
         hud_element_draw_next(id);
 
         id = statusBar->coinSparkleHID;
-        x = statusBar->drawPosX + 244;
+        x = OTRGetRectDimensionFromRightEdge(64);
         y = statusBar->drawPosY + 14;
         hud_element_set_render_pos(id, x, y);
         hud_element_draw_next(id);
 
-        x = statusBar->drawPosX + 247;
+        x = OTRGetRectDimensionFromRightEdge(61); // native x 259, 61px from right
         y = statusBar->drawPosY + 8;
         status_bar_draw_number(statusBar->coinTimesHID, x, y, statusBar->displayCoins, 3);
     }

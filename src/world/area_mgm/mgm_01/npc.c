@@ -2,6 +2,7 @@
 #include "hud_element.h"
 #include "effects.h"
 #include "entity.h"
+#include "port/Engine.h"
 
 #define SCOREKEEPER_ENEMY_IDX 0
 #define BROKEN_BLOCKS_VAR_IDX 2
@@ -101,18 +102,20 @@ void N(appendGfx_score_display) (void* renderData) {
     HudElemID hid;
     s32 diff;
 
+    s32 hiddenX = OTRGetRectDimensionFromRightEdge(0) + 1;
+    s32 shownX = OTRGetRectDimensionFromRightEdge(100);
     if (scorekeeper->varTable[BROKEN_BLOCKS_VAR_IDX] == -1) {
-        if (data->scoreWindowPosX < SCREEN_WIDTH + 1) {
+        if (data->scoreWindowPosX < hiddenX) {
             data->scoreWindowPosX += 10;
-            if (data->scoreWindowPosX > SCREEN_WIDTH + 1) {
-                data->scoreWindowPosX = SCREEN_WIDTH + 1;
+            if (data->scoreWindowPosX > hiddenX) {
+                data->scoreWindowPosX = hiddenX;
             }
         }
     } else {
-        if (data->scoreWindowPosX > 220) {
+        if (data->scoreWindowPosX > shownX) {
             data->scoreWindowPosX -= 10;
-            if (data->scoreWindowPosX < 220) {
-                data->scoreWindowPosX = 220;
+            if (data->scoreWindowPosX < shownX) {
+                data->scoreWindowPosX = shownX;
             }
         }
     }

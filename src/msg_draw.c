@@ -296,9 +296,9 @@ void appendGfx_message(MessagePrintState* printer, s16 posX, s16 posY, u16 addit
     }
     msg_drawState->textStartPos[0] = 0;
     msg_drawState->textStartPos[1] = 0;
-    msg_drawState->clipX[0] = 0;
+    msg_drawState->clipX[0] = OTRGetRectDimensionFromLeftEdge(0);
     msg_drawState->clipY[0] = 0;
-    msg_drawState->clipX[1] = SCREEN_WIDTH - 1;
+    msg_drawState->clipX[1] = OTRGetRectDimensionFromRightEdge(0) - 1;
     msg_drawState->clipY[1] = SCREEN_HEIGHT - 1;
     msg_drawState->msgScale.x = 1.0f;
     msg_drawState->msgScale.y = 1.0f;

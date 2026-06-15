@@ -9,6 +9,10 @@ s8 gBackroundWaveEnabled = false;
 s16 gBackroundTextureYOffset = 0;
 f32 gBackroundWavePhase = 0.0f;
 
+// widescreen: title screen only: draw the bg image once (no horizontal tiling)
+// and fill the revealed side bands with solid black instead.
+s8 gBackroundNoTileFill = false;
+
 BSS PAL_BIN gBackgroundPalette[256];
 static PAL_BIN* gBackgroundPaletteTlut = nullptr;
 BSS f32 gBackroundLastScrollValue;
@@ -49,6 +53,7 @@ void load_map_bg(char* optAssetName) {
 void reset_background_settings(void) {
     gBackroundLastScrollValue = 0;
     gBackroundWaveEnabled = false;
+    gBackroundNoTileFill = false;
     gGameStatusPtr->backgroundDarkness = 180;
     gGameStatusPtr->backgroundFlags &= BACKGROUND_RENDER_STATE_MASK;
     free(gBackgroundPaletteTlut);
@@ -231,6 +236,19 @@ void appendGfx_background_texture(void) {
     bgMinX = gGameStatusPtr->backgroundMinX;
     bgMinY = gGameStatusPtr->backgroundMinY;
 
+    // Title screen (widescreen): fill the full visible width with solid white
+    // first. the bg image is then drawn once on top of the center.
+    if (gBackroundNoTileFill) {
+        s32 fillLeft = OTRGetRectDimensionFromLeftEdge(0);
+        s32 fillRight = OTRGetRectDimensionFromRightEdge(0);
+        gDPPipeSync(gMainGfxPos++);
+        gDPSetCycleType(gMainGfxPos++, G_CYC_FILL);
+        gDPSetRenderMode(gMainGfxPos++, G_RM_NOOP, G_RM_NOOP2);
+        gDPSetFillColor(gMainGfxPos++, PACK_FILL_COLOR(255, 255, 255, 1));
+        gDPFillWideRectangle(gMainGfxPos++, fillLeft, bgMinY, fillRight - 1, bgMinY + bgMaxY - 1);
+        gDPPipeSync(gMainGfxPos++);
+    }
+
     gDPPipeSync(gMainGfxPos++);
     gDPSetCycleType(gMainGfxPos++, G_CYC_COPY);
     gDPSetTexturePersp(gMainGfxPos++, G_TP_NONE);
@@ -247,6 +265,20 @@ void appendGfx_background_texture(void) {
     }
 
     if (!gBackroundWaveEnabled) {
+        // Widescreen: tile the scrolling background across the full visible width.
+        s32 wsLeft = OTRGetRectDimensionFromLeftEdge(0);
+        s32 wsRight = OTRGetRectDimensionFromRightEdge(0);
+        s32 tx, bgTileBaseX = bgMinX;
+        if (gBackroundNoTileFill) {
+            // Title screen: draw the image exactly once at its native center,
+            // the side bands were already filled solid above.
+            wsRight = bgMinX + bgMaxX;
+        } else {
+            while (bgTileBaseX > wsLeft) {
+                bgTileBaseX -= bgMaxX;
+            }
+        }
+
         lineHeight = 2048 / gGameStatusPtr->backgroundMaxX;
         numLines = gGameStatusPtr->backgroundMaxY / lineHeight;
         extraHeight = gGameStatusPtr->backgroundMaxY % lineHeight;
@@ -260,12 +292,14 @@ void appendGfx_background_texture(void) {
                                0, 0, 295, 5, 0,
                                G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
-            gSPTextureRectangle(gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4,
-                                                 (bgXOffset + bgMinX - 1) * 4, (lineHeight * i + lineHeight - 1 + bgMinY) * 4,
-                                                 G_TX_RENDERTILE, (bgMaxX - bgXOffset) * 32, 0, 4096, 1024);
-            gSPTextureRectangle(gMainGfxPos++, (bgXOffset + bgMinX) * 4, (lineHeight * i + bgMinY) * 4,
-                                                 (bgMaxX + bgMinX - 1) * 4, (lineHeight * i + lineHeight - 1 + bgMinY) * 4,
-                                                 G_TX_RENDERTILE, 0, 0, 4096, 1024);
+            for (tx = bgTileBaseX; tx < wsRight; tx += bgMaxX) {
+                gSPWideTextureRectangle(gMainGfxPos++, tx * 4, (lineHeight * i + bgMinY) * 4,
+                                                     (bgXOffset + tx - 1) * 4, (lineHeight * i + lineHeight - 1 + bgMinY) * 4,
+                                                     G_TX_RENDERTILE, (bgMaxX - bgXOffset) * 32, 0, 4096, 1024);
+                gSPWideTextureRectangle(gMainGfxPos++, (bgXOffset + tx) * 4, (lineHeight * i + bgMinY) * 4,
+                                                     (bgMaxX + tx - 1) * 4, (lineHeight * i + lineHeight - 1 + bgMinY) * 4,
+                                                     G_TX_RENDERTILE, 0, 0, 4096, 1024);
+            }
         }
         if (extraHeight != 0) {
             texOffsetY = gBackroundTextureYOffset + lineHeight * i;
@@ -276,12 +310,14 @@ void appendGfx_background_texture(void) {
                                G_IM_FMT_CI, G_IM_SIZ_8b, bgMaxX, extraHeight,
                                0, 0, 295, extraHeight - 1, 0,
                                G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-            gSPTextureRectangle(gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4,
-                                                 (bgXOffset + bgMinX - 1) * 4, (bgMaxY - 1 + bgMinY) * 4,
-                                                 G_TX_RENDERTILE, (bgMaxX - bgXOffset) * 32, 0, 4096, 1024);
-            gSPTextureRectangle(gMainGfxPos++, (bgXOffset + bgMinX) * 4, (lineHeight * i + bgMinY) * 4,
-                                                 (bgMaxX + bgMinX - 1) * 4, (bgMaxY - 1 + bgMinY) * 4,
-                                                 G_TX_RENDERTILE, 0, 0, 4096, 1024);
+            for (tx = bgTileBaseX; tx < wsRight; tx += bgMaxX) {
+                gSPWideTextureRectangle(gMainGfxPos++, tx * 4, (lineHeight * i + bgMinY) * 4,
+                                                     (bgXOffset + tx - 1) * 4, (bgMaxY - 1 + bgMinY) * 4,
+                                                     G_TX_RENDERTILE, (bgMaxX - bgXOffset) * 32, 0, 4096, 1024);
+                gSPWideTextureRectangle(gMainGfxPos++, (bgXOffset + tx) * 4, (lineHeight * i + bgMinY) * 4,
+                                                     (bgMaxX + tx - 1) * 4, (bgMaxY - 1 + bgMinY) * 4,
+                                                     G_TX_RENDERTILE, 0, 0, 4096, 1024);
+            }
         }
     } else {
         lineHeight = 6;
@@ -334,4 +370,12 @@ void enable_background_wave(void) {
 
 void disable_background_wave(void) {
     gBackroundWaveEnabled = false;
+}
+
+void enable_background_solid_fill(void) {
+    gBackroundNoTileFill = true;
+}
+
+void disable_background_solid_fill(void) {
+    gBackroundNoTileFill = false;
 }

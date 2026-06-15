@@ -13,6 +13,7 @@
 #include <BS_thread_pool.hpp>
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstdarg>
 #include <fast/Fast3dWindow.h>
 #include <fast/interpreter.h>
@@ -1139,4 +1140,125 @@ extern "C" void GameEngine_ClearDepthBuffer(void) {
       interp->GetCurrentRenderingAPI()->ClearFramebuffer(false, true);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Widescreen aspect-ratio helpers.
+// ---------------------------------------------------------------------------
+
+// Native logical dimensions are a fixed 320x240; used as a fallback when the
+// interpreter is not yet available (e.g. before the first frame).
+static constexpr float WS_NATIVE_WIDTH = 320.0f;
+static constexpr float WS_NATIVE_HEIGHT = 240.0f;
+
+Fast::Interpreter* GameEngine_GetInterpreter() {
+  auto wnd = std::dynamic_pointer_cast<Fast::Fast3dWindow>(
+      Ship::Context::GetInstance()->GetWindow());
+  if (wnd == nullptr) {
+    return nullptr;
+  }
+  return wnd->GetInterpreterWeak().lock().get();
+}
+
+extern "C" float GameEngine_GetAspectRatio(void) {
+  auto interp = GameEngine_GetInterpreter();
+  return interp != nullptr ? interp->mCurDimensions.aspect_ratio
+                           : (WS_NATIVE_WIDTH / WS_NATIVE_HEIGHT);
+}
+
+// Convert an AdjX-space native X into SCISSOR-space native X.
+extern "C" int16_t OTRGetScissorCoordX(float v) {
+  auto interp = GameEngine_GetInterpreter();
+  float nw = interp != nullptr ? (float)interp->mNativeDimensions.width
+                               : WS_NATIVE_WIDTH;
+  float k = (4.0f / 3.0f) / GameEngine_GetAspectRatio();
+  return (int16_t)std::lround(nw / 2 + k * (v - nw / 2));
+}
+
+extern "C" float OTRGetHUDAspectRatio(void) {
+  if (CVarGetInteger("gHUDAspectRatio.Enabled", 0) == 0 ||
+      CVarGetInteger("gHUDAspectRatio.X", 0) == 0 ||
+      CVarGetInteger("gHUDAspectRatio.Y", 0) == 0) {
+    return GameEngine_GetAspectRatio();
+  }
+  return (float)CVarGetInteger("gHUDAspectRatio.X", 1) /
+         (float)CVarGetInteger("gHUDAspectRatio.Y", 1);
+}
+
+extern "C" float OTRGetDimensionFromLeftEdgeForcedAspect(float v,
+                                                         float aspectRatio) {
+  auto interp = GameEngine_GetInterpreter();
+  float nw = interp != nullptr ? (float)interp->mNativeDimensions.width
+                               : WS_NATIVE_WIDTH;
+  float nh = interp != nullptr ? (float)interp->mNativeDimensions.height
+                               : WS_NATIVE_HEIGHT;
+  float ar = aspectRatio > 0.0f ? aspectRatio : GameEngine_GetAspectRatio();
+  return (nw / 2 - nh / 2 * ar + v);
+}
+
+extern "C" float OTRGetDimensionFromRightEdgeForcedAspect(float v,
+                                                          float aspectRatio) {
+  auto interp = GameEngine_GetInterpreter();
+  float nw = interp != nullptr ? (float)interp->mNativeDimensions.width
+                               : WS_NATIVE_WIDTH;
+  float nh = interp != nullptr ? (float)interp->mNativeDimensions.height
+                               : WS_NATIVE_HEIGHT;
+  float ar = aspectRatio > 0.0f ? aspectRatio : GameEngine_GetAspectRatio();
+  return (nw / 2 + nh / 2 * ar - v);
+}
+
+extern "C" float OTRGetDimensionFromLeftEdge(float v) {
+  return OTRGetDimensionFromLeftEdgeForcedAspect(v, 0.0f);
+}
+
+extern "C" float OTRGetDimensionFromRightEdge(float v) {
+  return OTRGetDimensionFromRightEdgeForcedAspect(v, 0.0f);
+}
+
+extern "C" float OTRGetDimensionFromLeftEdgeOverride(float v) {
+  return OTRGetDimensionFromLeftEdgeForcedAspect(v, OTRGetHUDAspectRatio());
+}
+
+extern "C" float OTRGetDimensionFromRightEdgeOverride(float v) {
+  return OTRGetDimensionFromRightEdgeForcedAspect(v, OTRGetHUDAspectRatio());
+}
+
+extern "C" int16_t OTRGetRectDimensionFromLeftEdge(float v) {
+  return (int16_t)std::floor(OTRGetDimensionFromLeftEdge(v));
+}
+
+extern "C" int16_t OTRGetRectDimensionFromRightEdge(float v) {
+  return (int16_t)std::ceil(OTRGetDimensionFromRightEdge(v));
+}
+
+extern "C" int16_t OTRGetRectDimensionFromLeftEdgeForcedAspect(float v,
+                                                              float aspectRatio) {
+  return (int16_t)std::floor(
+      OTRGetDimensionFromLeftEdgeForcedAspect(v, aspectRatio));
+}
+
+extern "C" int16_t OTRGetRectDimensionFromRightEdgeForcedAspect(
+    float v, float aspectRatio) {
+  return (int16_t)std::ceil(
+      OTRGetDimensionFromRightEdgeForcedAspect(v, aspectRatio));
+}
+
+extern "C" int16_t OTRGetRectDimensionFromLeftEdgeOverride(float v) {
+  return OTRGetRectDimensionFromLeftEdgeForcedAspect(v, OTRGetHUDAspectRatio());
+}
+
+extern "C" int16_t OTRGetRectDimensionFromRightEdgeOverride(float v) {
+  return OTRGetRectDimensionFromRightEdgeForcedAspect(v, OTRGetHUDAspectRatio());
+}
+
+extern "C" uint32_t OTRGetGameRenderWidth(void) {
+  auto interp = GameEngine_GetInterpreter();
+  return interp != nullptr ? interp->mCurDimensions.width
+                           : (uint32_t)WS_NATIVE_WIDTH;
+}
+
+extern "C" uint32_t OTRGetGameRenderHeight(void) {
+  auto interp = GameEngine_GetInterpreter();
+  return interp != nullptr ? interp->mCurDimensions.height
+                           : (uint32_t)WS_NATIVE_HEIGHT;
 }

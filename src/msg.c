@@ -2163,7 +2163,7 @@ void draw_digit(IMG_PTR img, s32 charset, s32 posX, s32 posY) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK,
         G_TX_NOLOD, G_TX_NOLOD);
-    gSPTextureRectangle(gMainGfxPos++,
+    gSPWideTextureRectangle(gMainGfxPos++,
         4 * posX, 4 * posY,
         4 * (posX + num->texWidth), 4 * (posY + num->texHeight),
         G_TX_RENDERTILE,
@@ -2255,7 +2255,7 @@ void draw_number(s32 value, s32 x, s32 y, s32 charset, s32 palette, s32 opacity,
     gDPLoadTLUT_pal16(gMainGfxPos++, 0, D_802F4560[palette]);
     for (i = 0; i < count; i++) {
         posX = digitPosX[i];
-        if (posX > 0 && posX < 320) {
+        if (posX > OTRGetDimensionFromLeftEdge(0) && posX < OTRGetDimensionFromRightEdge(0)) {
             draw_digit(raster + digits[i] * texSize, charset, posX, y);
         }
     }

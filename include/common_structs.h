@@ -2196,7 +2196,7 @@ typedef struct {
     /* 0x00020 */ Hilite hilite;
     /* 0x00030 */ Mtx camPerspMatrix[8]; // could only be length 4, unsure
     /* 0x00230 */ Gfx mainGfx[DISPLAYCONTEXT_GFX_COUNT];
-    /* 0x10630 */ Gfx backgroundGfx[0x200]; // used by gfx_task_background
+    /* 0x10630 */ Gfx backgroundGfx[0x600]; // used by gfx_task_background (enlarged: widescreen tiles the scrolling bg across the full width, ~3-4x the texrects)
     /* 0x11630 */ Mtx matrixStack[0x200];
 } DisplayContext; // size = 0x19630
 

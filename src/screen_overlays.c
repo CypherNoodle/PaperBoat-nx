@@ -162,6 +162,36 @@ Gfx D_8014EA48[] = {
     gsDPSetDepthSource(G_ZS_PIXEL)
 };
 
+// Runtime, widescreen-aware equivalent of D_8014E9A8: the full-screen overlay
+// fill that the battle-start swirl (OVERLAY_TYPE_9 / OVERLAY_START_BATTLE) draws
+// behind the spinning-star stencils. The static D_8014E9A8 fills only native
+// [0,320], which AdjX squishes to the center ~75% of a wide window, leaving the
+// revealed side edges un-darkened. This emits the same render state but fills
+// the true visible width via gDPFillWideRectangle. The caller must set the
+// overlay prim color/alpha before calling, exactly as with D_8014E9A8.
+static void appendGfx_overlay_screen_fill(void) {
+    gDPPipeSync(gMainGfxPos++);
+    gDPSetDepthSource(gMainGfxPos++, G_ZS_PRIM);
+    gDPSetPrimDepth(gMainGfxPos++, 20, 0);
+    gDPSetRenderMode(gMainGfxPos++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    gDPSetCombineMode(gMainGfxPos++, PM_CC_SCREEN_OVERLAY, PM_CC_SCREEN_OVERLAY);
+    gSPClearGeometryMode(gMainGfxPos++, G_CULL_BOTH | G_LIGHTING | G_SHADING_SMOOTH);
+    gSPSetGeometryMode(gMainGfxPos++, G_ZBUFFER | G_SHADE);
+    gDPSetColorDither(gMainGfxPos++, G_CD_MAGICSQ);
+    gDPSetCycleType(gMainGfxPos++, G_CYC_1CYCLE);
+    gDPSetTextureFilter(gMainGfxPos++, G_TF_BILERP);
+    gDPSetTexturePersp(gMainGfxPos++, G_TP_NONE);
+    gDPSetTextureLOD(gMainGfxPos++, G_TL_TILE);
+    gDPSetTextureLUT(gMainGfxPos++, G_TT_NONE);
+    gDPSetTextureDetail(gMainGfxPos++, G_TD_CLAMP);
+    gDPSetTextureConvert(gMainGfxPos++, G_TC_FILT);
+    gDPFillWideRectangle(gMainGfxPos++, OTRGetRectDimensionFromLeftEdge(0), 0,
+                         OTRGetRectDimensionFromRightEdge(0), SCREEN_HEIGHT);
+    gDPSetColorDither(gMainGfxPos++, G_CD_DISABLE);
+    gDPPipeSync(gMainGfxPos++);
+    gDPSetDepthSource(gMainGfxPos++, G_ZS_PIXEL);
+}
+
 void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* overlay) {
     Camera* camera = &gCameras[gCurrentCameraID];
     u8 colR, colG, colB;
@@ -211,7 +241,8 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             gDPSetCombineMode(gMainGfxPos++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
             gDPSetPrimColor(gMainGfxPos++, 0, 0, colR, colG, colB, progress);
             gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-            gDPFillRectangle(gMainGfxPos++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+            gDPFillWideRectangle(gMainGfxPos++, OTRGetRectDimensionFromLeftEdge(0), 0,
+                             OTRGetRectDimensionFromRightEdge(0), SCREEN_HEIGHT - 1);
             gDPSetColorDither(gMainGfxPos++, G_CD_DISABLE);
             return;
         case OVERLAY_VIEWPORT_COLOR:
@@ -227,8 +258,8 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             gDPSetCombineMode(gMainGfxPos++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
             gDPSetPrimColor(gMainGfxPos++, 0, 0, colR, colG, colB, progress);
             gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-            gDPFillRectangle(gMainGfxPos++, camera->viewportStartX, camera->viewportStartY,
-                             camera->viewportStartX + camera->viewportW, camera->viewportStartY + camera->viewportH);
+            gDPFillWideRectangle(gMainGfxPos++, OTRGetRectDimensionFromLeftEdge(0), camera->viewportStartY,
+                             OTRGetRectDimensionFromRightEdge(0), camera->viewportStartY + camera->viewportH);
             gDPSetColorDither(gMainGfxPos++, G_CD_DISABLE);
             return;
     }
@@ -310,7 +341,7 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             guTranslate(&matrixStack[gMatrixListPos], 0.0f, 0.0f, 0.0f);
             gSPMatrix(gMainGfxPos++, &matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, alpha);
-            gSPDisplayList(gMainGfxPos++, D_8014E9A8);
+            appendGfx_overlay_screen_fill();
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
             break;
         case OVERLAY_START_BATTLE:
@@ -328,7 +359,7 @@ void _render_transition_stencil(u8 stencilType, f32 progress, ScreenOverlay* ove
             guTranslate(&matrixStack[gMatrixListPos], 0.0f, 0.0f, 0.0f);
             gSPMatrix(gMainGfxPos++, &matrixStack[gMatrixListPos++], G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, alpha);
-            gSPDisplayList(gMainGfxPos++, D_8014E9A8);
+            appendGfx_overlay_screen_fill();
             gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
             v0 = progress + 40;
             if (progress > 170) {

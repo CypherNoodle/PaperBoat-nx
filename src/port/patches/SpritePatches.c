@@ -144,9 +144,9 @@ void port_appendGfx_shading_palette(
 
     gDPSetScissor(
         gMainGfxPos++, 0,
-        camera->viewportStartX,
+        (gCurrentCameraID == CAM_DEFAULT || gCurrentCameraID == CAM_BATTLE) ? 0 : camera->viewportStartX,
         camera->viewportStartY,
-        camera->viewportStartX + camera->viewportW,
+        (gCurrentCameraID == CAM_DEFAULT || gCurrentCameraID == CAM_BATTLE) ? SCREEN_WIDTH : (camera->viewportStartX + camera->viewportW),
         camera->viewportStartY + camera->viewportH
     );
 

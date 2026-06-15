@@ -8,6 +8,7 @@
 #include "sprite/npc/BattleMerlee.h"
 #include "sprite/player.h"
 #include "model.h"
+#include "port/Engine.h"
 
 API_CALLABLE(ShowMerleeCoinMessage);
 API_CALLABLE(ShowMerleeRanOutMessage);
@@ -598,7 +599,10 @@ void update_encounters_neutral(void) {
                 }
             } else if (!(enemy->flags & ENEMY_FLAG_ACTIVE_WHILE_OFFSCREEN)) {
                 get_screen_coords(gCurrentCameraID, npc->pos.x, npc->pos.y, npc->pos.z, &screenX, &screenY, &screenZ);
-                if ((screenX < -160 || screenX > 480 || screenY < -120 || screenY > 360 || screenZ < 0) && !(enemy->flags & ENEMY_FLAG_PASSIVE)) {
+                f32 wsLeft = OTRGetDimensionFromLeftEdge(0);
+                f32 wsRight = OTRGetDimensionFromRightEdge(0);
+                f32 wsMarginX = (wsRight - wsLeft) * 0.5f;
+                if ((screenX < wsLeft - wsMarginX || screenX > wsRight + wsMarginX || screenY < -120 || screenY > 360 || screenZ < 0) && !(enemy->flags & ENEMY_FLAG_PASSIVE)) {
                     npc->flags |= NPC_FLAG_SUSPENDED;
                     enemy->flags |= ENEMY_FLAG_SUSPENDED;
                     script = get_script_by_id(enemy->auxScriptID);
