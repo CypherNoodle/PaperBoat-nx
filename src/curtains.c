@@ -3,6 +3,184 @@
 #include "ld_addrs.h"
 #include "nu/nusys.h"
 #include "game_modes.h"
+#include "port/Engine.h"
+#include "alignment.h"
+
+static const ALIGN_ASSET(2) char theater_walls_tex_setup_gfx[]    = "__OTR__theater/walls_tex_setup_gfx";
+static const ALIGN_ASSET(2) char theater_curtains_tex_setup_gfx[] = "__OTR__theater/curtains_tex_setup_gfx";
+static const ALIGN_ASSET(2) char theater_floor_tex_setup_gfx[]    = "__OTR__theater/floor_tex_setup_gfx";
+
+typedef struct {
+    s32 idx;    // vertex index in the group
+    f32 innerX; // |X| of the partner on the same texture row (the seam that stays fixed)
+    f32 innerS; // partner's S texcoord
+} TbPartner;
+
+static const TbPartner tbPart_Floor[]     = {
+    {4,800,2688},{5,800,2688},{11,800,2688},{20,800,2688},
+    {13,800,640},{14,800,640},{16,800,640},{17,800,640},{-1,0,0}};
+static const TbPartner tbPart_Curtain[]   = {
+    {12,960,1024},{15,960,1024},{18,960,2048},
+    {20,960,-1024},{21,960,-1024},{29,960,7168},{30,960,7168},{-1,0,0}};
+
+// Mutable per-frame working copies (filled by build_theater_widescreen_dl).
+static Vtx tb_LeftWall[6];
+static Vtx tb_RightWall[6];
+static Vtx tb_Floor[25];
+static Vtx tb_LeftInsetShadow[4];
+static Vtx tb_RightInsetShadow[4];
+static Vtx tb_Curtain[31];
+static Vtx tb_WallShadows[8];
+
+// Scratch DL buffer for the rebuilt theater frame (generously sized; original is < 80 cmds).
+static Gfx tb_theaterGfx[160];
+
+// Copy base -> out and push every |X|==1600 vertex out to |X|==1600*k, scaling the
+// S texcoord of listed vertices by the world-width factor about their inner partner.
+static void tb_remap_group(const Vtx* base, Vtx* out, s32 count, const TbPartner* parts, f32 k) {
+    const f32 edge = 1600.0f;
+    s32 i;
+    for (i = 0; i < count; i++) {
+        out[i] = base[i];
+        if (out[i].v.ob[0] == 1600 || out[i].v.ob[0] == -1600) {
+            f32 sgn = (out[i].v.ob[0] > 0) ? 1.0f : -1.0f;
+            out[i].v.ob[0] = (s16)(sgn * edge * k + (sgn > 0 ? 0.5f : -0.5f));
+            if (parts != nullptr) {
+                const TbPartner* p;
+                for (p = parts; p->idx >= 0; p++) {
+                    if (p->idx == i) {
+                        f32 widthFactor = (edge * k - p->innerX) / (edge - p->innerX);
+                        f32 ns = p->innerS + ((f32)base[i].v.tc[0] - p->innerS) * widthFactor;
+                        out[i].v.tc[0] = (s16)(ns + (ns >= 0 ? 0.5f : -0.5f));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Rigid-body translate of a whole column group (wall leg or column shadow).
+static void tb_translate_group(const Vtx* base, Vtx* out, s32 count, f32 k) {
+    const f32 edge = 1600.0f;
+    f32 dx = edge * (k - 1.0f); // how far the screen edge moved out
+    s32 i;
+    for (i = 0; i < count; i++) {
+        out[i] = base[i];
+        s16 x = base[i].v.ob[0];
+        if (x > 0) {
+            out[i].v.ob[0] = (s16)(x + dx + 0.5f);
+        } else if (x < 0) {
+            out[i].v.ob[0] = (s16)(x - dx - 0.5f);
+        }
+    }
+}
+
+// Build the widescreen theater frame into tb_theaterGfx and return it. At k==1 the
+// vertices are identical to the originals, so the output matches theater_gfx exactly.
+static Gfx* build_theater_widescreen_dl(void) {
+    f32 k = GameEngine_GetAspectRatio() / (4.0f / 3.0f);
+    Gfx* gfx = tb_theaterGfx;
+
+    if (k < 1.0f) {
+        k = 1.0f;
+    }
+
+    // Base (4:3) geometry
+    const Vtx* base_LeftWall         = (const Vtx*)LOAD_ASSET(theater_left_wall_vtx);
+    const Vtx* base_RightWall        = (const Vtx*)LOAD_ASSET(theater_right_wall_vtx);
+    const Vtx* base_Floor            = (const Vtx*)LOAD_ASSET(theater_floor_vtx);
+    const Vtx* base_LeftInsetShadow  = (const Vtx*)LOAD_ASSET(theater_left_inset_shadow_vtx);
+    const Vtx* base_RightInsetShadow = (const Vtx*)LOAD_ASSET(theater_right_inset_shadow_vtx);
+    const Vtx* base_Curtain          = (const Vtx*)LOAD_ASSET(theater_curtain_vtx);
+    const Vtx* base_WallShadows      = (const Vtx*)LOAD_ASSET(theater_wall_shadows_vtx);
+
+    // Columns + their shadows
+    tb_translate_group(base_LeftWall,         tb_LeftWall,        6,  k);
+    tb_translate_group(base_RightWall,        tb_RightWall,       6,  k);
+    tb_translate_group(base_LeftInsetShadow,  tb_LeftInsetShadow, 4,  k);
+    tb_translate_group(base_RightInsetShadow, tb_RightInsetShadow,4,  k);
+    tb_translate_group(base_WallShadows,      tb_WallShadows,     8,  k);
+    // Curtain + Floor
+    tb_remap_group(base_Floor,           tb_Floor,           25, tbPart_Floor,       k);
+    tb_remap_group(base_Curtain,         tb_Curtain,         31, tbPart_Curtain,     k);
+
+    // wall shadows
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0C184340; gfx++; // SetOtherMode_L
+    gfx[0].words.w0 = 0xFC121803; gfx[0].words.w1 = 0xFFFFFFF8; gfx++; // SetCombineMode
+    gSPDisplayList(gfx++, theater_curtains_tex_setup_gfx);
+    gSPVertex(gfx++, tb_WallShadows, 8, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSP2Triangles(gfx++, 4,5,6,0, 4,6,7,0);
+
+    // inset shadows
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0C184240; gfx++;
+    gfx[0].words.w0 = 0xFCFFFE03; gfx[0].words.w1 = 0xFFFE79F8; gfx++;
+    gfx[0].words.w0 = 0xD7000000; gfx[0].words.w1 = 0x00800080; gfx++; // SetTexScale (texture off-ish)
+    gSPVertex(gfx++, tb_LeftInsetShadow, 4, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSPVertex(gfx++, tb_RightInsetShadow, 4, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+
+    // floor
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0F0A4200; gfx++;
+    gfx[0].words.w0 = 0xFC121803; gfx[0].words.w1 = 0xFFFFFFF8; gfx++;
+    gSPDisplayList(gfx++, theater_walls_tex_setup_gfx);
+    gSPVertex(gfx++, tb_Floor, 25, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSP2Triangles(gfx++, 4,5,0,0, 4,0,3,0);
+    gSP2Triangles(gfx++, 1,6,7,0, 1,7,2,0);
+    gSP2Triangles(gfx++, 3,8,9,0, 3,9,10,0);
+    gSP2Triangles(gfx++, 11,4,3,0, 11,3,10,0);
+    gSP2Triangles(gfx++, 12,13,14,0, 12,14,15,0);
+    gSP2Triangles(gfx++, 8,12,15,0, 8,15,9,0);
+    gSP2Triangles(gfx++, 6,16,13,0, 6,13,7,0);
+    gSP2Triangles(gfx++, 14,17,18,0, 19,14,18,0);
+    gSP2Triangles(gfx++, 20,11,21,0, 11,22,21,0);
+    gSP2Triangles(gfx++, 23,19,18,0, 23,18,24,0);
+    gSP2Triangles(gfx++, 22,23,24,0, 22,24,21,0);
+
+    // right wall
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0F0A4200; gfx++;
+    gfx[0].words.w0 = 0xFC121803; gfx[0].words.w1 = 0xFFFFFFF8; gfx++;
+    gSPDisplayList(gfx++, theater_floor_tex_setup_gfx);
+    gSPVertex(gfx++, tb_RightWall, 6, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSP2Triangles(gfx++, 1,4,5,0, 1,5,2,0);
+
+    // left wall
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0F0A4200; gfx++;
+    gfx[0].words.w0 = 0xFC121803; gfx[0].words.w1 = 0xFFFFFFF8; gfx++;
+    gSPDisplayList(gfx++, theater_floor_tex_setup_gfx);
+    gSPVertex(gfx++, tb_LeftWall, 6, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSP2Triangles(gfx++, 1,4,5,0, 1,5,2,0);
+
+    // curtain
+    gDPPipeSync(gfx++);
+    gfx[0].words.w0 = 0xE200001C; gfx[0].words.w1 = 0x0C184240; gfx++;
+    gfx[0].words.w0 = 0xFC127E03; gfx[0].words.w1 = 0xFFFFF3F8; gfx++;
+    gSPDisplayList(gfx++, theater_curtains_tex_setup_gfx);
+    gSPVertex(gfx++, tb_Curtain, 31, 0);
+    gSP2Triangles(gfx++, 0,1,2,0, 0,2,3,0);
+    gSP2Triangles(gfx++, 4,5,6,0, 4,6,7,0);
+    gSP2Triangles(gfx++, 8,9,10,0, 8,10,11,0);
+    gSP2Triangles(gfx++, 12,13,14,0, 12,14,15,0);
+    gSP2Triangles(gfx++, 15,16,17,0, 15,17,18,0);
+    gSP2Triangles(gfx++, 19,20,21,0, 19,21,22,0);
+    gSP2Triangles(gfx++, 13,23,24,0, 13,24,14,0);
+    gSP2Triangles(gfx++, 23,25,26,0, 23,26,24,0);
+    gSP2Triangles(gfx++, 25,27,28,0, 25,28,26,0);
+    gSP2Triangles(gfx++, 27,29,30,0, 27,30,28,0);
+
+    gSPEndDisplayList(gfx++);
+    return tb_theaterGfx;
+}
 
 Vp TheaterViewport = {
     {
@@ -111,7 +289,8 @@ void render_curtains(void) {
         gSPMatrix(gMainGfxPos++, &D_8009BAA8[1], G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         rgb = 255.0f - (gCurtainFade * 255.0f);
         gDPSetPrimColor(gMainGfxPos++, 0, 0, rgb, rgb, rgb, 255);
-        gSPDisplayList(gMainGfxPos++, theater_gfx);
+        // Widescreen: build with outer edges pushed to the widened screen edge.
+        gSPDisplayList(gMainGfxPos++, build_theater_widescreen_dl());
         gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
         gDPPipeSync(gMainGfxPos++);
     }

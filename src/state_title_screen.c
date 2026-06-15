@@ -192,6 +192,9 @@ void state_init_title_screen(void) {
     set_game_mode_render_frontUI(appendGfx_title_screen);
     load_map_bg("title_bg");
     set_background(&gBackgroundImage);
+    // Widescreen: don't tile the title backdrop across the revealed sides, draw
+    // it once and fill the side bands solid black instead.
+    enable_background_solid_fill();
     bgm_set_song(0, SONG_MAIN_THEME, 0, 500, 8);
     TitleScreen_TimeLeft = 480;
 }

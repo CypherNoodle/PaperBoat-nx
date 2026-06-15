@@ -173,9 +173,9 @@ void render_effects_UI(void) {
                                                 G_SHADING_SMOOTH | G_CLIPPING | 0x40F9FA);
                             gSPSetGeometryMode(gMainGfxPos++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
                             gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE,
-                                              camera->viewportStartX,
+                                              (gCurrentCameraID == CAM_DEFAULT || gCurrentCameraID == CAM_BATTLE) ? 0 : camera->viewportStartX,
                                               camera->viewportStartY,
-                                              camera->viewportStartX + camera->viewportW,
+                                              (gCurrentCameraID == CAM_DEFAULT || gCurrentCameraID == CAM_BATTLE) ? SCREEN_WIDTH : (camera->viewportStartX + camera->viewportW),
                                               camera->viewportStartY + camera->viewportH);
                             gSPClipRatio(gMainGfxPos++, FRUSTRATIO_2);
 

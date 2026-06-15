@@ -275,6 +275,9 @@ void hud_element_draw_rect(HudElement* hudElement, s16 texSizeX, s16 texSizeY, s
         baseY = tempY + 2;
     }
 
+    s32 wsClipLeft = OTRGetRectDimensionFromLeftEdge(0);
+    s32 wsClipRight = OTRGetRectDimensionFromRightEdge(0);
+
     flags1 = (hudElement->flags & HUD_ELEMENT_FLAG_FMT_CI4);
     isFmtCI4 = flags1 != 0;
     flags1 = (hudElement->flags & HUD_ELEMENT_FLAG_FMT_IA8);
@@ -407,16 +410,16 @@ void hud_element_draw_rect(HudElement* hudElement, s16 texSizeX, s16 texSizeY, s
                 texStartX = 0;
             }
 
-            if (lrx < 0  || ulx > SCREEN_WIDTH) {
+            if (lrx < wsClipLeft || ulx > wsClipRight) {
                 break;
             }
 
-            if (lrx >= SCREEN_WIDTH) {
-                s32 temp = uls + SCREEN_WIDTH + 63;
+            if (lrx >= wsClipRight) {
+                s32 temp = uls + wsClipRight + 63;
                 temp -= baseX + lrs;
                 lrs = temp - 1;
 
-                lrx = SCREEN_WIDTH;
+                lrx = wsClipRight;
                 isLastTileX = true;
             }
 
@@ -550,9 +553,9 @@ void hud_element_draw_rect(HudElement* hudElement, s16 texSizeX, s16 texSizeY, s
             }
 
             if (hudElement->flags & HUD_ELEMENT_FLAG_FILTER_TEX) {
-                gSPScisTextureRectangle(gMainGfxPos++, ulx * 4, uly * 4, lrx * 4, lry * 4, 0, texStartX * 32 + 16, texStartY * 32 + 16, widthScale, heightScale);
+                gSPWideTextureRectangle(gMainGfxPos++, ulx * 4, uly * 4, lrx * 4, lry * 4, 0, texStartX * 32 + 16, texStartY * 32 + 16, widthScale, heightScale);
             } else {
-                gSPScisTextureRectangle(gMainGfxPos++, ulx * 4, uly * 4, lrx * 4, lry * 4, 0, texStartX * 32, texStartY * 32, widthScale, heightScale);
+                gSPWideTextureRectangle(gMainGfxPos++, ulx * 4, uly * 4, lrx * 4, lry * 4, 0, texStartX * 32, texStartY * 32, widthScale, heightScale);
             }
             if (isLastTileX) {
                 break;
@@ -1853,7 +1856,9 @@ void draw_hud_element_internal(s32 id, s32 clipMode) {
         if (!(elem->flags & (HUD_ELEMENT_FLAG_INVISIBLE | HUD_ELEMENT_FLAG_HIDDEN)) && (elem->drawSizePreset >= 0)) {
             if (clipMode != HUD_ELEMENT_DRAW_NEXT) {
                 if (clipMode == HUD_ELEMENT_DRAW_FIRST_WITH_CLIPPING) {
-                    gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, 12, 20, SCREEN_WIDTH - 12, SCREEN_HEIGHT - 20);
+                    gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE,
+                                  OTRGetScissorCoordX(OTRGetRectDimensionFromLeftEdge(12)), 20,
+                                  OTRGetScissorCoordX(OTRGetRectDimensionFromRightEdge(12)), SCREEN_HEIGHT - 20);
                 }
                 gDPPipeSync(gMainGfxPos++);
                 gDPSetCycleType(gMainGfxPos++, G_CYC_1CYCLE);

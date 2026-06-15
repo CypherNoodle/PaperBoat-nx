@@ -137,6 +137,12 @@ void render_frame(s32 isSecondPass) {
             lrx = ulx + camera->viewportW;
             lry = uly + camera->viewportH;
 
+            // Widescreen: let the overworld camera's scissor span the full native width
+            if (camID == CAM_DEFAULT || camID == CAM_BATTLE) {
+                ulx = 0;
+                lrx = SCREEN_WIDTH;
+            }
+
             if (ulx < 0) {
                 ulx = 0;
             }
@@ -400,6 +406,13 @@ void set_cam_viewport(s16 id, s16 x, s16 y, s16 width, s16 height) {
     camera->vpAlt.vp.vtrans[1] = gGameStatusPtr->altViewportOffset.y + 4 * (s16) ((u16) camera->viewportStartY + (camera->viewportH / 2));
     camera->vpAlt.vp.vtrans[2] = 0x200;
     camera->vpAlt.vp.vtrans[3] = 0;
+
+    if (id == CAM_DEFAULT || id == CAM_BATTLE) {
+        camera->vp.vp.vscale[0] = 2.0f * SCREEN_WIDTH;
+        camera->vp.vp.vtrans[0] = 4 * (SCREEN_WIDTH / 2);
+        camera->vpAlt.vp.vscale[0] = 2.0f * SCREEN_WIDTH;
+        camera->vpAlt.vp.vtrans[0] = gGameStatusPtr->altViewportOffset.x + 4 * (SCREEN_WIDTH / 2);
+    }
 }
 
 void get_cam_viewport(s32 camID, u16* x, u16* y, u16* width, u16* height) {

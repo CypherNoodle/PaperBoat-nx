@@ -1,6 +1,7 @@
 #include "common.h"
 #include "hud_element.h"
 #include "message_ids.h"
+#include "port/Engine.h"
 
 #define LINE_HEIGHT 13
 
@@ -407,7 +408,10 @@ s32 popup_menu_update(void) {
                         break;
                 }
 #else
-                PopupWinX = PopupWorldStartX[gPopupMenu->popupType] + 20;
+                // Widescreen: world popup menus are right-edge anchored (each
+                // table entry preserves a per-menu right margin). At 4:3 this
+                // is exactly PopupWorldStartX[type] + 20.
+                PopupWinX = OTRGetRectDimensionFromRightEdge(SCREEN_WIDTH - (PopupWorldStartX[gPopupMenu->popupType] + 20));
 #endif
             }
             if (PopupMenu_MaxDisplayableEntryCount >= 7) {
@@ -1450,15 +1454,15 @@ void popup_draw_menu_content(s32* userData, s32 baseX, s32 baseY, s32 width, s32
         case POPUP_MENU_READ_POSTCARD:
         case POPUP_MENU_USEKEY:
         case POPUP_MENU_POST_OFFICE:
-            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, x, y, x + 112, y1);
+            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, OTRGetScissorCoordX(x), y, OTRGetScissorCoordX(x + 112), y1);
             break;
         case POPUP_MENU_SWITCH_PARTNER:
         case POPUP_MENU_UPGRADE_PARTNER:
-            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, x, y, x + 90, y1);
+            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, OTRGetScissorCoordX(x), y, OTRGetScissorCoordX(x + 90), y1);
             break;
 #if !VERSION_JP
         case POPUP_MENU_THROW_AWAY_ITEM:
-            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, x, y, x + 160, y1);
+            gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, OTRGetScissorCoordX(x), y, OTRGetScissorCoordX(x + 160), y1);
             break;
 #endif
     }
@@ -1509,7 +1513,7 @@ void popup_draw_menu_content(s32* userData, s32 baseX, s32 baseY, s32 width, s32
             break;
     }
 #else
-    gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, x, y, x + PopupContentScissorWidths[gPopupMenu->popupType], y1);
+    gDPSetScissor(gMainGfxPos++, G_SC_NON_INTERLACE, OTRGetScissorCoordX(x), y, OTRGetScissorCoordX(x + PopupContentScissorWidths[gPopupMenu->popupType]), y1);
 #endif
 
     x = baseX + 32;

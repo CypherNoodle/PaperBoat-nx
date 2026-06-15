@@ -6,6 +6,7 @@
 #include "sprite.h"
 #include "effects.h"
 #include "battle/states/states.h"
+#include "port/Engine.h"
 
 f32 StarPointsIncrementInterp = 0.0f;
 b8 BtlStarPointsBlinking = false;
@@ -896,7 +897,7 @@ void btl_update_starpoints_display(void) {
 
     if (gBattleStatus.flags1 & BS_FLAGS1_ACTORS_VISIBLE) {
         if (!(gBattleStatus.flags2 & BS_FLAGS2_AWARDING_STAR_POINTS)) {
-            StarPointsBasePosX = 292;
+            StarPointsBasePosX = OTRGetRectDimensionFromRightEdge(28);
             StarPointsBasePosY = 196;
             StarPointsMoveInterpAmt = 6;
             D_8029DA4C = battleStatus->totalStarPoints % 10;
