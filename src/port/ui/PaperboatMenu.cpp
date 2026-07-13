@@ -137,6 +137,7 @@ void PaperboatMenu::InitElement() {
   Ship::Menu::InitElement();
   AddMenuSettings();
   AddMenuEnhancements();
+  AddMenuShaderSettings();
   AddMenuDevTools();
 
   if (CVarGetInteger(CVAR_SETTING("Menu.SidebarSearch"), 0)) {
@@ -175,7 +176,7 @@ void PaperboatMenu::InitElement() {
           return Ship::Context::GetInstance()
                      ->GetWindow()
                      ->GetWindowBackend() !=
-                 Ship::WindowBackend::FAST3D_DXGI_DX11;
+                  Fast::WindowBackend::FAST3D_DXGI_DX11;
         },
         "Available Only on DirectX"}},
       {DISABLE_FOR_DIRECTX,
@@ -183,7 +184,7 @@ void PaperboatMenu::InitElement() {
           return Ship::Context::GetInstance()
                      ->GetWindow()
                      ->GetWindowBackend() ==
-                 Ship::WindowBackend::FAST3D_DXGI_DX11;
+                 Fast::WindowBackend::FAST3D_DXGI_DX11;
         },
         "Not Available on DirectX"}},
       {DISABLE_FOR_MATCH_REFRESH_RATE_ON,

@@ -213,8 +213,8 @@ void GameEngine::FinishInit() {
     std::vector<std::string> mod_archives;
     for (const auto &entry : std::filesystem::directory_iterator(mods_path)) {
       const auto ext = entry.path().extension().string();
-      if (entry.is_regular_file() &&
-          (ext == ".o2r" || ext == ".otr" || ext == ".zip")) {
+      if ((entry.is_regular_file() &&
+          (ext == ".o2r" || ext == ".otr" || ext == ".zip")) || entry.is_directory()) {
         mod_archives.push_back(
             std::filesystem::absolute(entry.path()).string());
       }
@@ -227,13 +227,13 @@ void GameEngine::FinishInit() {
   }
 
   this->context->InitLogging(spdlog::level::trace, spdlog::level::trace);
-  this->context->InitGfxDebugger();
+  // this->context->InitGfxDebugger();
   this->context->InitCrashHandler();
 
-  auto audioChannelsSetting = Ship::Context::GetInstance()
-                                  ->GetConfig()
-                                  ->GetCurrentAudioChannelsSetting();
-  this->context->InitAudio({32000, 1024, 1680, audioChannelsSetting});
+  // auto audioChannelsSetting = Ship::Context::GetInstance()
+  //                                 ->GetConfig()
+  //                                 ->GetCurrentAudioChannelsSetting();
+  this->context->InitAudio({32000, 1024, 1680 });
 
   auto loader = context->GetResourceManager()->GetResourceLoader();
   loader->RegisterResourceFactory(
@@ -941,7 +941,7 @@ void GameEngine::RunCommands(
   interpreter->mInterpolationIndex = 0;
 
   for (const auto &m : mtx_replacements) {
-    wnd->DrawAndRunGraphicsCommands(Commands, m);
+    wnd->DrawAndRunGraphicsCommands(Commands, m, {});
     interpreter->mInterpolationIndex++;
   }
 }
@@ -995,6 +995,27 @@ void GameEngine::ProcessGfxCommands(Gfx *commands) {
 }
 
 static const char *sOtrSignature = "__OTR__";
+
+// Writes one register of the shader custom-uniform file (uCustom[idx] in
+// shader templates). Registers 0-1 are engine built-ins; use 2..15.
+extern "C" void GameEngine_SetCustomUniform(uint8_t idx, const float values[4]) {
+    gfx_set_custom_uniform(idx, values);
+}
+
+// Registers a fullscreen post-processing pass (a prism shader template in the
+// o2r, e.g. "shaders/post/invert.shader"). Passes run in registration order
+// over the game image at the end of each frame. Returns a handle.
+extern "C" int GameEngine_RegisterPostPass(const char *o2rShaderPath) {
+    return gfx_register_post_pass(o2rShaderPath);
+}
+
+extern "C" void GameEngine_UnregisterPostPass(int id) {
+    gfx_unregister_post_pass(id);
+}
+
+extern "C" void GameEngine_ClearPostPasses(void) {
+    gfx_clear_post_passes();
+}
 
 extern "C" uint8_t GameEngine_OTRSigCheck(const char *data) {
   if (data == nullptr) {
