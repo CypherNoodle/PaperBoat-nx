@@ -24,7 +24,14 @@ void is_debug_init(void) {
     osEPiWriteIo(nuPiCartHandle, (u32) &gISVDbgPrnAdrs->magic, ASCII_TO_U32('I', 'S', '6', '4'));
 }
 
-#ifndef _WIN32
+// Overriding libc's printf/puts needs a linker that lets this definition win.
+// MSVC's does not, and wasm-ld rejects it ("duplicate symbol: printf"). Both
+// keep libc's; the IS-Viewer is cartridge hardware neither platform has.
+#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+#define PAPERBOAT_OVERRIDE_LIBC_PRINT 1
+#endif
+
+#ifdef PAPERBOAT_OVERRIDE_LIBC_PRINT
 int printf(const char* restrict fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -41,10 +48,12 @@ int __printf_chk(int flag, const char* restrict fmt, ...) {
     return _Printf(is_debug_print, nullptr, fmt, args);
 }
 
+#ifdef PAPERBOAT_OVERRIDE_LIBC_PRINT
 int puts(const char* s) {
     printf("%s\n", s);
     return 0;
 }
+#endif
 
 void osSyncPrintf(const char* fmt, ...) {
     va_list args;

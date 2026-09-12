@@ -10,6 +10,12 @@
 #include <string>
 #include <unordered_map>
 
+// A widget's label is a printf format by design ("Master Volume: %d %%"), so
+// it is deliberately not a literal. Android's NDK builds -Werror=format-security.
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
 namespace UIWidgets {
 
 // Automatically adds newlines to break up text longer than a specified number

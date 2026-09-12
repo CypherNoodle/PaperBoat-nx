@@ -1,0 +1,21 @@
+# Functions Asyncify must not instrument in the browser build.
+#
+# Asyncify turns each one into thousands of wasm locals, which Safari keeps on
+# the worker's native stack. Torch never suspends, so instrumenting it only
+# overflows that stack ("Maximum call stack size exceeded").
+Companion::*
+Torch::*
+BaseFactory::*
+PM64::*
+PM64Audio::*
+SM64::*
+OoT::*
+BK64::*
+MK64::*
+SF64::*
+N64::*
+YAML::*
+prism::*
+Decompressor::*
+miniz_cpp::*
+*GetSafeNode*
