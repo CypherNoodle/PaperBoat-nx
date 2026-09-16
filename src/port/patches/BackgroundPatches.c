@@ -2,6 +2,9 @@
 
 #include "common.h"
 #include "model.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "port/Engine.h"
 #include "port/patches/Patches.h"
 #include "alignment.h"
@@ -16,9 +19,30 @@ extern PAL_BIN gBackgroundPalette[256];
 
 u16 blend_background_channel(u16 arg0, s32 arg1, s32 alpha);
 
-static ALIGN_ASSET(2) char sBgRasterPath[64];
-static ALIGN_ASSET(2) char sBgPalettePath[64];
-static PAL_BIN* sBgPaletteTlut = NULL;
+// Fast3D memoizes by path pointer, so each background needs its own stable string:
+// a shared buffer would leave every map after the first drawing the previous texture.
+#define MAX_BG_PATHS 64
+
+static char* bg_intern_path(const char* path) {
+    static char* sPaths[MAX_BG_PATHS];
+    static s32 sPathCount = 0;
+    s32 i;
+
+    for (i = 0; i < sPathCount; i++) {
+        if (strcmp(sPaths[i], path) == 0) {
+            return sPaths[i];
+        }
+    }
+    if (sPathCount >= MAX_BG_PATHS) {
+        return NULL;
+    }
+    sPaths[sPathCount] = (char*) malloc(strlen(path) + 1);
+    strcpy(sPaths[sPathCount], path);
+    return sPaths[sPathCount++];
+}
+
+static char* sBgRasterPath = NULL;
+static char* sBgPalettePath = NULL;
 
 void port_load_map_bg(char* optAssetName) {
     if (optAssetName == NULL) {
@@ -33,17 +57,25 @@ void port_load_map_bg(char* optAssetName) {
         }
     }
 
-    snprintf(sBgRasterPath, sizeof(sBgRasterPath), "__OTR__backgrounds/%s", assetName);
-    snprintf(sBgPalettePath, sizeof(sBgPalettePath), "__OTR__backgrounds/%s_pal0", assetName);
+    char rasterPath[64];
+    char palettePath[64];
+
+    snprintf(rasterPath, sizeof(rasterPath), "__OTR__backgrounds/%s", assetName);
+    snprintf(palettePath, sizeof(palettePath), "__OTR__backgrounds/%s_pal0", assetName);
+    sBgRasterPath = bg_intern_path(rasterPath);
+    sBgPalettePath = bg_intern_path(palettePath);
+    if (sBgRasterPath == NULL || sBgPalettePath == NULL) {
+        return;
+    }
 
     gBackgroundImage.raster = (IMG_PTR) sBgRasterPath;
 
     // CPU-side fog/tint blending
-    u8* palData = (u8*) ResourceGetDataByName(sBgPalettePath);
+    u8* palData = (u8*) GameEngine_GetDataExact(sBgPalettePath);
     gBackgroundImage.palette = (PAL_PTR) palData;
 
-    gBackgroundImage.width = ResourceGetTexWidthByName(sBgRasterPath);
-    gBackgroundImage.height = ResourceGetTexHeightByName(sBgRasterPath);
+    gBackgroundImage.width = GameEngine_GetTexWidthExact(sBgRasterPath);
+    gBackgroundImage.height = GameEngine_GetTexHeightExact(sBgRasterPath);
     gBackgroundImage.startX = 12;
     gBackgroundImage.startY = 20;
 }
@@ -166,11 +198,6 @@ void port_appendGfx_background_texture(void) {
                 }
                 break;
         }
-
-        free(sBgPaletteTlut);
-        sBgPaletteTlut = malloc(256 * sizeof(PAL_BIN));
-        memcpy(sBgPaletteTlut, gBackgroundPalette, 256 * sizeof(PAL_BIN));
-        gfx_texture_cache_clear();
     }
 
     bgMaxX = gGameStatusPtr->backgroundMaxX;
@@ -213,21 +240,52 @@ void port_appendGfx_background_texture(void) {
     }
 
     gDPPipeSync(gMainGfxPos++);
-    gDPSetCycleType(gMainGfxPos++, G_CYC_COPY);
     gDPSetTexturePersp(gMainGfxPos++, G_TP_NONE);
     gDPSetTextureLUT(gMainGfxPos++, G_TT_RGBA16);
-    gDPSetCombineMode(gMainGfxPos++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPSetRenderMode(gMainGfxPos++, G_RM_NOOP, G_RM_NOOP2);
     gDPSetTextureFilter(gMainGfxPos++, G_TF_POINT);
-    gDPPipeSync(gMainGfxPos++);
 
-    // Palette: non-fog passes the raw RGBA16 palette data loaded in port_load_map_bg,
-    // fog passes the CPU-blended palette computed above instead.
+    // Always the background's own palette, loaded by name so a replacement can key on it.
+    // Fog and tint used to be baked into the palette on the CPU; they're per-channel
+    // scales, so the combiner does the same job — and it works on replacement art too.
+    s32 bgDsdx = 4096; // copy mode steps four texels per pixel
+    s32 bgEdge = 0;
     if (!(gGameStatusPtr->backgroundFlags & BACKGROUND_FLAG_FOG)) {
-        gDPLoadTLUT_pal256(gMainGfxPos++, gGameStatusPtr->backgroundPalette);
+        gDPSetCycleType(gMainGfxPos++, G_CYC_COPY);
+        gDPSetCombineMode(gMainGfxPos++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPSetRenderMode(gMainGfxPos++, G_RM_NOOP, G_RM_NOOP2);
     } else {
-        gDPLoadTLUT_pal256(gMainGfxPos++, sBgPaletteTlut);
+        bgDsdx = 1024;
+        bgEdge = 4;
+        gDPSetCycleType(gMainGfxPos++, G_CYC_1CYCLE);
+        gDPSetRenderMode(gMainGfxPos++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        switch (*gBackgroundTintModePtr) {
+            case ENV_TINT_NONE:
+            case ENV_TINT_SHROUD:
+                if (fogA == 255) {
+                    gDPSetPrimColor(gMainGfxPos++, 0, 0, 0, 0, 0, 255);
+                } else {
+                    gDPSetPrimColor(gMainGfxPos++, 0, 0, fogR, fogG, fogB, fogA);
+                }
+                gDPSetCombineLERP(
+                    gMainGfxPos++, PRIMITIVE, TEXEL0, PRIMITIVE_ALPHA, TEXEL0, 0, 0, 0, 1, PRIMITIVE, TEXEL0,
+                    PRIMITIVE_ALPHA, TEXEL0, 0, 0, 0, 1
+                );
+                break;
+            case ENV_TINT_DEPTH:
+            case ENV_TINT_REMAP:
+            default:
+                // channels remapped to [offset, offset + scale]: texel * prim + env
+                gDPSetPrimColor(gMainGfxPos++, 0, 0, r1, g1, b1, 255);
+                gDPSetEnvColor(gMainGfxPos++, r2, g2, b2, 255);
+                gDPSetCombineLERP(
+                    gMainGfxPos++, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, 0, 0, 0, 1, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, 0,
+                    0, 0, 1
+                );
+                break;
+        }
     }
+    gDPPipeSync(gMainGfxPos++);
+    gDPLoadTLUT_pal256(gMainGfxPos++, sBgPalettePath);
 
     gDPLoadTextureTile(
         gMainGfxPos++, gGameStatusPtr->backgroundRaster, G_IM_FMT_CI, G_IM_SIZ_8b, bgMaxX, bgMaxY, 0, 0, bgMaxX - 1,
@@ -255,12 +313,12 @@ void port_appendGfx_background_texture(void) {
 
         for (tx = bgTileBaseX; tx < wsRight; tx += bgMaxX) {
             gSPWideTextureRectangle(
-                gMainGfxPos++, tx * 4, bgMinY * 4, (bgXOffset + tx - 1) * 4, (bgMaxY - 1 + bgMinY) * 4, G_TX_RENDERTILE,
-                (bgMaxX - bgXOffset) * 32, 0, 4096, 1024
+                gMainGfxPos++, tx * 4, bgMinY * 4, (bgXOffset + tx - 1) * 4 + bgEdge,
+                (bgMaxY - 1 + bgMinY) * 4 + bgEdge, G_TX_RENDERTILE, (bgMaxX - bgXOffset) * 32, 0, bgDsdx, 1024
             );
             gSPWideTextureRectangle(
-                gMainGfxPos++, (bgXOffset + tx) * 4, bgMinY * 4, (bgMaxX + tx - 1) * 4, (bgMaxY - 1 + bgMinY) * 4,
-                G_TX_RENDERTILE, 0, 0, 4096, 1024
+                gMainGfxPos++, (bgXOffset + tx) * 4, bgMinY * 4, (bgMaxX + tx - 1) * 4 + bgEdge,
+                (bgMaxY - 1 + bgMinY) * 4 + bgEdge, G_TX_RENDERTILE, 0, 0, bgDsdx, 1024
             );
         }
     } else {
@@ -273,26 +331,28 @@ void port_appendGfx_background_texture(void) {
             waveOffset = sin_rad(gBackroundWavePhase + i * (TAU / 15)) * 3.0f;
             bgXOffset = 2.0f * (gGameStatusPtr->backgroundXOffset + waveOffset);
             gSPTextureRectangle(
-                gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4, (2 * bgXOffset + (bgMinX - 1)) * 4,
-                (lineHeight * i + lineHeight - 1 + bgMinY) * 4, G_TX_RENDERTILE, bgMaxX * 32 - bgXOffset * 16,
-                (lineHeight * i) * 32, 4096, 1024
+                gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4, (2 * bgXOffset + (bgMinX - 1)) * 4 + bgEdge,
+                (lineHeight * i + lineHeight - 1 + bgMinY) * 4 + bgEdge, G_TX_RENDERTILE, bgMaxX * 32 - bgXOffset * 16,
+                (lineHeight * i) * 32, bgDsdx, 1024
             );
             gSPTextureRectangle(
-                gMainGfxPos++, bgXOffset * 2 + bgMinX * 4, (lineHeight * i + bgMinY) * 4, (bgMaxX + bgMinX - 1) * 4,
-                (lineHeight * i + lineHeight - 1 + bgMinY) * 4, G_TX_RENDERTILE, 0, (lineHeight * i) * 32, 4096, 1024
+                gMainGfxPos++, bgXOffset * 2 + bgMinX * 4, (lineHeight * i + bgMinY) * 4,
+                (bgMaxX + bgMinX - 1) * 4 + bgEdge, (lineHeight * i + lineHeight - 1 + bgMinY) * 4 + bgEdge,
+                G_TX_RENDERTILE, 0, (lineHeight * i) * 32, bgDsdx, 1024
             );
         }
         if (extraHeight != 0) {
             waveOffset = sin_rad(gBackroundWavePhase + i * (TAU / 15)) * 3.0f;
             bgXOffset = 2.0f * (gGameStatusPtr->backgroundXOffset + waveOffset);
             gSPTextureRectangle(
-                gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4, (2 * bgXOffset + (bgMinX - 1)) * 4,
-                (bgMaxY - 1 + bgMinY) * 4, G_TX_RENDERTILE, bgMaxX * 32 - bgXOffset * 16, (lineHeight * i) * 32, 4096,
-                1024
+                gMainGfxPos++, bgMinX * 4, (lineHeight * i + bgMinY) * 4, (2 * bgXOffset + (bgMinX - 1)) * 4 + bgEdge,
+                (bgMaxY - 1 + bgMinY) * 4 + bgEdge, G_TX_RENDERTILE, bgMaxX * 32 - bgXOffset * 16,
+                (lineHeight * i) * 32, bgDsdx, 1024
             );
             gSPTextureRectangle(
-                gMainGfxPos++, bgXOffset * 2 + bgMinX * 4, (lineHeight * i + bgMinY) * 4, (bgMaxX + bgMinX - 1) * 4,
-                (bgMaxY - 1 + bgMinY) * 4, G_TX_RENDERTILE, 0, (lineHeight * i) * 32, 4096, 1024
+                gMainGfxPos++, bgXOffset * 2 + bgMinX * 4, (lineHeight * i + bgMinY) * 4,
+                (bgMaxX + bgMinX - 1) * 4 + bgEdge, (bgMaxY - 1 + bgMinY) * 4 + bgEdge, G_TX_RENDERTILE, 0,
+                (lineHeight * i) * 32, bgDsdx, 1024
             );
         }
     }

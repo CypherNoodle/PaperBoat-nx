@@ -5,6 +5,7 @@
 
 #include "assets/ui.h"
 #include "port/Engine.h"
+#include "port/patches/Patches.h"
 
 //TODO get a real ceil
 s32 my_ceil(f32 f) {
@@ -24,6 +25,7 @@ extern u8* D_8015131C;
 extern Gfx* D_80151338;
 extern IMG_BIN D_80159B50[0x200];
 extern PAL_BIN D_8015C7E0[0x10];
+extern PAL_PTR MsgItemIconPalette;
 
 #if !VERSION_JP
 extern s16 MsgStyleVerticalLineOffsets[];
@@ -678,10 +680,10 @@ void appendGfx_message(MessagePrintState* printer, s16 posX, s16 posY, u16 addit
                             signRaster = ui_msg_sign_corner_bottomright_png;
                             printer->windowSize.y = 72;
                             msg_drawState->textColor = MSG_PAL_18;
-                            signPalette = (PAL_PTR)LOAD_ASSET(ui_msg_sign_corner_topleft_pal);
+                            signPalette = (PAL_PTR)LOAD_ASSET_GFX(ui_msg_sign_corner_topleft_pal);
                         } else {
                             signRaster = ui_msg_lamppost_corner_bottomright_png;
-                            signPalette = (PAL_PTR)LOAD_ASSET(ui_msg_lamppost_corner_bottomright_pal);
+                            signPalette = (PAL_PTR)LOAD_ASSET_GFX(ui_msg_lamppost_corner_bottomright_pal);
                             msg_drawState->textColor = MSG_PAL_1C;
                         }
                         msg_drawState->clipX[0] = 20 + MSG_SIGN_OFFSET_X + 14;
@@ -974,7 +976,7 @@ void appendGfx_message(MessagePrintState* printer, s16 posX, s16 posY, u16 addit
                             imgDrawPosY = (s16)((msg_drawState->nextPos[1] + (msg_drawState->textStartPos[1] + (printer->windowBasePos.y + posY))) -
                                        additionalOffsetY);
 
-                            draw_ci_image_with_clipping(D_80159B50, 32, 32, G_IM_FMT_CI, G_IM_SIZ_4b, D_8015C7E0, imgDrawPosX, imgDrawPosY, msg_drawState->clipX[0],
+                            draw_ci_image_with_clipping(D_8015131C, 32, 32, G_IM_FMT_CI, G_IM_SIZ_4b, MsgItemIconPalette, imgDrawPosX, imgDrawPosY, msg_drawState->clipX[0],
                                                         msg_drawState->clipY[0], msg_drawState->clipX[1] - msg_drawState->clipX[0],
                                                         msg_drawState->clipY[1] - msg_drawState->clipY[0], phi_t3);
                             msg_drawState->printModeFlags |= MSG_PRINT_FLAG_10;
@@ -1710,7 +1712,7 @@ void msg_draw_char(MessagePrintState* printer, MessageDrawState* drawState, s32 
 
     if (drawState->printModeFlags & (MSG_PRINT_FLAG_10 | MSG_PRINT_FLAG_1)) {
         drawState->printModeFlags &= ~(MSG_PRINT_FLAG_10 | MSG_PRINT_FLAG_1);
-        gDPLoadTLUT_pal16(gMainGfxPos++, 0, D_802F4560[palette]);
+        gDPLoadTLUT_pal16(gMainGfxPos++, 0, port_msg_glyph_palette(D_802F4560[palette]));
     }
 
     if (messageCharset->texSize.x >= 16 && messageCharset->texSize.x % 16 == 0) {
@@ -1725,7 +1727,7 @@ void msg_draw_char(MessagePrintState* printer, MessageDrawState* drawState, s32 
                                    G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         } else {
 #endif
-            gDPLoadTextureBlock_4b(gMainGfxPos++, messageCharset->rasters[fontVariant].raster + messageCharset->charRasterSize * charIndex, G_IM_FMT_CI,
+            gDPLoadTextureBlock_4b(gMainGfxPos++, port_msg_glyph_raster(messageCharset->rasters[fontVariant].raster + messageCharset->charRasterSize * charIndex), G_IM_FMT_CI,
                                    messageCharset->texSize.x, messageCharset->texSize.y, 0,
                                    G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 #if VERSION_IQUE
@@ -1745,7 +1747,7 @@ void msg_draw_char(MessagePrintState* printer, MessageDrawState* drawState, s32 
                                   G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         } else {
 #endif
-            gDPLoadTextureTile_4b(gMainGfxPos++, messageCharset->rasters[fontVariant].raster + messageCharset->charRasterSize * charIndex, G_IM_FMT_CI,
+            gDPLoadTextureTile_4b(gMainGfxPos++, port_msg_glyph_raster(messageCharset->rasters[fontVariant].raster + messageCharset->charRasterSize * charIndex), G_IM_FMT_CI,
                                   messageCharset->texSize.x, messageCharset->texSize.y,
                                   0, 0, messageCharset->texSize.x - 1, messageCharset->texSize.y - 1, 0,
                                   G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2272,8 +2274,8 @@ void msg_draw_frame(s32 posX, s32 posY, s32 sizeX, s32 sizeY, s32 style, s32 pal
 }
 
 void msg_get_glyph(s32 font, s32 variation, s32 charIndex, s32 palette, MesasgeFontGlyphData* out) {
-    out->raster = &MsgCharsets[font]->rasters[variation].raster[(u16)MsgCharsets[font]->charRasterSize * charIndex];
-    out->palette = D_802F4560[palette];
+    out->raster = port_msg_glyph_raster(&MsgCharsets[font]->rasters[variation].raster[(u16)MsgCharsets[font]->charRasterSize * charIndex]);
+    out->palette = port_msg_glyph_palette(D_802F4560[palette]);
     out->texSize.x = MsgCharsets[font]->texSize.x;
     out->texSize.y = MsgCharsets[font]->texSize.y;
     out->charWidth = msg_get_draw_char_width(charIndex, font, variation, 1.0f, 0, 0);

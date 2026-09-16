@@ -10,6 +10,7 @@
 #include "message_ids.h"
 #include "nu/nusys.h"
 #include "ld_addrs.h"
+#include "port/interpolation/FrameInterpolation.h"
 #include "sprite.h"
 #include "sprite/player.h"
 #include "port/Engine.h"
@@ -319,7 +320,7 @@ void item_entity_load(ItemEntity* item) {
                 while (true) {
                     if (entry->id == -1) {
                         entry->id = raster;
-                        entry->data = (u8*)LOAD_ASSET((const char*)raster);
+                        entry->data = (u8*)LOAD_ASSET_GFX((const char*)raster);
                         i++;
                         break;
                     } else if (entry->id == raster) {
@@ -336,7 +337,7 @@ void item_entity_load(ItemEntity* item) {
                 while (true) {
                     if (entry->id == -1) {
                         entry->id = palette;
-                        entry->data = (u8*)LOAD_ASSET((const char*)palette);
+                        entry->data = (u8*)LOAD_ASSET_GFX((const char*)palette);
                         i++;
                         break;
                     } else if (entry->id == palette) {
@@ -954,9 +955,9 @@ void appendGfx_item_entity(void* data) {
     }
 
     if (!(item->flags & ITEM_ENTITY_FLAG_FULLSIZE)) {
-        gDPLoadTLUT_pal16(gMainGfxPos++, 0, gHudElementCacheTablePalette[item->lookupPaletteIndex].data);
+        gDPLoadTLUT_pal16(gMainGfxPos++, 0, (PAL_PTR) gHudElementCacheTablePalette[item->lookupPaletteIndex].id);
         if (gSpriteShadingProfile->flags != 0) {
-            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
             gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR |
                        G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
             gDPLoadSync(gMainGfxPos++);
@@ -977,7 +978,7 @@ void appendGfx_item_entity(void* data) {
                 func_801491E4(mtxTranslate, 0, 0, 24, 24, 255);
             }
         } else {
-            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
             gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0,
                        G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
             gDPLoadSync(gMainGfxPos++);
@@ -989,9 +990,9 @@ void appendGfx_item_entity(void* data) {
         }
         gSPDisplayList(gMainGfxPos++, D_8014C678);
     } else {
-        gDPLoadTLUT_pal16(gMainGfxPos++, 0, gHudElementCacheTablePalette[item->lookupPaletteIndex].data);
+        gDPLoadTLUT_pal16(gMainGfxPos++, 0, (PAL_PTR) gHudElementCacheTablePalette[item->lookupPaletteIndex].id);
         if (gSpriteShadingProfile->flags != 0) {
-            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
             gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0,
                        G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
             gDPLoadSync(gMainGfxPos++);
@@ -1011,7 +1012,7 @@ void appendGfx_item_entity(void* data) {
                 func_801491E4(mtxTranslate, 0, 0, 32, 32, 255);
             }
         } else {
-            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+            gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
             gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0,
                        G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
             gDPLoadSync(gMainGfxPos++);
@@ -1110,6 +1111,7 @@ void render_item_entities(void) {
             if ((item->flags != 0)) {
                 if (!(item->flags & ITEM_ENTITY_FLAG_HIDDEN)) {
                     if ((item->flags & ITEM_ENTITY_FLAG_INVISIBLE)) {
+                        FrameInterpolation_RecordOpenChild("item_entity", (uintptr_t) item);
                         if (!(item->flags & ITEM_ENTITY_FLAG_FULLSIZE)) {
                             offsetY = -4;
                         } else {
@@ -1164,9 +1166,9 @@ void render_item_entities(void) {
                         }
 
                         if (!(item->flags & ITEM_ENTITY_FLAG_FULLSIZE)) {
-                            gDPLoadTLUT_pal16(gMainGfxPos++, 0, gHudElementCacheTablePalette[item->lookupPaletteIndex].data);
+                            gDPLoadTLUT_pal16(gMainGfxPos++, 0, (PAL_PTR) gHudElementCacheTablePalette[item->lookupPaletteIndex].id);
                             if (gSpriteShadingProfile->flags != 0) {
-                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
                                 gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
                                 gDPLoadSync(gMainGfxPos++);
                                 gDPLoadTile(gMainGfxPos++, G_TX_LOADTILE, 0, 0, 0x002E, 0x005C);
@@ -1182,7 +1184,7 @@ void render_item_entities(void) {
                                     func_801491E4(sp58, 0, 0, 24, 24, 255);
                                 }
                             } else {
-                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 12, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
                                 gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
                                 gDPLoadSync(gMainGfxPos++);
                                 gDPLoadTile(gMainGfxPos++, G_TX_LOADTILE, 0, 0, 0x002E, 0x005C);
@@ -1192,9 +1194,9 @@ void render_item_entities(void) {
                             }
                             gSPDisplayList(gMainGfxPos++, D_8014C678);
                         } else {
-                            gDPLoadTLUT_pal16(gMainGfxPos++, 0, gHudElementCacheTablePalette[item->lookupPaletteIndex].data);
+                            gDPLoadTLUT_pal16(gMainGfxPos++, 0, (PAL_PTR) gHudElementCacheTablePalette[item->lookupPaletteIndex].id);
                             if (gSpriteShadingProfile->flags != 0) {
-                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
                                 gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
                                 gDPLoadSync(gMainGfxPos++);
                                 gDPLoadTile(gMainGfxPos++, G_TX_LOADTILE, 0, 0, 0x003E, 0x007C);
@@ -1210,7 +1212,7 @@ void render_item_entities(void) {
                                     func_801491E4(sp58, 0, 0, 32, 32, 255);
                                 }
                             } else {
-                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, gHudElementCacheTableRaster[item->lookupRasterIndex].data);
+                                gDPSetTextureImage(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 16, (IMG_PTR) gHudElementCacheTableRaster[item->lookupRasterIndex].id);
                                 gDPSetTile(gMainGfxPos++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 8, G_TX_NOLOD);
                                 gDPLoadSync(gMainGfxPos++);
                                 gDPLoadTile(gMainGfxPos++, G_TX_LOADTILE, 0, 0, 0x003E, 0x007C);
@@ -1222,6 +1224,7 @@ void render_item_entities(void) {
                         }
                         gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
                         gDPPipeSync(gMainGfxPos++);
+                        FrameInterpolation_RecordCloseChild();
                     }
                 }
             }
