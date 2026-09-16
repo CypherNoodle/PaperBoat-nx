@@ -23,6 +23,7 @@ PaperBoat does not include any copyrighted assets.  You are required to provide 
 
 ### 1. Verify your ROM dump
 US SHA1 Hash: `3837f44cda784b466c9a2d99df70d77c322b97a0`
+You can verify you have dumped a supported copy of the game by using the compatibility checker at https://paperboat.equipment/.
 
 ### 2. Download PaperBoat from [Releases](https://github.com/HarbourMasters/PaperBoat/releases)
 
@@ -41,7 +42,7 @@ US SHA1 Hash: `3837f44cda784b466c9a2d99df70d77c322b97a0`
 
 ### 4. Play!
 
-Congratulations, you are now sailing with 2 Ship 2 Harkinian! Have fun!
+Congratulations, you are now sailing with PaperBoat! Have fun!
 
 # Configuration
 
