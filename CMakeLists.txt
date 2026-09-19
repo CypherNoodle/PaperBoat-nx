@@ -12,6 +12,16 @@ set(CMAKE_C_EXTENSIONS ON)  # Enable GNU extensions (gnu99)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+if(NINTENDO_SWITCH)
+    # Newlib hides POSIX/BSD declarations in strict C++ mode. Use its public
+    # feature switch for the game and dependencies, preserving toolchain flags.
+    add_compile_definitions(_DEFAULT_SOURCE=1)
+    set(ENABLE_SCRIPTING OFF CACHE BOOL "" FORCE)
+    set(DISABLE_DLL_LOADER ON CACHE BOOL "" FORCE)
+    set(INCLUDE_MPQ_SUPPORT OFF CACHE BOOL "" FORCE)
+    set(USE_OPENGLES OFF CACHE BOOL "" FORCE)
+endif()
+
 include(cmake/paperboat-cvars.cmake)
 include(cmake/lus-cvars.cmake)
 
@@ -227,6 +237,8 @@ if(MSVC AND TARGET prism)
     target_compile_options(prism PRIVATE /EHsc)
 endif()
 
+# Switch consumes archives extracted on a desktop; Torch runs on the host.
+if(NOT NINTENDO_SWITCH)
 # Add torch as a library for asset extraction
 set(USE_STANDALONE OFF CACHE BOOL "" FORCE)
 set(ROM_CRC_BSWAP ON CACHE BOOL "" FORCE)
@@ -239,6 +251,7 @@ set(BUILD_MARIO_ARTIST OFF CACHE BOOL "" FORCE)
 set(BUILD_BK64 OFF CACHE BOOL "" FORCE)
 set(BUILD_OOT OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/torch)
+endif()
 
 # Collect all game C sources (excluding .inc.c which are included by other files)
 # Also, dx now has some cpp files.
@@ -301,6 +314,9 @@ file(GLOB_RECURSE PORT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 list(FILTER PORT_SOURCES EXCLUDE REGEX ".*.inc.c")
+if(NINTENDO_SWITCH)
+    list(FILTER PORT_SOURCES EXCLUDE REGEX "^src/port/extractor/")
+endif()
 
 if(IOS)
     set(IOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ios)
@@ -361,7 +377,9 @@ source_group(TREE ${CMAKE_SOURCE_DIR}/src PREFIX "Game" FILES ${GAME_SOURCES})
 source_group(TREE ${CMAKE_SOURCE_DIR}/src/port PREFIX "Port" FILES ${PORT_SOURCES})
 
 # Embed the application icon (paperboat.ico) into the Windows executable
-target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/Resource.rc)
+if(WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/Resource.rc)
+endif()
 source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/Resource.rc)
 
 if (NOT MSVC)
@@ -471,7 +489,13 @@ add_custom_command(
 add_custom_target(GeneratePortO2R DEPENDS "${PAPERBOAT_PORT_O2R}")
 add_dependencies(${PROJECT_NAME} GeneratePortO2R)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE libultraship torch yaml-cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+if(NOT NINTENDO_SWITCH)
+    target_link_libraries(${PROJECT_NAME} PRIVATE torch yaml-cpp)
+endif()
+if(NINTENDO_SWITCH)
+    include(cmake/switch-target.cmake)
+endif()
 
 if(ANDROID)
     # libzip comes from libultraship's android.cmake, so its headers are in the
@@ -551,7 +575,7 @@ if(IOS)
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets/" "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT_NAME}>/assets/"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PAPERBOAT_PORT_O2R}" "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT_NAME}>/paperboat.o2r"
     )
-elseif(NOT ANDROID AND NOT EMSCRIPTEN)
+elseif(NOT ANDROID AND NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "Copying config.yml, asset yamls and paperboat.o2r..."

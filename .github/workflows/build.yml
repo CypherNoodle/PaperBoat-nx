@@ -6,6 +6,7 @@ on:
     # this workflow. A lone `tags-ignore` would leave branches undefined.
     branches:
       - "**"
+      - "!switch-port"
   pull_request:
   workflow_dispatch:
   workflow_call:

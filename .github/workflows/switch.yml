@@ -1,0 +1,43 @@
+name: Switch experimental
+
+on:
+  push:
+    branches: [switch-port]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: switch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: devkitpro/devkita64:latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify preinstalled devkitPro toolchain
+        run: |
+          export PATH="$DEVKITPRO/devkitA64/bin:$DEVKITPRO/tools/bin:$PATH"
+          aarch64-none-elf-g++ --version
+          cmake --version
+          ninja --version
+          test -f "$DEVKITPRO/cmake/Switch.cmake"
+      - name: Configure
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          cmake -S . -B build-switch -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+            -DCMAKE_BUILD_TYPE=Release
+      - name: Build package
+        run: cmake --build build-switch --target switch-package --parallel 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paperboat-switch-experimental
+          path: build-switch/switch/
+          if-no-files-found: error

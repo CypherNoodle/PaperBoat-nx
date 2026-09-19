@@ -1,7 +1,9 @@
 #include "Engine.h"
 
 #include "ShipInit.hpp"
+#ifndef __SWITCH__
 #include "extractor/GameExtractor.h"
+#endif
 #include "importer/PM64TextureFactory.h"
 #include "importer/Vec3sFactory.h"
 #include "nlohmann/json.hpp"
@@ -10,7 +12,9 @@
 #include "port/interpolation/FrameInterpolation.h"
 #include "port/ui/cvar_prefixes.h"
 #include "port/audio/AudioVolume.h"
+#ifndef __SWITCH__
 #include "src/Companion.h"
+#endif
 #include "ui/PaperboatGui.hpp"
 #include "ui/PaperboatModMenuWindow.h"
 #include "ui/TouchControls.h"
@@ -198,6 +202,9 @@ GameEngine::GameEngine() {
     this->context->InitLogging();
     this->context->InitConfiguration();
     this->context->InitConsoleVariables();
+#ifdef __SWITCH__
+    CVarSetInteger("gSettings.ControlNav", CVarGetInteger("gSettings.ControlNav", 1));
+#endif
 
     this->context->InitControlDeck(std::make_shared<LUS::ControlDeck>());
     this->context->InitResourceManager(
@@ -360,6 +367,10 @@ void GameEngine::ScaleImGui() {
 }
 
 void GameEngine::RunExtract(int argc, char* argv[]) {
+#ifdef __SWITCH__
+    // SwitchPlatform::Prepare checks the required archives before SDL starts.
+    CheckAndCreateModFolder();
+#else
     bool extractDone = false;
     ExtractSteps extractStep = ES_PORT_ARCHIVE;
     WindowsSteps windowsStep = WS_TEMP;
@@ -818,6 +829,7 @@ void GameEngine::RunExtract(int argc, char* argv[]) {
     if (menuWasVisible) {
         gui->GetMenu()->Show();
     }
+#endif
 }
 
 void GameEngine::Create(int argc, char* argv[]) {

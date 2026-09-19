@@ -3,6 +3,9 @@
 #include <libultraship.h>
 
 #include "Engine.h"
+#ifdef __SWITCH__
+#include "switch/SwitchPlatform.h"
+#endif
 #include "port/interpolation/FrameInterpolation.h"
 
 #ifdef __EMSCRIPTEN__
@@ -44,6 +47,11 @@ extern "C"
     WebCache_Load();
 #endif
 
+#ifdef __SWITCH__
+    if (!SwitchPlatform::Prepare()) {
+        return 1;
+    }
+#endif
     GameEngine::Create(argc, argv);
 
     auto wnd = std::dynamic_pointer_cast<Fast::Fast3dWindow>(Ship::Context::GetRawInstance()->GetWindow());
@@ -53,7 +61,11 @@ extern "C"
     load_engine_data();
 
     // Main loop
-    while (wnd->IsRunning()) {
+    while (wnd->IsRunning()
+#ifdef __SWITCH__
+           && SwitchPlatform::MainLoop()
+#endif
+    ) {
         GameEngine::Instance->StartFrame();
         FrameInterpolation_StartRecord();
         Graphics_ThreadUpdate();
