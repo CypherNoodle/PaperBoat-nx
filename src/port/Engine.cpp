@@ -15,6 +15,7 @@
 #include "port/audio/AudioVolume.h"
 #include "port/os/OS.h"
 #include "port/DevTools/ThreadWatchdog.h"
+#include "port/TextureCache.h"
 #ifndef __SWITCH__
 #include "src/Companion.h"
 #endif
@@ -293,6 +294,7 @@ void GameEngine::FinishInit() {
             interpreter->SetResolvedResourceCacheEnabled(true);
         }
     }
+    TextureCache_Configure();
 
     auto loader = Ship::Context::GetRawInstance()->GetResourceManager()->GetResourceLoader();
     loader->RegisterResourceFactory(
