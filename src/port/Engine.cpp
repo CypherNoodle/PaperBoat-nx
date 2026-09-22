@@ -290,7 +290,13 @@ void GameEngine::FinishInit() {
 #endif
 #endif
 
+#ifdef __SWITCH__
+    // Keep the mixer's 32 kHz timebase; allow ~100 ms of queued audio to absorb
+    // short rendering/SD stalls (desktop uses ~52 ms).
+    Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 3200 });
+#else
     Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 1680 });
+#endif
 
     // Opt in to texture path memoization.
     if (gsFast3dWindow != nullptr) {
@@ -1039,6 +1045,10 @@ uint32_t GameEngine::GetInterpolationFPS() {
 void GameEngine::HandleAudioThread() {
     int16_t audioBuffer[AUDIO_SAMPLES * 4 * 2];
     Acmd cmdList[0x800];
+#ifdef __SWITCH__
+    auto nextUnderrunReport = std::chrono::steady_clock::now();
+    uint32_t underrunsSinceReport = 0;
+#endif
 
     while (mAudio.running) {
         {
@@ -1076,7 +1086,19 @@ void GameEngine::HandleAudioThread() {
 
             bool accepted = AudioPlayerBuffered() >= before + (frameSamples / 2);
             if (accepted && before == 0) {
+#ifdef __SWITCH__
+                // This thread is on the frame's critical path. Avoid repeated
+                // synchronous SD writes while already struggling to feed audio.
+                ++underrunsSinceReport;
+                const auto now = std::chrono::steady_clock::now();
+                if (now >= nextUnderrunReport) {
+                    SPDLOG_WARN("audio queue underran ({} events since previous report)", underrunsSinceReport);
+                    underrunsSinceReport = 0;
+                    nextUnderrunReport = now + std::chrono::seconds(5);
+                }
+#else
                 SPDLOG_WARN("audio queue underran");
+#endif
             }
         };
 
