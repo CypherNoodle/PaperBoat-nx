@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "ship/utils/FilesystemPath.h"
 #include <cctype>
 #include <filesystem>
 #include <map>
@@ -176,7 +177,7 @@ void UpdateModFiles(bool init, bool reset) {
                 continue;
             }
             SPDLOG_INFO("Loading mod archive: {}", it->second.generic_string());
-            GetArchiveManager()->AddArchive(std::filesystem::absolute(it->second).generic_string());
+            GetArchiveManager()->AddArchive(Ship::AbsolutePath(it->second).generic_string());
         }
     }
 

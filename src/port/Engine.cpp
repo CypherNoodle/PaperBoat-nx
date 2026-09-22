@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "switch/SwitchPlatform.h"
+#include <stdexcept>
 
 #include "ShipInit.hpp"
 #ifndef __SWITCH__
@@ -202,7 +203,12 @@ GameEngine::GameEngine() {
     gShipContext = this->context;
 
     SwitchPlatform::Trace("Initializing logging");
-    this->context->InitLogging();
+    if (!this->context->InitLogging()) {
+        throw std::runtime_error("Failed to initialize logging");
+    }
+#ifdef __SWITCH__
+    spdlog::set_level(spdlog::level::info);
+#endif
     SwitchPlatform::Trace("Initializing configuration");
     this->context->InitConfiguration();
     this->context->InitConsoleVariables();
@@ -213,9 +219,11 @@ GameEngine::GameEngine() {
     SwitchPlatform::Trace("Initializing controllers");
     this->context->InitControlDeck(std::make_shared<LUS::ControlDeck>());
     SwitchPlatform::Trace("Initializing resource manager");
-    this->context->InitResourceManager(
+    if (!this->context->InitResourceManager(
         portArchiveExists ? std::vector<std::string> { assets_path } : std::vector<std::string> {}, {}, 3
-    );
+    )) {
+        throw std::runtime_error("Failed to load paperboat.o2r; see logs/Paperboat.log");
+    }
     SwitchPlatform::Trace("Initializing console");
     this->context->InitConsole();
     SwitchPlatform::Trace("Initializing crash handler");
