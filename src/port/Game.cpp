@@ -5,6 +5,7 @@
 #include "Engine.h"
 #ifdef __SWITCH__
 #include "switch/SwitchPlatform.h"
+#include <exception>
 #endif
 #include "port/interpolation/FrameInterpolation.h"
 
@@ -51,14 +52,25 @@ extern "C"
     if (!SwitchPlatform::Prepare()) {
         return 1;
     }
+    try {
+    SwitchPlatform::Trace("Creating engine");
 #endif
     GameEngine::Create(argc, argv);
+#ifdef __SWITCH__
+    SwitchPlatform::Trace("Engine created");
+#endif
 
     auto wnd = std::dynamic_pointer_cast<Fast::Fast3dWindow>(Ship::Context::GetRawInstance()->GetWindow());
 
     // Initialize game systems
     init_game_globals();
+#ifdef __SWITCH__
+    SwitchPlatform::Trace("Game globals initialized; loading engine data");
+#endif
     load_engine_data();
+#ifdef __SWITCH__
+    SwitchPlatform::Trace("Engine data loaded; entering frame loop");
+#endif
 
     // Main loop
     while (wnd->IsRunning()
@@ -89,4 +101,13 @@ extern "C"
     WebCache_SaveNoWait();
 #endif
     return 0;
+#ifdef __SWITCH__
+    } catch (const std::exception& error) {
+        SwitchPlatform::Trace(error.what());
+        return 1;
+    } catch (...) {
+        SwitchPlatform::Trace("Unknown C++ exception");
+        return 1;
+    }
+#endif
 }

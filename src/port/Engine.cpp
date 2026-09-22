@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "switch/SwitchPlatform.h"
 
 #include "ShipInit.hpp"
 #ifndef __SWITCH__
@@ -199,23 +200,32 @@ GameEngine::GameEngine() {
     );
     gShipContext = this->context;
 
+    SwitchPlatform::Trace("Initializing logging");
     this->context->InitLogging();
+    SwitchPlatform::Trace("Initializing configuration");
     this->context->InitConfiguration();
     this->context->InitConsoleVariables();
 #ifdef __SWITCH__
     CVarSetInteger("gSettings.ControlNav", CVarGetInteger("gSettings.ControlNav", 1));
 #endif
 
+    SwitchPlatform::Trace("Initializing controllers");
     this->context->InitControlDeck(std::make_shared<LUS::ControlDeck>());
+    SwitchPlatform::Trace("Initializing resource manager");
     this->context->InitResourceManager(
         portArchiveExists ? std::vector<std::string> { assets_path } : std::vector<std::string> {}, {}, 3
     );
+    SwitchPlatform::Trace("Initializing console");
     this->context->InitConsole();
+    SwitchPlatform::Trace("Initializing crash handler");
     this->context->InitCrashHandler();
+    SwitchPlatform::Trace("Initializing events");
     this->context->InitEventSystem();
 
     gsFast3dWindow = std::make_shared<Fast::Fast3dWindow>(std::vector<std::shared_ptr<Ship::GuiWindow>>({}));
+    SwitchPlatform::Trace("Initializing graphics window");
     this->context->InitWindow(gsFast3dWindow);
+    SwitchPlatform::Trace("Graphics window initialized");
     this->context->InitFileDropMgr();
 
     PaperboatGui::SetupMenu();
@@ -236,6 +246,7 @@ GameEngine::GameEngine() {
 }
 
 void GameEngine::FinishInit() {
+    SwitchPlatform::Trace("Finishing engine initialization");
     spdlog::set_pattern("[%H:%M:%S.%e] [%s:%#] [%l] %v");
     SPDLOG_INFO(
         "Starting PaperBoat version {} (Branch: {} | Commit: {})", std::string_view(gBuildVersion),
@@ -263,7 +274,11 @@ void GameEngine::FinishInit() {
     spdlog::flush_on(spdlog::level::trace);
 #else
     spdlog::set_level(spdlog::level::info);
+#ifdef __SWITCH__
+    spdlog::flush_on(spdlog::level::info);
+#else
     spdlog::flush_on(spdlog::level::warn);
+#endif
 #endif
 
     Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 1680 });
