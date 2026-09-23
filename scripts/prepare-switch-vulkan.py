@@ -15,6 +15,22 @@ def checkout(name, repo, revision):
     return dest
 
 shaderc = checkout('shaderc', 'https://github.com/google/shaderc.git', 'v2025.3')
+# Shaderc 2025.3 passes a generator expression to glslang's configure-time
+# installation option. CMake treats that nonempty string as true even when
+# SHADERC_SKIP_INSTALL is ON, producing an invalid dependency export set.
+p = shaderc / 'third_party/CMakeLists.txt'
+s = p.read_text()
+old = 'set(GLSLANG_ENABLE_INSTALL $<NOT:${SKIP_GLSLANG_INSTALL}>)'
+new = '''if(SKIP_GLSLANG_INSTALL)
+      set(GLSLANG_ENABLE_INSTALL OFF)
+    else()
+      set(GLSLANG_ENABLE_INSTALL ON)
+    endif()'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned shaderc install configuration no longer matches the Switch patch')
+    s = s.replace(old, new)
+p.write_text(s)
 for name, repo, rev in [
     ('glslang','KhronosGroup/glslang','efd24d75bcbc55620e759f6bf42c45a32abac5f8'),
     ('spirv-tools','KhronosGroup/SPIRV-Tools','33e02568181e3312f49a3cf33df470bf96ef293a'),
