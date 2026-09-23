@@ -32,6 +32,14 @@ s = s.replace('#else\n\t\tdlclose(loadedModule);', '#elif !defined(__SWITCH__)\n
 p.write_text(s)
 
 sdl = checkout('SDL', 'https://github.com/devkitPro/SDL.git', '0738d3c9f6993875e2f3dd0e8cc0bb4ae4440b4e')
+# Horizon exposes pthread-compatible symbols from libc.  SDL's generic
+# fallback adds -lpthread, which does not exist in the devkitPro sysroot and
+# makes its configure-time thread probe fail.
+p = sdl / 'cmake/sdlchecks.cmake'
+s = p.read_text()
+s = s.replace('elseif(QNX)\n      # pthread support is baked in',
+              'elseif(QNX OR NINTENDO_SWITCH)\n      # pthread support is provided by the platform libc')
+p.write_text(s)
 p = sdl / 'src/video/switch/SDL_switchvideo.c'
 s = p.read_text()
 needle = '    if (!_this->egl_data) {'
