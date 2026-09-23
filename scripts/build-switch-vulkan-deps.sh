@@ -5,11 +5,14 @@ deps=/paperboat/switch-vulkan-deps
 toolchain=/opt/devkitpro/cmake/Switch.cmake
 # SDL's Switch branch still sets the old PTHREADS option names. Enable the
 # current options explicitly so CheckPTHREAD actually runs on this platform.
+# Disable generic video backends so SDL selects the native Switch driver before
+# creating either the Zink/EGL or native Vulkan window.
 cmake -S "$deps/SDL" -B "$deps/SDL-build" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$toolchain" -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
   -DCMAKE_INSTALL_PREFIX=/opt/devkitpro/portlibs/switch \
   -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DSDL_TESTS=OFF \
+  -DSDL_OFFSCREEN=OFF -DSDL_DUMMYVIDEO=OFF \
   -DSDL_THREADS=ON -DSDL_PTHREADS=ON -DSDL_PTHREADS_SEM=ON \
   || { tail -n 180 "$deps/SDL-build/CMakeFiles/CMakeConfigureLog.yaml"; exit 1; }
 grep -Eq '^HAVE_PTHREADS:INTERNAL=(1|TRUE)$' "$deps/SDL-build/CMakeCache.txt"

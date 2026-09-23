@@ -47,6 +47,10 @@ void SwitchPlatform::Trace(const char* message) {
 
 bool SwitchPlatform::Prepare() {
 #ifdef PAPERBOAT_NXVK_ZINK
+    // The custom SDL build also contains generic backends. Pin the native
+    // driver before SDL initializes video so OpenGL uses Switch EGL/Zink and
+    // Vulkan receives the Switch NWindow path.
+    setenv("SDL_VIDEODRIVER", "Switch", 1);
     setenv("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", "1", 1);
     setenv("GALLIUM_DRIVER", "zink", 1);
     Trace("=== NXVK / Zink experimental build ===");
