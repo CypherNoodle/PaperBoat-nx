@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "switch/SwitchPlatform.h"
+#include "switch/SwitchRumble.h"
 #include <stdexcept>
 
 #include "ShipInit.hpp"
@@ -905,6 +906,9 @@ void GameEngine::RelaunchIfRequested(int argc, char* argv[]) {
 }
 
 void GameEngine::Destroy() {
+#ifdef __SWITCH__
+    SwitchRumble_ForceStop(1);
+#endif
     PaperboatGui::Destroy();
 
     // Persist the window state (fullscreen, size, position) explicitly rather than

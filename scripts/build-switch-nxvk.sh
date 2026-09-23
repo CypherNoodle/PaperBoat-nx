@@ -14,16 +14,25 @@ if [ ! -f switch/build/pkg/lib/libnvk_gl.a ]; then
 fi
 make CONTAINER= install-gl
 
+bash /paperboat/scripts/build-switch-vulkan-deps.sh
+
 git config --global --add safe.directory /paperboat
 cmake -S /paperboat -B /paperboat/build-switch-nxvk -G Ninja \
   -DCMAKE_MAKE_PROGRAM="$real_ninja" \
   -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
-  -DCMAKE_BUILD_TYPE=Release -DSWITCH_NXVK_ZINK=ON -DNXVK_SOURCE_DIR=/work
+  -DCMAKE_BUILD_TYPE=Release -DSWITCH_NXVK_ZINK=ON -DNXVK_SOURCE_DIR=/work \
+  -DSWITCH_VULKAN_DEPS=/paperboat/switch-vulkan-deps
 cmake --build /paperboat/build-switch-nxvk --target switch-package --parallel 2
+# Require both renderers in the linked executable before allowing publication.
+aarch64-none-elf-nm -C /paperboat/build-switch-nxvk/paperboat.elf > /tmp/paperboat-symbols.txt
+grep -q 'Fast::GfxRenderingAPIVK::VulkanInit' /tmp/paperboat-symbols.txt
+grep -q 'Fast::GfxRenderingAPIOGL::Init' /tmp/paperboat-symbols.txt
 package=/paperboat/build-switch-nxvk/switch/paperboat
 mv "$package/paperboat.nro" "$package/paperboat-nxvk.nro"
-cp /paperboat/docs/SWITCH-NXVK.md "$package/README-NXVK.md"
-mkdir -p "$package/licenses/nxvk"
-cp /work/licenses/GPL-2.0-or-later "$package/licenses/nxvk/"
+documentation=/paperboat/build-switch-nxvk/documentation
+mkdir -p "$documentation/licenses/nxvk"
+cp /paperboat/docs/SWITCH-NXVK.md "$documentation/README-NXVK.md"
+cp /work/licenses/GPL-2.0-or-later "$documentation/licenses/nxvk/"
 printf 'PaperBoat source: https://github.com/CypherNoodle/PaperBoat-nx/tree/%s\nNXVK source: https://github.com/PalindromicBreadLoaf/nxvk/tree/e028d428c3b1f2dabadd81645c53cddfc8d7ab51\n' \
-  "$(git -C /paperboat rev-parse HEAD)" > "$package/SOURCES.txt"
+  "$(git -C /paperboat rev-parse HEAD)" > "$documentation/SOURCES.txt"
+touch /paperboat/build-switch-nxvk/native-vulkan-ready

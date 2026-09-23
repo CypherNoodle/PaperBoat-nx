@@ -1,4 +1,4 @@
-name: Switch NXVK Zink experimental
+name: Switch NXVK Zink and Vulkan experimental
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
           key: nxvk-zink-e028d428c3b1f2dabadd81645c53cddfc8d7ab51-v1
       - name: Build NXVK toolchain image
         run: docker build -t paperboat-nxvk nxvk-source/switch/docker
-      - name: Build Zink driver and PaperBoat
+      - name: Build Zink, native Vulkan and PaperBoat
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE/nxvk-source:/work" \
@@ -47,7 +47,14 @@ jobs:
           path: nxvk-source/switch/build/pkg
           key: nxvk-zink-e028d428c3b1f2dabadd81645c53cddfc8d7ab51-v1
       - uses: actions/upload-artifact@v4
+        if: ${{ success() && hashFiles('build-switch-nxvk/native-vulkan-ready') != '' }}
         with:
           name: paperboat-switch-nxvk-zink-experimental
           path: build-switch-nxvk/switch/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: ${{ success() && hashFiles('build-switch-nxvk/native-vulkan-ready') != '' }}
+        with:
+          name: paperboat-nxvk-documentation
+          path: build-switch-nxvk/documentation/
           if-no-files-found: error

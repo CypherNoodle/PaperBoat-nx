@@ -7,6 +7,7 @@
  */
 
 #include "Engine.h"
+#include "switch/SwitchRumble.h"
 #include "common.h"
 #include "nu/nusys.h"
 #include "port/os/OS.h"
@@ -239,28 +240,43 @@ void nuContPakMgrInit(void) {
 }
 
 void nuContRmbMgrInit(void) {
+#ifdef __SWITCH__
+    SwitchRumble_Init();
+#endif
     // No-op - rumble via libultraship
 }
 
 void nuContRmbForceStop(void) {
-    // TODO: Call libultraship rumble stop
+#ifdef __SWITCH__
+    SwitchRumble_ForceStop(1);
+#endif
 }
 
 void nuContRmbForceStopEnd(void) {
-    // No-op
+#ifdef __SWITCH__
+    SwitchRumble_ForceStop(0);
+#endif
 }
 
 s32 nuContRmbCheck(u32 port) {
+#ifdef __SWITCH__
+    return SwitchRumble_Check(port);
+#else
     // No-op
     return 0;
+#endif
 }
 
 void nuContRmbModeSet(u32 port, u8 mode) {
-    // No-op
+#ifdef __SWITCH__
+    SwitchRumble_SetMode(port, mode);
+#endif
 }
 
 void nuContRmbStart(u32 port, u16 freq, u16 frame) {
-    // TODO: Call libultraship rumble start
+#ifdef __SWITCH__
+    SwitchRumble_Start(port, freq, frame);
+#endif
 }
 
 // Static pad buffer shared across nuContDataGet/nuContDataGetAll
