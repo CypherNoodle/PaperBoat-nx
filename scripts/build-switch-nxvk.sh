@@ -5,7 +5,7 @@ set -euo pipefail
 export PATH="$DEVKITPRO/devkitA64/bin:$DEVKITPRO/tools/bin:$PATH"
 mkdir -p /tmp/paperboat-build-tools
 real_ninja="$(command -v ninja)"
-printf '#!/bin/sh\nexec %s "$@" -j2\n' "$real_ninja" > /tmp/paperboat-build-tools/ninja
+printf '#!/bin/sh\nexec %s -j2 "$@"\n' "$real_ninja" > /tmp/paperboat-build-tools/ninja
 chmod +x /tmp/paperboat-build-tools/ninja
 export PATH="/tmp/paperboat-build-tools:$PATH"
 export CARGO_BUILD_JOBS=2
@@ -16,6 +16,7 @@ make CONTAINER= install-gl
 
 git config --global --add safe.directory /paperboat
 cmake -S /paperboat -B /paperboat/build-switch-nxvk -G Ninja \
+  -DCMAKE_MAKE_PROGRAM="$real_ninja" \
   -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
   -DCMAKE_BUILD_TYPE=Release -DSWITCH_NXVK_ZINK=ON -DNXVK_SOURCE_DIR=/work
 cmake --build /paperboat/build-switch-nxvk --target switch-package --parallel 2
