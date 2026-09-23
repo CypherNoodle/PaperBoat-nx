@@ -53,24 +53,14 @@ extern "C"
         return 1;
     }
     try {
-    SwitchPlatform::Trace("Creating engine");
 #endif
     GameEngine::Create(argc, argv);
-#ifdef __SWITCH__
-    SwitchPlatform::Trace("Engine created");
-#endif
 
     auto wnd = std::dynamic_pointer_cast<Fast::Fast3dWindow>(Ship::Context::GetRawInstance()->GetWindow());
 
     // Initialize game systems
     init_game_globals();
-#ifdef __SWITCH__
-    SwitchPlatform::Trace("Game globals initialized; loading engine data");
-#endif
     load_engine_data();
-#ifdef __SWITCH__
-    SwitchPlatform::Trace("Engine data loaded; entering frame loop");
-#endif
 
     // Main loop
     while (wnd->IsRunning()
@@ -103,10 +93,10 @@ extern "C"
     return 0;
 #ifdef __SWITCH__
     } catch (const std::exception& error) {
-        SwitchPlatform::Trace(error.what());
+        SPDLOG_ERROR("Startup/runtime exception: {}", error.what());
         return 1;
     } catch (...) {
-        SwitchPlatform::Trace("Unknown C++ exception");
+        SPDLOG_ERROR("Unknown C++ exception");
         return 1;
     }
 #endif

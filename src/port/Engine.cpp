@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "switch/SwitchPlatform.h"
 #include <stdexcept>
 
 #include "ShipInit.hpp"
@@ -202,39 +201,27 @@ GameEngine::GameEngine() {
     );
     gShipContext = this->context;
 
-    SwitchPlatform::Trace("Initializing logging");
     if (!this->context->InitLogging()) {
         throw std::runtime_error("Failed to initialize logging");
     }
-#ifdef __SWITCH__
-    spdlog::set_level(spdlog::level::info);
-#endif
-    SwitchPlatform::Trace("Initializing configuration");
     this->context->InitConfiguration();
     this->context->InitConsoleVariables();
 #ifdef __SWITCH__
     CVarSetInteger("gSettings.ControlNav", CVarGetInteger("gSettings.ControlNav", 1));
 #endif
 
-    SwitchPlatform::Trace("Initializing controllers");
     this->context->InitControlDeck(std::make_shared<LUS::ControlDeck>());
-    SwitchPlatform::Trace("Initializing resource manager");
     if (!this->context->InitResourceManager(
         portArchiveExists ? std::vector<std::string> { assets_path } : std::vector<std::string> {}, {}, 3
     )) {
         throw std::runtime_error("Failed to load paperboat.o2r; see logs/Paperboat.log");
     }
-    SwitchPlatform::Trace("Initializing console");
     this->context->InitConsole();
-    SwitchPlatform::Trace("Initializing crash handler");
     this->context->InitCrashHandler();
-    SwitchPlatform::Trace("Initializing events");
     this->context->InitEventSystem();
 
     gsFast3dWindow = std::make_shared<Fast::Fast3dWindow>(std::vector<std::shared_ptr<Ship::GuiWindow>>({}));
-    SwitchPlatform::Trace("Initializing graphics window");
     this->context->InitWindow(gsFast3dWindow);
-    SwitchPlatform::Trace("Graphics window initialized");
     this->context->InitFileDropMgr();
 
     PaperboatGui::SetupMenu();
@@ -255,7 +242,6 @@ GameEngine::GameEngine() {
 }
 
 void GameEngine::FinishInit() {
-    SwitchPlatform::Trace("Finishing engine initialization");
     spdlog::set_pattern("[%H:%M:%S.%e] [%s:%#] [%l] %v");
     SPDLOG_INFO(
         "Starting PaperBoat version {} (Branch: {} | Commit: {})", std::string_view(gBuildVersion),
@@ -283,16 +269,10 @@ void GameEngine::FinishInit() {
     spdlog::flush_on(spdlog::level::trace);
 #else
     spdlog::set_level(spdlog::level::info);
-#ifdef __SWITCH__
-    spdlog::flush_on(spdlog::level::info);
-#else
     spdlog::flush_on(spdlog::level::warn);
-#endif
 #endif
 
 #ifdef __SWITCH__
-    // Keep the mixer's 32 kHz timebase; allow ~100 ms of queued audio to absorb
-    // short rendering/SD stalls (desktop uses ~52 ms).
     Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 3200 });
 #else
     Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 1680 });
@@ -1045,10 +1025,6 @@ uint32_t GameEngine::GetInterpolationFPS() {
 void GameEngine::HandleAudioThread() {
     int16_t audioBuffer[AUDIO_SAMPLES * 4 * 2];
     Acmd cmdList[0x800];
-#ifdef __SWITCH__
-    auto nextUnderrunReport = std::chrono::steady_clock::now();
-    uint32_t underrunsSinceReport = 0;
-#endif
 
     while (mAudio.running) {
         {
@@ -1086,19 +1062,7 @@ void GameEngine::HandleAudioThread() {
 
             bool accepted = AudioPlayerBuffered() >= before + (frameSamples / 2);
             if (accepted && before == 0) {
-#ifdef __SWITCH__
-                // This thread is on the frame's critical path. Avoid repeated
-                // synchronous SD writes while already struggling to feed audio.
-                ++underrunsSinceReport;
-                const auto now = std::chrono::steady_clock::now();
-                if (now >= nextUnderrunReport) {
-                    SPDLOG_WARN("audio queue underran ({} events since previous report)", underrunsSinceReport);
-                    underrunsSinceReport = 0;
-                    nextUnderrunReport = now + std::chrono::seconds(5);
-                }
-#else
                 SPDLOG_WARN("audio queue underran");
-#endif
             }
         };
 

@@ -58,19 +58,11 @@ Minus toggles the menu; the existing SDL controller mappings are used.
 - Test Joy-Con and Pro Controller, menu navigation, audio, HOME/resume and exit.
 - Measure handheld/docked performance and memory use before setting expectations.
 
-## Startup diagnostics
+## Logging
 
-The Switch renderer requests OpenGL 4.1 core and uses matching core shaders and a
-vertex array object, including the ImGui backend. SDL window/context failures and
-missing GL entry points are checked before rendering.
-
-After a failed launch, collect `switch/paperboat/switch-startup.log` and
-`switch/paperboat/logs/Paperboat.log`. The startup file appends checkpoints and
-closes after each write, independently of the engine logger. Each launch starts
-with a banner. The engine logger is synchronous on Switch, so an immediate crash
-does not leave messages queued on a logging thread. A C++ exception is recorded
-in the startup file before returning to hbmenu; CPU/GPU faults may still cause the
-system error screen. These logs identify the last completed stage, not a stack trace.
+The normal engine log is `switch/paperboat/logs/Paperboat.log`. Temporary
+startup checkpoints and `switch-startup.log` generation have been removed.
+An old startup log on the SD card can be deleted manually.
 
 ## NXVK follow-up
 
