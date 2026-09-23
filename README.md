@@ -1,21 +1,5 @@
 # PaperBoat
-*Harbour Masters port of Paper Mario 64*
-
-Project Lead:
-* Caladius
-
-Developers:
-* Bass3l
-* JeodC
-* Caladius
-* KiritoDv
-
-## Website & Discord
-Official Website: https://www.harbourmasters.org/
-
-Official Discord: https://discord.gg/harbourmasters
-
-*If you're having any trouble after reading through this `README`, feel free ask for help in the PaperBoat text channels. Please keep in mind that we do not condone piracy.*
+*Port of Paper Mario 64 for Nintendo Switch*
 
 # Quick Start
 
@@ -25,20 +9,14 @@ PaperBoat does not include any copyrighted assets.  You are required to provide 
 US SHA1 Hash: `3837f44cda784b466c9a2d99df70d77c322b97a0`
 You can verify you have dumped a supported copy of the game by using the compatibility checker at https://paperboat.equipment/.
 
-### 2. Download PaperBoat from [Releases](https://github.com/HarbourMasters/PaperBoat/releases)
+### 2. Download PaperBoat from [Releases](https://github.com/CypherNoodle/PaperBoat/releases)
 
 ### 3. Launch the Game!
-#### Windows
+* #### Nintendo Switch
 * Extract the zip
-* Launch `paperboat.exe`
-
-#### Linux
-* Place your supported copy of the game in the same folder as the appimage.
-* Execute `paperboat.appimage`. You may have to `chmod +x` the appimage via terminal.
-
-#### macOS
-* Run `paperboat.app`.
-* When prompted, select your supported copy of the game.
+* Copy the folder `paperboat` to `sdmc:/switch/`
+* Generate `pm64.o2r` using the matching PaperBoat desktop version and your own supported ROM, then put it in `sdmc:/switch/paperboat/`
+* Launch `paperboat.nro`
 
 ### 4. Play!
 
@@ -46,27 +24,13 @@ Congratulations, you are now sailing with PaperBoat! Have fun!
 
 # Configuration
 
-### Default keyboard configuration
-| N64 | A | B | Z | Start | Analog stick | C buttons | D-Pad |
-| - | - | - | - | - | - | - | - |
-| Keyboard | X | C | Z | Space | WASD | Arrow keys | TFGH |
-
-### Other shortcuts
-| Keys | Action |
-| - | - |
-| Esc | Toggle menubar |
-| F11 | Fullscreen |
-| Tab | Toggle Alternate assets |
-| Ctrl+R | Reset |
+### Default gamepad configuration
+| N64 | A | B | L | R | Z | Start | Analog stick | C buttons | D-Pad |
+| - | - | - | - | - | - | - | - | - | - |
+| JoyCon | A | B | LB | RT | LT | + | Left Stick | Right Stick | D-Pad |
 
 ### Graphics Backends
-Currently, there are three rendering APIs supported: DirectX 11 (Windows), OpenGL (all platforms), and Metal (macOS). You can change which API to use in the `Settings` menu of the menubar, which requires a restart.
-
-If you're having an issue with crashing, you can also change the API manually in the `paperboat.cfg.json` file by finding the `"Backend": {` section and updating the backend ID and name. Be sure to use one of the valid values:
-
-- `0` = DirectX 11 (default on Windows)
-- `1` = OpenGL
-- `2` = Metal (default on macOS)
+Currently, there are three rendering APIs supported: OpenGL.
 
 # Custom Assets
 
