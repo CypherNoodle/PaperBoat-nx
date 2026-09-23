@@ -26,6 +26,12 @@ jobs:
           repository: PalindromicBreadLoaf/nxvk
           ref: e028d428c3b1f2dabadd81645c53cddfc8d7ab51
           path: nxvk-source
+      - name: Restore built NXVK portlib
+        id: nxvk-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: nxvk-source/switch/build/pkg
+          key: nxvk-zink-e028d428c3b1f2dabadd81645c53cddfc8d7ab51-v1
       - name: Build NXVK toolchain image
         run: docker build -t paperboat-nxvk nxvk-source/switch/docker
       - name: Build Zink driver and PaperBoat
@@ -34,6 +40,12 @@ jobs:
             -v "$GITHUB_WORKSPACE/nxvk-source:/work" \
             -v "$GITHUB_WORKSPACE:/paperboat" \
             -w /work paperboat-nxvk bash /paperboat/scripts/build-switch-nxvk.sh
+      - name: Cache completed driver even if the game build fails
+        if: ${{ always() && steps.nxvk-cache.outputs.cache-hit != 'true' && hashFiles('nxvk-source/switch/build/pkg/lib/libnvk_gl.a') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: nxvk-source/switch/build/pkg
+          key: nxvk-zink-e028d428c3b1f2dabadd81645c53cddfc8d7ab51-v1
       - uses: actions/upload-artifact@v4
         with:
           name: paperboat-switch-nxvk-zink-experimental

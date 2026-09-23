@@ -10,6 +10,13 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 # The game includes archive headers from libultraship.
 target_link_libraries(${PROJECT_NAME} PRIVATE libzip::zip)
+if(SWITCH_NXVK_ZINK)
+    set(NXVK_SOURCE_DIR "" CACHE PATH "Pinned NXVK source tree for its newlib compatibility helpers")
+    if(NOT EXISTS "${NXVK_SOURCE_DIR}/switch/smoke/nvk_compat.c")
+        message(FATAL_ERROR "NXVK_SOURCE_DIR must point to the pinned NXVK source checkout")
+    endif()
+    target_sources(${PROJECT_NAME} PRIVATE "${NXVK_SOURCE_DIR}/switch/smoke/nvk_compat.c")
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME paperboat)
 nx_generate_nacp(OUTPUT paperboat.nacp NAME "PaperBoat" AUTHOR "PaperBoat contributors"
