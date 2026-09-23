@@ -19,8 +19,9 @@ and average frame time. These include interpolated frames, not just game logic
 updates. **Target FPS** controls the requested rate and is not a measurement.
 
 Compare the same scene with identical resolution, MSAA, target FPS, and docked
-or handheld mode. Select **OpenGL** (Zink) or **Vulkan** in the Graphics renderer
-setting, then restart. Check `logs/Paperboat.log` for the selected renderer:
+or handheld mode. The first launch uses **OpenGL** through Zink. Select
+**OpenGL** (Zink) or **Vulkan** (native NXVK) in the Graphics renderer setting,
+then restart. Check `logs/Paperboat.log` for the selected renderer:
 Zink for OpenGL, or `Switch native Vulkan` for Vulkan. Keep both logs when reporting problems. A faster
 driver is not guaranteed, and audio underruns may have causes outside rendering.
 
