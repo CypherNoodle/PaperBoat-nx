@@ -1,0 +1,41 @@
+name: Switch NXVK Zink experimental
+
+on:
+  push:
+    branches: [switch-nxvk-zink]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: switch-nxvk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Checkout pinned NXVK source
+        uses: actions/checkout@v4
+        with:
+          repository: PalindromicBreadLoaf/nxvk
+          ref: e028d428c3b1f2dabadd81645c53cddfc8d7ab51
+          path: nxvk-source
+      - name: Build NXVK toolchain image
+        run: docker build -t paperboat-nxvk nxvk-source/switch/docker
+      - name: Build Zink driver and PaperBoat
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/nxvk-source:/work" \
+            -v "$GITHUB_WORKSPACE:/paperboat" \
+            -w /work paperboat-nxvk bash /paperboat/scripts/build-switch-nxvk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paperboat-switch-nxvk-zink-experimental
+          path: build-switch-nxvk/switch/
+          if-no-files-found: error

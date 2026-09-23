@@ -19,6 +19,27 @@
 #include "port/ui/devtools/saveeditor/SaveEditor.h"
 
 namespace PaperboatGui {
+class FpsOverlay final : public Ship::GuiWindow {
+  public:
+    FpsOverlay() : GuiWindow("", true, "FPS overlay") {}
+    void InitElement() override {}
+    void UpdateElement() override {}
+    void DrawElement() override {}
+    void Draw() override {
+        if (!CVarGetInteger(CVAR_SETTING("ShowFPS"), 0)) return;
+        const auto* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10), ImGuiCond_Always);
+        ImGui::SetNextWindowBgAlpha(0.65f);
+        const auto flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+                           ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs |
+                           ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+        if (ImGui::Begin("FPS overlay", nullptr, flags)) {
+            const float fps = ImGui::GetIO().Framerate;
+            ImGui::Text("FPS: %.1f | %.1f ms", fps, fps > 0.0f ? 1000.0f / fps : 0.0f);
+        }
+        ImGui::End();
+    }
+};
 // MARK: - Delegates
 std::shared_ptr<Ship::GuiWindow> mInputEditorWindow;
 std::shared_ptr<PaperboatMenu> mPaperboatMenu;
@@ -51,6 +72,7 @@ void SetupMenu() {
 
 void SetupGuiElements() {
     auto gui = Ship::Context::GetRawInstance()->GetWindow()->GetGui();
+    gui->AddGuiWindow(std::make_shared<FpsOverlay>());
 
     auto& style = ImGui::GetStyle();
     style.FramePadding = ImVec2(4.0f, 6.0f);

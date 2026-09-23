@@ -46,6 +46,11 @@ void SwitchPlatform::Trace(const char* message) {
 }
 
 bool SwitchPlatform::Prepare() {
+#ifdef PAPERBOAT_NXVK_ZINK
+    setenv("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", "1", 1);
+    setenv("GALLIUM_DRIVER", "zink", 1);
+    Trace("=== NXVK / Zink experimental build ===");
+#endif
     Trace("=== PaperBoat startup: OpenGL core diagnostics ===");
     const auto type = appletGetAppletType();
     Trace(type == AppletType_Application ? "Applet type: application" : "Applet type: other");

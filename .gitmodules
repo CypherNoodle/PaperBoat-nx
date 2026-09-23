@@ -5,4 +5,4 @@
 [submodule "external/libultraship"]
 	path = external/libultraship
 	url = https://github.com/CypherNoodle/libultraship.git
-	branch = switch-port
+	branch = switch-nxvk-zink
