@@ -62,9 +62,11 @@ if new not in s:
 p.write_text(s)
 p = sdl / 'src/video/switch/SDL_switchvideo.c'
 s = p.read_text()
+if '#include <stdlib.h>' not in s:
+    s = s.replace('#include "../../SDL_internal.h"', '#include "../../SDL_internal.h"\n#include <stdlib.h>')
 needle = '    if (!_this->egl_data) {'
 replacement = '''    /* PaperBoat native Vulkan owns NWindow; do not create an EGL surface. */
-    if (!(window->flags & SDL_WINDOW_OPENGL)) {
+    if (!(window->flags & SDL_WINDOW_OPENGL) || getenv("PAPERBOAT_NXVK_VULKAN")) {
         window_data = (SDL_WindowData *) SDL_calloc(1, sizeof(SDL_WindowData));
         if (!window_data) return SDL_OutOfMemory();
         window->driverdata = window_data;
@@ -79,4 +81,6 @@ replacement = '''    /* PaperBoat native Vulkan owns NWindow; do not create an E
 if 'PaperBoat native Vulkan owns NWindow' not in s:
     assert s.count(needle) == 1
     s = s.replace(needle, replacement)
+if 'PAPERBOAT_NXVK_VULKAN' not in s:
+    raise RuntimeError('SDL Vulkan escape hatch was not applied')
 p.write_text(s)
