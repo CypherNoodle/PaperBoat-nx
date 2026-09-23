@@ -33,6 +33,7 @@ static int dragSourceIndex = -1;
 static int dragTargetIndex = -1;
 
 static WidgetInfo altAssetsWidget;
+static WidgetInfo autoMipmapsWidget;
 
 #define CVAR_ENABLED_MODS_NAME  CVAR_SETTING("EnabledMods")
 #define CVAR_DISABLED_MODS_NAME CVAR_SETTING("DisabledMods")
@@ -368,6 +369,7 @@ static void DrawModManager() {
 
 void PaperboatModMenuWindow::DrawElement() {
     PaperboatGui::mPaperboatMenu->MenuDrawItem(altAssetsWidget, 200, PaperboatGui::GetMenuThemeColor());
+    PaperboatGui::mPaperboatMenu->MenuDrawItem(autoMipmapsWidget, 200, PaperboatGui::GetMenuThemeColor());
 
     ImGui::TextColored(
         UIWidgets::ColorValues.at(UIWidgets::Colors::Yellow),
@@ -398,6 +400,18 @@ static void RegisterModMenuWidgets() {
         .PreFunc([](WidgetInfo& info) {
             std::static_pointer_cast<UIWidgets::CheckboxOptions>(info.options)->disabled = editing;
         });
+
+    autoMipmapsWidget = { .name = "HD Texture Mipmaps", .type = WidgetType::WIDGET_CVAR_CHECKBOX };
+    autoMipmapsWidget.CVar(CVAR_ENHANCEMENT("Mods.AutoMipmaps"))
+        .Options(
+            UIWidgets::CheckboxOptions()
+                .DefaultValue(true)
+                .Color(THEME_COLOR)
+                .Tooltip(
+                    "Generates mipmaps for HD replacement textures, which smooths them in the distance. Turn it "
+                    "off if the GPU hangs while a texture pack is enabled."
+                )
+        );
 }
 
 static RegisterMenuInitFunc menuInitFunc(RegisterModMenuWidgets);

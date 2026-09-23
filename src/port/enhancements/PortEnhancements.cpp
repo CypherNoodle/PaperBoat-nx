@@ -55,6 +55,11 @@ void PortEnhancements_Register() {
     REGISTER_EVENT(TheaterPostDraw);
     REGISTER_EVENT(CurtainsPreDraw);
     REGISTER_EVENT(CurtainsPostDraw);
+    REGISTER_EVENT(BackgroundPreDraw);
+    REGISTER_EVENT(CameraPerspective);
+    REGISTER_EVENT(CameraFitViewport);
+    REGISTER_EVENT(CameraSetViewport);
+    REGISTER_EVENT(BattleMenuDrawReel);
     REGISTER_EVENT(VanillaBehavior);
 
     // Register game events
@@ -66,6 +71,9 @@ void PortEnhancements_Register() {
     REGISTER_EVENT(OnPlayerSPChange);
     REGISTER_EVENT(OnPlayerBPCostCheck);
     REGISTER_EVENT(OnPostSaveFileLoad);
+    REGISTER_EVENT(OnBattleEffectsRemoved);
+    REGISTER_EVENT(OnBlockWindowCheck);
+    REGISTER_EVENT(OnMapLoad);
 }
 
 void PortEnhancements_Exit() {
