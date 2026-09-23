@@ -21,7 +21,8 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME paperboat)
 nx_generate_nacp(OUTPUT paperboat.nacp NAME "PaperBoat" AUTHOR "PaperBoat contributors"
     VERSION "${PROJECT_VERSION}")
-nx_create_nro(${PROJECT_NAME} OUTPUT paperboat.nro NACP paperboat.nacp)
+nx_create_nro(${PROJECT_NAME} OUTPUT paperboat.nro NACP paperboat.nacp
+    ICON "${CMAKE_SOURCE_DIR}/switch-icon.png")
 
 # Keep the shader/font archive beside the executable on the SD card.
 add_custom_target(switch-package
