@@ -37,8 +37,12 @@ sdl = checkout('SDL', 'https://github.com/devkitPro/SDL.git', '0738d3c9f6993875e
 # makes its configure-time thread probe fail.
 p = sdl / 'cmake/sdlchecks.cmake'
 s = p.read_text()
-s = s.replace('elseif(QNX)\n      # pthread support is baked in',
-              'elseif(QNX OR NINTENDO_SWITCH)\n      # pthread support is provided by the platform libc')
+old = 'elseif(QNX)\n      # pthread support is baked in'
+new = 'elseif(QNX OR NINTENDO_SWITCH)\n      # pthread support is provided by the platform libc'
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL pthread configuration no longer matches the Switch patch')
+    s = s.replace(old, new)
 p.write_text(s)
 p = sdl / 'src/video/switch/SDL_switchvideo.c'
 s = p.read_text()
