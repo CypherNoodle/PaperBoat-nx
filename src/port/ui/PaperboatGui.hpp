@@ -9,6 +9,7 @@ namespace PaperboatGui {
 void SetupHooks();
 void SetupMenu();
 void SetupGuiElements();
+void UpdateImageEnhancementFilter();
 void Draw();
 void Destroy();
 void RegisterPopup(std::string title, std::string message, std::string button1 = "OK", std::string button2 = "",

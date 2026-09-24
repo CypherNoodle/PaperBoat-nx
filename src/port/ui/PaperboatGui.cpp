@@ -64,6 +64,7 @@ void SetupMenu() {
     auto gui = Ship::Context::GetRawInstance()->GetWindow()->GetGui();
     mPaperboatMenu = std::make_shared<PaperboatGui::PaperboatMenu>(CVAR_WINDOW("Menu"), "Port Menu");
     gui->SetMenu(mPaperboatMenu);
+    UpdateImageEnhancementFilter();
 
     mModalWindow = std::make_shared<PaperboatModalWindow>(CVAR_WINDOW("ModalWindow"), "Modal Window");
     gui->AddGuiWindow(mModalWindow);

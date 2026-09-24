@@ -23,6 +23,9 @@ BSS s32 SpriteQuadCacheInfo[22]; // upper bytes: width, height; lower 16 bits: t
 BSS s32 SpriteCurBaseRot[3];
 BSS s32 SpriteUpdateNotifyValue;
 
+static f32 sSpriteXbrEnabled[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+static f32 sSpriteXbrDisabled[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
 SpriteComponent** spr_allocate_components(s32);
 void spr_load_npc_extra_anims(SpriteAnimData*, u32*);
 void spr_init_player_raster_cache(s32 cacheSize, s32 maxRasterSize);
@@ -328,6 +331,7 @@ void spr_appendGfx_component(
     Quad* quad;
     s32 width;
     s32 height;
+    s32 textureFilter = CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0);
 
     guTranslateF(mtxLocal, dx, dy, dz);
 
@@ -374,10 +378,9 @@ void spr_appendGfx_component(
         }
     }
 
-    if (CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0)) {
+    if (textureFilter != 0) {
         gDPSetTextureFilter(gMainGfxPos++, G_TF_POINT);
     }
-
     width = cache->width;
     height = cache->height;
     quadIndex = cache->quadCacheIndex;
@@ -399,7 +402,7 @@ void spr_appendGfx_component(
         ifxImg.alpha = opacity;
         u32 imgfxFlags = IMGFX_FLAG_80000;
 
-        if (CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0)) {
+        if (textureFilter != 0) {
             imgfxFlags |= IMGFX_FLAG_NO_FILTERING;
         }
 
@@ -961,11 +964,18 @@ s32 spr_draw_player_sprite(s32 spriteInstanceID, s32 yaw, s32 alphaIn, PAL_PTR* 
         palettes = paletteList;
     }
 
+    const bool xbrEnabled = CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0) == 2;
+    if (xbrEnabled) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrEnabled);
+    }
     while (*compList != PTR_LIST_END) {
         spr_draw_component(alpha | DRAW_SPRITE_USE_PLAYER_RASTERS, *compList++, *animList, rasterList, palettes, zscale, mtx);
         if (*animList != PTR_LIST_END) {
             animList++;
         }
+    }
+    if (xbrEnabled) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrDisabled);
     }
 
     return true;
@@ -1168,11 +1178,18 @@ s32 spr_draw_npc_sprite(s32 spriteInstanceID, s32 yaw, s32 alphaIn, PAL_PTR* pal
         palettes = paletteList;
     }
 
+    const bool xbrEnabled = CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0) == 2;
+    if (xbrEnabled) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrEnabled);
+    }
     while (*components != PTR_LIST_END) {
         spr_draw_component(alpha, *components++, *animComps, rasters, palettes, zscale, mtx);
         if (*animComps != PTR_LIST_END) {
             animComps++;
         }
+    }
+    if (xbrEnabled) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrDisabled);
     }
 
     return true;

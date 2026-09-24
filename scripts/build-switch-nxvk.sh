@@ -3,12 +3,13 @@ set -euo pipefail
 
 # Run in the upstream NXVK toolchain image: NXVK at /work, game at /paperboat.
 export PATH="$DEVKITPRO/devkitA64/bin:$DEVKITPRO/tools/bin:$PATH"
+build_jobs="${PAPERBOAT_BUILD_JOBS:-$(nproc)}"
 mkdir -p /tmp/paperboat-build-tools
 real_ninja="$(command -v ninja)"
-printf '#!/bin/sh\nexec %s -j2 "$@"\n' "$real_ninja" > /tmp/paperboat-build-tools/ninja
+printf '#!/bin/sh\nexec %s -j%s "$@"\n' "$real_ninja" "$build_jobs" > /tmp/paperboat-build-tools/ninja
 chmod +x /tmp/paperboat-build-tools/ninja
 export PATH="/tmp/paperboat-build-tools:$PATH"
-export CARGO_BUILD_JOBS=2
+export CARGO_BUILD_JOBS="$build_jobs"
 if [ ! -f switch/build/pkg/lib/libnvk_gl.a ]; then
   make CONTAINER= gl
 fi
@@ -22,7 +23,7 @@ cmake -S /paperboat -B /paperboat/build-switch-nxvk -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
   -DCMAKE_BUILD_TYPE=Release -DSWITCH_NXVK_ZINK=ON -DNXVK_SOURCE_DIR=/work \
   -DSWITCH_VULKAN_DEPS=/paperboat/switch-vulkan-deps
-cmake --build /paperboat/build-switch-nxvk --target switch-package --parallel 2
+cmake --build /paperboat/build-switch-nxvk --target switch-package --parallel "$build_jobs"
 # Require both renderers in the linked executable before allowing publication.
 aarch64-none-elf-nm -C /paperboat/build-switch-nxvk/paperboat.elf > /tmp/paperboat-symbols.txt
 grep -q 'Fast::GfxRenderingAPIVK::VulkanInit' /tmp/paperboat-symbols.txt

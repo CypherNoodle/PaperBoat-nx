@@ -5,6 +5,8 @@
 #include "TouchControls.h"
 #include "UIWidgets.hpp"
 #include "port/Engine.h"
+#include <fast/Fast3dWindow.h>
+#include <fast/interpreter.h>
 #include <spdlog/fmt/fmt.h>
 #ifdef __SWITCH__
 #include "port/switch/SwitchPlatform.h"
@@ -49,7 +51,35 @@ static const std::unordered_map<int32_t, const char*> textureFilteringMap = {
 static const std::unordered_map<int32_t, const char*> texture2DFilteringMap = {
     { 0, "Default" },
     { 1, "Sharp" },
+    { 2, "xBR Lite" },
 };
+
+static const std::unordered_map<int32_t, const char*> anisotropicFilteringMap = {
+    { 1, "Off (1x)" }, { 2, "2x" }, { 4, "4x" }, { 8, "8x" }, { 16, "16x" },
+};
+
+static const std::unordered_map<int32_t, const char*> imageEnhancementMap = {
+    { 0, "Off" }, { 1, "FXAA" }, { 2, "CAS Sharpen" }, { 3, "FXAA + CAS" },
+};
+
+static std::vector<int> sImageEnhancementPasses;
+
+void UpdateImageEnhancementFilter() {
+    for (const int pass : sImageEnhancementPasses) {
+        gfx_unregister_post_pass(pass);
+    }
+    sImageEnhancementPasses.clear();
+
+#ifdef __SWITCH__
+    const int mode = CVarGetInteger(CVAR_IMAGE_ENHANCEMENT, 0);
+    if (mode == 1 || mode == 3) {
+        sImageEnhancementPasses.push_back(gfx_register_post_pass("shaders/post/fxaa.shader"));
+    }
+    if (mode == 2 || mode == 3) {
+        sImageEnhancementPasses.push_back(gfx_register_post_pass("shaders/post/cas.shader"));
+    }
+#endif
+}
 
 #ifdef __SWITCH__
 static const std::unordered_map<int32_t, const char*> handheldResolutionMap = {
@@ -420,10 +450,40 @@ void PaperboatMenu::AddMenuSettings() {
         .RaceDisable(false)
         .Options(ComboboxOptions().Tooltip("Sets the applied Texture Filtering.").ComboMap(textureFilteringMap));
 
+    AddWidget(path, "Anisotropic Filtering", WIDGET_CVAR_COMBOBOX)
+        .CVar(CVAR_ANISOTROPIC_FILTERING)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo& info) {
+            auto wnd = std::dynamic_pointer_cast<Fast::Fast3dWindow>(
+                Ship::Context::GetRawInstance()->GetWindow());
+            if (wnd != nullptr) {
+                wnd->SetTextureFilter(static_cast<Fast::FilteringMode>(
+                    CVarGetInteger(CVAR_TEXTURE_FILTER, Fast::FILTER_THREE_POINT)));
+            }
+        })
+        .Options(ComboboxOptions()
+                     .Tooltip("Controls anisotropic filtering for HD textures with generated mipmaps.")
+                     .ComboMap(anisotropicFilteringMap)
+                     .DefaultIndex(8));
+
+#ifdef __SWITCH__
+    AddWidget(path, "Image Enhancement", WIDGET_CVAR_COMBOBOX)
+        .CVar(CVAR_IMAGE_ENHANCEMENT)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo& info) { UpdateImageEnhancementFilter(); })
+        .Options(ComboboxOptions()
+                     .Tooltip("Applies a low-cost fullscreen filter. FXAA smooths edges; CAS restores sharpness.")
+                     .ComboMap(imageEnhancementMap)
+                     .DefaultIndex(0));
+#endif
+
     AddWidget(path, "2D Texture Filter", WIDGET_CVAR_COMBOBOX)
-    .CVar(CVAR_2D_TEXTURE_FILTER)
-    .RaceDisable(false)
-    .Options(ComboboxOptions().Tooltip("Sets texture filtering for 2D sprites.").ComboMap(texture2DFilteringMap));
+        .CVar(CVAR_2D_TEXTURE_FILTER)
+        .RaceDisable(false)
+        .Options(ComboboxOptions()
+                     .Tooltip("Sets filtering for character sprites. xBR Lite smooths pixel-art diagonals without "
+                              "filtering the 3D scene.")
+                     .ComboMap(texture2DFilteringMap));
 
     path.column = SECTION_COLUMN_2;
     AddWidget(path, "Advanced Graphics Options", WIDGET_SEPARATOR_TEXT);
