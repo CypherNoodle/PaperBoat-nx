@@ -7,7 +7,7 @@
 #include "port/Engine.h"
 #include <spdlog/fmt/fmt.h>
 #ifdef __SWITCH__
-#include <switch.h>
+#include "port/switch/SwitchPlatform.h"
 #endif
 
 namespace PaperboatGui {
@@ -75,7 +75,7 @@ static void ApplySwitchOutputResolution(bool docked, int32_t selectedHeight) {
 }
 
 static void DrawSwitchResolutionSelector(WidgetInfo&) {
-    const bool docked = appletGetOperationMode() == AppletOperationMode_Console;
+    const bool docked = SwitchPlatform::IsDocked();
     const char* cvar = docked ? CVAR_SETTING("SwitchOutputResolution.Docked")
                               : CVAR_SETTING("SwitchOutputResolution.Handheld");
     const auto& resolutions = docked ? dockedResolutionMap : handheldResolutionMap;
@@ -83,7 +83,6 @@ static void DrawSwitchResolutionSelector(WidgetInfo&) {
         "Output Resolution", cvar, resolutions,
         ComboboxOptions()
             .DefaultIndex(0)
-            .Color(THEME_COLOR)
             .Tooltip("Sets the display output resolution. Available choices are limited to the current handheld "
                      "or docked mode.")
     );
