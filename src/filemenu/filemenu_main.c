@@ -50,9 +50,6 @@ extern u8 D_filemenu_8025093C[4];
 
 BSS u8 filemenu_filename[8];
 
-#define LOCALE_FILE_NUMBER_X 33
-//TODO ifdef for LOCALE_DE/ES/FR/JP/CN ...
-
 #if VERSION_IQUE
 #define OFFSET_WIDTH        5
 #define DELETE_OFFSET_X     9
@@ -68,8 +65,6 @@ BSS u8 filemenu_filename[8];
 #define CENTER_CANCEL_X     18
 #define RIGHT_CANCEL_X      20
 #define FILE_X              5
-#define FILE_NUMBER_X       33
-#define FILE_NAME_X         46
 #define NUMBER_OFFSET_Y     0
 #endif
 
@@ -647,10 +642,18 @@ void filemenu_draw_contents_file_title(
     s32 width, s32 height,
     s32 opacity, s32 darkening)
 {
+#if !VERSION_IQUE
+    u8* fileLabel;
+    s32 fileNumberX;
+    s32 fileNameX;
+    s32 filenameCharWidth;
+#endif
+
     if (filemenu_currentMenu == FILE_MENU_MAIN && menu->selected == fileIdx) {
         filemenu_set_cursor_goal_pos(fileIdx + 60, baseX - 3, baseY + 8);
     }
 
+#if VERSION_IQUE
     filemenu_draw_message(filemenu_get_menu_message(FILE_MESSAGE_FILE_26), baseX + FILE_X, baseY + 1, 255, 0, 1);
 
     if (!gSaveSlotMetadata[fileIdx].hasData) {
@@ -662,6 +665,29 @@ void filemenu_draw_contents_file_title(
             ARRAY_COUNT(gSaveSlotSummary[fileIdx].filename),
             baseX + FILE_NAME_X, baseY + 1, 255, 0, 1, 9);
     }
+#else
+    fileLabel = filemenu_get_menu_message(FILE_MESSAGE_FILE_26);
+    fileNumberX = FILE_X + get_msg_width((intptr_t)fileLabel, MSG_FONT_MENU) + 2;
+    fileNameX = fileNumberX + 10;
+    filenameCharWidth = (width - fileNameX - 2) / ARRAY_COUNT(gSaveSlotSummary[fileIdx].filename);
+
+    if (filenameCharWidth > 9) {
+        filenameCharWidth = 9;
+    } else if (filenameCharWidth < 6) {
+        filenameCharWidth = 6;
+    }
+
+    filemenu_draw_message(fileLabel, baseX + FILE_X, baseY + 1, 255, 0, 1);
+    draw_number(fileIdx + 1, baseX + fileNumberX, baseY + 1 + NUMBER_OFFSET_Y, DRAW_NUMBER_CHARSET_THIN,
+                MSG_PAL_WHITE, 255, DRAW_NUMBER_STYLE_MONOSPACE);
+
+    if (gSaveSlotMetadata[fileIdx].hasData) {
+        filemenu_draw_file_name(
+            gSaveSlotSummary[fileIdx].filename,
+            ARRAY_COUNT(gSaveSlotSummary[fileIdx].filename),
+            baseX + fileNameX, baseY + 1, 255, 0, 1, filenameCharWidth);
+    }
+#endif
 }
 #endif
 
