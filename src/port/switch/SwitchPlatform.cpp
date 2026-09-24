@@ -67,4 +67,8 @@ bool SwitchPlatform::Prepare() {
 bool SwitchPlatform::MainLoop() {
     return appletMainLoop();
 }
+
+bool SwitchPlatform::IsDocked() {
+    return appletGetOperationMode() == AppletOperationMode_Console;
+}
 #endif
