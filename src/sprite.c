@@ -23,6 +23,9 @@ BSS s32 SpriteQuadCacheInfo[22]; // upper bytes: width, height; lower 16 bits: t
 BSS s32 SpriteCurBaseRot[3];
 BSS s32 SpriteUpdateNotifyValue;
 
+static f32 sSpriteXbrEnabled[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+static f32 sSpriteXbrDisabled[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
 SpriteComponent** spr_allocate_components(s32);
 void spr_load_npc_extra_anims(SpriteAnimData*, u32*);
 void spr_init_player_raster_cache(s32 cacheSize, s32 maxRasterSize);
@@ -328,6 +331,7 @@ void spr_appendGfx_component(
     Quad* quad;
     s32 width;
     s32 height;
+    s32 textureFilter = CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0);
 
     guTranslateF(mtxLocal, dx, dy, dz);
 
@@ -374,8 +378,11 @@ void spr_appendGfx_component(
         }
     }
 
-    if (CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0)) {
+    if (textureFilter != 0) {
         gDPSetTextureFilter(gMainGfxPos++, G_TF_POINT);
+    }
+    if (textureFilter == 2) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrEnabled);
     }
 
     width = cache->width;
@@ -399,13 +406,16 @@ void spr_appendGfx_component(
         ifxImg.alpha = opacity;
         u32 imgfxFlags = IMGFX_FLAG_80000;
 
-        if (CVarGetInteger(CVAR_2D_TEXTURE_FILTER, 0)) {
+        if (textureFilter != 0) {
             imgfxFlags |= IMGFX_FLAG_NO_FILTERING;
         }
 
         if (imgfx_appendGfx_component((u8) CurSpriteImgFX, &ifxImg, imgfxFlags, mtxTransform) == 1) {
             CurSpriteImgFX &= ~SPR_IMGFX_FLAG_ALL;
         }
+    }
+    if (textureFilter == 2) {
+        gSPSetUniform(gMainGfxPos++, 2, sSpriteXbrDisabled);
     }
     gSPPopMatrix(gMainGfxPos++, G_MTX_MODELVIEW);
 }

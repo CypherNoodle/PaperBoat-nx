@@ -10,9 +10,34 @@
             return @{texture}(uTexPal, vec2((idx * 255.0 + bank + 0.5) / 256.0, 0.5));
         }
 
+        float paletteLuma(in vec4 color) {
+            return dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        }
+
+        vec4 paletteXbrLite(in sampler2D tex, in vec2 uv, in vec2 texSize, in float bank) {
+            vec2 pixel = 1.0 / texSize;
+            vec2 subpixel = fract(uv * texSize) - 0.5;
+            vec4 center = paletteTap(tex, uv, bank);
+            vec4 north = paletteTap(tex, uv + vec2(0.0, -pixel.y), bank);
+            vec4 south = paletteTap(tex, uv + vec2(0.0,  pixel.y), bank);
+            vec4 west = paletteTap(tex, uv + vec2(-pixel.x, 0.0), bank);
+            vec4 east = paletteTap(tex, uv + vec2( pixel.x, 0.0), bank);
+            float horizontalEdge = abs(paletteLuma(west) - paletteLuma(east));
+            float verticalEdge = abs(paletteLuma(north) - paletteLuma(south));
+            vec4 neighbour = horizontalEdge > verticalEdge
+                                 ? (subpixel.x < 0.0 ? west : east)
+                                 : (subpixel.y < 0.0 ? north : south);
+            float similarity = 1.0 - clamp(abs(paletteLuma(center) - paletteLuma(neighbour)) * 4.0, 0.0, 1.0);
+            float edgeDistance = horizontalEdge > verticalEdge ? abs(subpixel.x) : abs(subpixel.y);
+            return mix(center, neighbour, similarity * smoothstep(0.15, 0.5, edgeDistance) * 0.65);
+        }
+
         // Filtering must happen after the palette lookup, like real hardware:
         // params.y selects nearest (0), bilinear (1) or N64 three-point (2).
         vec4 paletteSample(in sampler2D tex, in vec2 uv, in vec2 texSize, in vec4 params) {
+            if (uCustom[2].x > 0.5) {
+                return paletteXbrLite(tex, uv, texSize, params.x);
+            }
             if (params.y > 1.5) {
                 vec2 offset = fract(uv * texSize - vec2(0.5));
                 offset -= step(1.0, offset.x + offset.y);

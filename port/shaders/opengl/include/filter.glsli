@@ -20,7 +20,33 @@
         return c0 + abs(offset.x)*(c1-c0) + abs(offset.y)*(c2-c0);
     }
 
+    float xbrLuma(in vec4 color) {
+        return dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    }
+
+    vec4 filterXbrLite(in sampler2D tex, in vec2 texCoord, in vec2 texSize) {
+        vec2 pixel = 1.0 / texSize;
+        vec2 subpixel = fract(texCoord * texSize) - 0.5;
+        vec4 center = @{texture}(tex, texCoord);
+        vec4 north = @{texture}(tex, texCoord + vec2(0.0, -pixel.y));
+        vec4 south = @{texture}(tex, texCoord + vec2(0.0,  pixel.y));
+        vec4 west = @{texture}(tex, texCoord + vec2(-pixel.x, 0.0));
+        vec4 east = @{texture}(tex, texCoord + vec2( pixel.x, 0.0));
+
+        float horizontalEdge = abs(xbrLuma(west) - xbrLuma(east));
+        float verticalEdge = abs(xbrLuma(north) - xbrLuma(south));
+        vec4 neighbour = horizontalEdge > verticalEdge
+                             ? (subpixel.x < 0.0 ? west : east)
+                             : (subpixel.y < 0.0 ? north : south);
+        float similarity = 1.0 - clamp(abs(xbrLuma(center) - xbrLuma(neighbour)) * 4.0, 0.0, 1.0);
+        float edgeDistance = horizontalEdge > verticalEdge ? abs(subpixel.x) : abs(subpixel.y);
+        return mix(center, neighbour, similarity * smoothstep(0.15, 0.5, edgeDistance) * 0.65);
+    }
+
     vec4 hookTexture2D(in int id, sampler2D tex, in vec2 uv, in vec2 texSize) {
+        if (uCustom[2].x > 0.5) {
+            return filterXbrLite(tex, uv, texSize);
+        }
     @if(o_three_point_filtering)
         if(texture_filtering[id] == @{FILTER_THREE_POINT}) {
             return filter3point(tex, uv, texSize);
