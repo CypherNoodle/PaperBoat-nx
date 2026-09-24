@@ -30,7 +30,7 @@ Congratulations, you are now sailing with PaperBoat! Have fun!
 | JoyCon | A | B | LB | RT | LT | + | Left Stick | Right Stick | D-Pad |
 
 ### Graphics Backends
-Currently, there are three rendering APIs supported: OpenGL.
+Currently, rendering APIs supported: OpenGL (Zink).
 
 # Custom Assets
 
