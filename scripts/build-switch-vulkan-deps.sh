@@ -3,6 +3,7 @@ set -euo pipefail
 python3 /paperboat/scripts/prepare-switch-vulkan.py
 deps=/paperboat/switch-vulkan-deps
 toolchain=/opt/devkitpro/cmake/Switch.cmake
+build_jobs="${PAPERBOAT_BUILD_JOBS:-$(nproc)}"
 # SDL's Switch branch still sets the old PTHREADS option names. Enable the
 # current options explicitly so CheckPTHREAD actually runs on this platform.
 # Disable generic video backends so SDL selects the native Switch driver before
@@ -16,7 +17,7 @@ cmake -S "$deps/SDL" -B "$deps/SDL-build" -G Ninja \
   -DSDL_THREADS=ON -DSDL_PTHREADS=ON -DSDL_PTHREADS_SEM=ON \
   || { tail -n 180 "$deps/SDL-build/CMakeFiles/CMakeConfigureLog.yaml"; exit 1; }
 grep -Eq '^HAVE_PTHREADS:INTERNAL=(1|TRUE)$' "$deps/SDL-build/CMakeCache.txt"
-cmake --build "$deps/SDL-build" --target install --parallel 2
+cmake --build "$deps/SDL-build" --target install --parallel "$build_jobs"
 cmake -S "$deps/shaderc" -B "$deps/shaderc-build" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$toolchain" -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
@@ -25,4 +26,4 @@ cmake -S "$deps/shaderc" -B "$deps/shaderc-build" -G Ninja \
   -DSHADERC_SKIP_EXECUTABLES=ON -DSHADERC_SKIP_COPYRIGHT_CHECK=ON \
   -DSPIRV_SKIP_TESTS=ON -DSPIRV_SKIP_EXECUTABLES=ON \
   -DENABLE_GLSLANG_BINARIES=OFF -DENABLE_OPT=ON
-cmake --build "$deps/shaderc-build" --target shaderc_combined --parallel 2
+cmake --build "$deps/shaderc-build" --target shaderc_combined --parallel "$build_jobs"

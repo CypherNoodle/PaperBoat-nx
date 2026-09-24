@@ -10,9 +10,14 @@ The dedicated Switch workflow builds the upstream NXVK toolchain and driver,
 then the game. No Linux or Windows game build is requested. The first build can
 take substantially longer because it builds Mesa and Rust dependencies.
 
-Copy `paperboat-nxvk.nro` beside the existing NRO in `switch/paperboat/`, keeping
-`paperboat.o2r` and your own `pm64.o2r` there. Both NROs share configuration and
-saves; back these up before comparing. Launch in application mode.
+Copy `paperboat.nro` to `switch/paperboat/`, keeping `paperboat.o2r` and your own
+`pm64.o2r` there. Back up the previous NRO, configuration and saves before
+replacing it. Launch in application mode.
+
+Under **Settings > Graphics > Advanced Graphics Options**, output-resolution
+presets are limited to 1280x720 in handheld mode and 1920x1080 in docked mode.
+The active mode is detected automatically. **Internal Resolution** remains an
+independent render-scale control.
 
 Enable **Settings > Graphics > Show FPS** to display measured presentation FPS
 and average frame time. These include interpolated frames, not just game logic
