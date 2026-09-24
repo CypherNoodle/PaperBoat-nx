@@ -2,7 +2,7 @@ name: Switch NXVK Zink and Vulkan experimental
 
 on:
   push:
-    branches: [switch-nxvk-zink]
+    branches: [graphics-filters]
   workflow_dispatch:
 
 permissions:
