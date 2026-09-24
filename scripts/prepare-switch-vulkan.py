@@ -1,4 +1,4 @@
-"""Fetch pinned shader compiler/loader and allow SDL windows without EGL ownership."""
+"""Fetch pinned Switch graphics dependencies and apply SDL platform fixes."""
 from pathlib import Path
 import subprocess
 
@@ -83,4 +83,153 @@ if 'PaperBoat native Vulkan owns NWindow' not in s:
     s = s.replace(needle, replacement)
 if 'PAPERBOAT_NXVK_VULKAN' not in s:
     raise RuntimeError('SDL Vulkan escape hatch was not applied')
+p.write_text(s)
+
+# The pinned SDL Switch joystick driver advertises no rumble capability, skips
+# vibration-handle initialization for player one, and passes Uint16 motor
+# strengths as invalid HD-rumble frequencies/amplitudes.  Keep SDL's public
+# rumble API working so both the input editor test and gameplay use libnx.
+p = sdl / 'src/joystick/switch/SDL_sysjoystick.c'
+s = p.read_text()
+old = '''    HidVibrationDeviceHandle vibrationDeviceHandles;
+    HidVibrationValue vibrationValues;'''
+new = '''    HidVibrationDeviceHandle vibrationDeviceHandles[2];
+    HidVibrationValue vibrationValues[2];
+    int vibrationDeviceCount;'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL vibration state no longer matches the Switch patch')
+    s = s.replace(old, new)
+
+old = 'static SWITCHJoystickState state[JOYSTICK_COUNT];'
+new = '''static SWITCHJoystickState state[JOYSTICK_COUNT];
+static HidVibrationDeviceHandle handheldVibrationDeviceHandles[2];
+static int handheldVibrationDeviceCount;
+
+static int SWITCH_InitVibrationDevices(HidVibrationDeviceHandle *handles, HidNpadIdType id,
+                                       HidNpadStyleTag style) {
+    if (R_SUCCEEDED(hidInitializeVibrationDevices(handles, 2, id, style))) {
+        return 2;
+    }
+    if (R_SUCCEEDED(hidInitializeVibrationDevices(handles, 1, id, style))) {
+        return 1;
+    }
+    return 0;
+}'''
+if 'SWITCH_InitVibrationDevices' not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL vibration globals no longer match the Switch patch')
+    s = s.replace(old, new)
+
+old = '''    else {
+        state[0].pad_mapping = (HidNpadButton*)&pad_mapping_default;
+    }
+
+    // initialize pad and vibrations for pad 1 to 7'''
+new = '''    else {
+        state[0].pad_mapping = (HidNpadButton*)&pad_mapping_default;
+    }
+    state[0].vibrationDeviceCount = SWITCH_InitVibrationDevices(
+            state[0].vibrationDeviceHandles, HidNpadIdType_No1, HidNpadStyleSet_NpadFullCtrl);
+    handheldVibrationDeviceCount = SWITCH_InitVibrationDevices(
+            handheldVibrationDeviceHandles, HidNpadIdType_Handheld, HidNpadStyleTag_NpadHandheld);
+
+    // initialize pad and vibrations for pad 1 to 7'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL player-one vibration initialization no longer matches the Switch patch')
+    s = s.replace(old, new)
+
+old = '''        hidInitializeVibrationDevices(&state[i].vibrationDeviceHandles, 1,
+                                      HidNpadIdType_No1 + i, state[i].pad_style);'''
+new = '''        state[i].vibrationDeviceCount = SWITCH_InitVibrationDevices(
+                state[i].vibrationDeviceHandles, HidNpadIdType_No1 + i, state[i].pad_style);'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL per-player vibration initialization no longer matches the Switch patch')
+    s = s.replace(old, new)
+
+old = '''            hidInitializeVibrationDevices(&state[i].vibrationDeviceHandles, 1,
+                                          HidNpadIdType_No1 + i, state[i].pad_style);'''
+new = '''            state[i].vibrationDeviceCount = SWITCH_InitVibrationDevices(
+                    state[i].vibrationDeviceHandles, HidNpadIdType_No1 + i, state[i].pad_style);'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL vibration refresh no longer matches the Switch patch')
+    s = s.replace(old, new)
+
+old = '''static int SWITCH_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble) {
+    int id = joystick->instance_id;
+
+    state[id].vibrationValues.amp_low =
+    state[id].vibrationValues.amp_high = low_frequency_rumble == 0 ? 0.0f : 320.0f;
+    state[id].vibrationValues.freq_low =
+            low_frequency_rumble == 0 ? 160.0f : (float) low_frequency_rumble / 204;
+    state[id].vibrationValues.freq_high =
+            high_frequency_rumble == 0 ? 320.0f : (float) high_frequency_rumble / 204;
+
+    hidSendVibrationValues(&state[id].vibrationDeviceHandles, &state[id].vibrationValues, 1);
+
+    return 0;
+}'''
+new = '''static int SWITCH_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble) {
+    int id = joystick->instance_id;
+    HidVibrationDeviceHandle *handles;
+    int count;
+    int i;
+    Result rc;
+
+    if (id < 0 || id >= JOYSTICK_COUNT) {
+        return SDL_SetError("Invalid Switch joystick instance: %d", id);
+    }
+
+    if (id == 0 &&
+        (hidGetNpadStyleSet(HidNpadIdType_Handheld) & HidNpadStyleTag_NpadHandheld)) {
+        handles = handheldVibrationDeviceHandles;
+        count = handheldVibrationDeviceCount;
+    } else {
+        handles = state[id].vibrationDeviceHandles;
+        count = state[id].vibrationDeviceCount;
+    }
+    if (count <= 0) {
+        return SDL_SetError("Switch controller has no vibration device");
+    }
+
+    for (i = 0; i < count; i++) {
+        state[id].vibrationValues[i].amp_low = (float) low_frequency_rumble / 65535.0f;
+        state[id].vibrationValues[i].freq_low = 160.0f;
+        state[id].vibrationValues[i].amp_high = (float) high_frequency_rumble / 65535.0f;
+        state[id].vibrationValues[i].freq_high = 320.0f;
+    }
+
+    rc = hidSendVibrationValues(handles, state[id].vibrationValues, count);
+    if (R_FAILED(rc)) {
+        return SDL_SetError("Could not send Switch vibration: 0x%x", rc);
+    }
+
+    return 0;
+}'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL rumble implementation no longer matches the Switch patch')
+    s = s.replace(old, new)
+
+old = '''static Uint32 SWITCH_JoystickGetCapabilities(SDL_Joystick *joystick) {
+    return 0;
+}'''
+new = '''static Uint32 SWITCH_JoystickGetCapabilities(SDL_Joystick *joystick) {
+    int id = joystick->instance_id;
+
+    if (id < 0 || id >= JOYSTICK_COUNT) {
+        return 0;
+    }
+    if ((id == 0 && handheldVibrationDeviceCount > 0) || state[id].vibrationDeviceCount > 0) {
+        return SDL_JOYCAP_RUMBLE;
+    }
+    return 0;
+}'''
+if new not in s:
+    if s.count(old) != 1:
+        raise RuntimeError('Pinned SDL rumble capabilities no longer match the Switch patch')
+    s = s.replace(old, new)
 p.write_text(s)
