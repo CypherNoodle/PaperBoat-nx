@@ -1102,9 +1102,61 @@ void GameEngine::RunCommands(Gfx* Commands, const std::vector<std::unordered_map
 
     interpreter->mInterpolationIndex = 0;
 
-    for (const auto& m : mtx_replacements) {
-        wnd->DrawAndRunGraphicsCommands(Commands, m, {});
+#ifdef __SWITCH__
+    // Rendering all interpolated frames synchronously means that a backend which
+    // cannot sustain the requested rate also delays the next 30 Hz game update.
+    // NXVK's swapchain can block while waiting for a compositor buffer even with
+    // swap interval zero. Keep enough time for the last scheduled frame so missed
+    // render targets drop visual-only frames instead of slowing gameplay.
+    using Clock = std::chrono::steady_clock;
+    constexpr double kGameFrameSeconds = 1.0 / 30.0;
+    constexpr double kDeadlineToleranceSeconds = 0.00075;
+    static double sEstimatedDrawSeconds = 0.0;
+    static int32_t sLastTargetFps = 0;
+    const int32_t targetFps = wnd->GetTargetFps();
+    if (targetFps != sLastTargetFps) {
+        sEstimatedDrawSeconds = 0.0;
+        sLastTargetFps = targetFps;
+    }
+    const auto batchStart = Clock::now();
+#endif
+
+    for (size_t i = 0; i < mtx_replacements.size(); i++) {
+#ifdef __SWITCH__
+        const bool isFinalFrame = i + 1 == mtx_replacements.size();
+        if (!isFinalFrame && sEstimatedDrawSeconds > 0.0) {
+            const double elapsedSeconds = std::chrono::duration<double>(Clock::now() - batchStart).count();
+
+            // Drawing another interpolation frame is useful only if both it and
+            // the mandatory final frame are expected to fit in this game tick.
+            if (elapsedSeconds + 2.0 * sEstimatedDrawSeconds >
+                kGameFrameSeconds + kDeadlineToleranceSeconds) {
+                continue;
+            }
+        }
+
+        // Display-list interpolation commands refer to the original sub-frame
+        // index, so preserve it even when preceding visual frames were dropped.
+        interpreter->mInterpolationIndex = static_cast<int>(i);
+        const auto drawStart = Clock::now();
+        const bool drewFrame = wnd->DrawAndRunGraphicsCommands(Commands, mtx_replacements[i], {});
+        const double drawSeconds = std::chrono::duration<double>(Clock::now() - drawStart).count();
+
+        if (drewFrame && mtx_replacements.size() > 1) {
+            // React immediately to a newly blocking present, but recover smoothly
+            // when the renderer becomes fast enough to add interpolation frames.
+            if (sEstimatedDrawSeconds <= 0.0) {
+                sEstimatedDrawSeconds = drawSeconds;
+            } else {
+                const double weight = drawSeconds > sEstimatedDrawSeconds ? 0.5 : 0.25;
+                sEstimatedDrawSeconds += weight * (drawSeconds - sEstimatedDrawSeconds);
+            }
+        }
+        interpreter->mInterpolationIndex = static_cast<int>(i + 1);
+#else
+        wnd->DrawAndRunGraphicsCommands(Commands, mtx_replacements[i], {});
         interpreter->mInterpolationIndex++;
+#endif
     }
 }
 
