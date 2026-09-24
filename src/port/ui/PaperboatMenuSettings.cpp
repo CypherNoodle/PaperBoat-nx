@@ -6,6 +6,9 @@
 #include "UIWidgets.hpp"
 #include "port/Engine.h"
 #include <spdlog/fmt/fmt.h>
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 namespace PaperboatGui {
 
@@ -47,6 +50,53 @@ static const std::unordered_map<int32_t, const char*> texture2DFilteringMap = {
     { 0, "Default" },
     { 1, "Sharp" },
 };
+
+#ifdef __SWITCH__
+static const std::unordered_map<int32_t, const char*> handheldResolutionMap = {
+    { 0, "Automatic (1280 x 720)" },
+    { 360, "640 x 360" },
+    { 540, "960 x 540" },
+    { 720, "1280 x 720" },
+};
+
+static const std::unordered_map<int32_t, const char*> dockedResolutionMap = {
+    { 0, "Automatic (1920 x 1080)" },
+    { 540, "960 x 540" },
+    { 720, "1280 x 720" },
+    { 900, "1600 x 900" },
+    { 1080, "1920 x 1080" },
+};
+
+static void ApplySwitchOutputResolution(bool docked, int32_t selectedHeight) {
+    const int32_t height = selectedHeight == 0 ? (docked ? 1080 : 720) : selectedHeight;
+    const int32_t width = height * 16 / 9;
+    Ship::Context::GetRawInstance()->GetWindow()->SetCurrentDimensions(width, height);
+    Ship::Context::GetRawInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+}
+
+static void DrawSwitchResolutionSelector(WidgetInfo&) {
+    const bool docked = appletGetOperationMode() == AppletOperationMode_Console;
+    const char* cvar = docked ? CVAR_SETTING("SwitchOutputResolution.Docked")
+                              : CVAR_SETTING("SwitchOutputResolution.Handheld");
+    const auto& resolutions = docked ? dockedResolutionMap : handheldResolutionMap;
+    const bool changed = UIWidgets::CVarCombobox(
+        "Output Resolution", cvar, resolutions,
+        ComboboxOptions()
+            .DefaultIndex(0)
+            .Color(THEME_COLOR)
+            .Tooltip("Sets the display output resolution. Available choices are limited to the current handheld "
+                     "or docked mode.")
+    );
+
+    static int32_t previousMode = -1;
+    const int32_t currentMode = docked ? 1 : 0;
+    if (changed || currentMode != previousMode) {
+        ApplySwitchOutputResolution(docked, CVarGetInteger(cvar, 0));
+        previousMode = currentMode;
+    }
+    ImGui::TextDisabled("Current mode: %s", docked ? "Docked" : "Handheld");
+}
+#endif
 
 static const std::unordered_map<int32_t, const char*> notificationPosition = {
     { 0, "Top Left" }, { 1, "Top Right" }, { 2, "Bottom Left" }, { 3, "Bottom Right" }, { 4, "Hidden" },
@@ -288,36 +338,6 @@ void PaperboatMenu::AddMenuSettings() {
         .RaceDisable(false)
         .Callback([](WidgetInfo& info) { Ship::Context::GetRawInstance()->GetWindow()->ToggleFullscreen(); })
         .Options(ButtonOptions().Tooltip("Toggles Fullscreen On/Off."));
-    AddWidget(path, "Internal Resolution", WIDGET_CVAR_SLIDER_FLOAT)
-        .CVar(CVAR_INTERNAL_RESOLUTION)
-        .RaceDisable(false)
-        .Callback([](WidgetInfo& info) {
-            Ship::Context::GetRawInstance()->GetWindow()->SetResolutionMultiplier(
-                CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1)
-            );
-        })
-        .PreFunc([](WidgetInfo& info) {
-            if (mPaperboatMenu->disabledMap.at(DISABLE_FOR_ADVANCED_RESOLUTION_ON).active
-                && mPaperboatMenu->disabledMap.at(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON).active)
-            {
-                info.activeDisables.push_back(DISABLE_FOR_ADVANCED_RESOLUTION_ON);
-                info.activeDisables.push_back(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON);
-            } else if (mPaperboatMenu->disabledMap.at(DISABLE_FOR_LOW_RES_MODE_ON).active) {
-                info.activeDisables.push_back(DISABLE_FOR_LOW_RES_MODE_ON);
-            }
-        })
-        .Options(
-            FloatSliderOptions()
-                .Tooltip(
-                    "Multiplies your output resolution by the value "
-                    "inputted, as a more intensive but effective "
-                    "form of anti-aliasing."
-                )
-                .ShowButtons(false)
-                .IsPercentage()
-                .Min(0.5f)
-                .Max(2.0f)
-        );
 #ifndef __WIIU__
     AddWidget(path, "Anti-aliasing (MSAA)", WIDGET_CVAR_SLIDER_INT)
         .CVar(CVAR_MSAA_VALUE)
@@ -408,6 +428,39 @@ void PaperboatMenu::AddMenuSettings() {
 
     path.column = SECTION_COLUMN_2;
     AddWidget(path, "Advanced Graphics Options", WIDGET_SEPARATOR_TEXT);
+#ifdef __SWITCH__
+    AddWidget(path, "Switch Output Resolution", WIDGET_CUSTOM)
+        .RaceDisable(false)
+        .CustomFunction(DrawSwitchResolutionSelector);
+#endif
+    AddWidget(path, "Internal Resolution", WIDGET_CVAR_SLIDER_FLOAT)
+        .CVar(CVAR_INTERNAL_RESOLUTION)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo& info) {
+            Ship::Context::GetRawInstance()->GetWindow()->SetResolutionMultiplier(
+                CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1)
+            );
+        })
+        .PreFunc([](WidgetInfo& info) {
+            if (mPaperboatMenu->disabledMap.at(DISABLE_FOR_ADVANCED_RESOLUTION_ON).active
+                && mPaperboatMenu->disabledMap.at(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON).active)
+            {
+                info.activeDisables.push_back(DISABLE_FOR_ADVANCED_RESOLUTION_ON);
+                info.activeDisables.push_back(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON);
+            } else if (mPaperboatMenu->disabledMap.at(DISABLE_FOR_LOW_RES_MODE_ON).active) {
+                info.activeDisables.push_back(DISABLE_FOR_LOW_RES_MODE_ON);
+            }
+        })
+        .Options(
+            FloatSliderOptions()
+                .Tooltip(
+                    "Scales the internal rendering resolution independently from the Switch output resolution."
+                )
+                .ShowButtons(false)
+                .IsPercentage()
+                .Min(0.5f)
+                .Max(2.0f)
+        );
 
     // Settings > Input Viewer
     path.sidebarName = "Input Viewer";

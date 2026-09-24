@@ -28,7 +28,6 @@ aarch64-none-elf-nm -C /paperboat/build-switch-nxvk/paperboat.elf > /tmp/paperbo
 grep -q 'Fast::GfxRenderingAPIVK::VulkanInit' /tmp/paperboat-symbols.txt
 grep -q 'Fast::GfxRenderingAPIOGL::Init' /tmp/paperboat-symbols.txt
 package=/paperboat/build-switch-nxvk/switch/paperboat
-mv "$package/paperboat.nro" "$package/paperboat-nxvk.nro"
 documentation=/paperboat/build-switch-nxvk/documentation
 mkdir -p "$documentation/licenses/nxvk"
 cp /paperboat/docs/SWITCH-NXVK.md "$documentation/README-NXVK.md"

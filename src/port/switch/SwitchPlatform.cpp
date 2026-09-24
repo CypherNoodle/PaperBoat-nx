@@ -37,14 +37,6 @@ bool HasFile(const char* path) {
 }
 }
 
-void SwitchPlatform::Trace(const char* message) {
-    // Independent of spdlog and closed on every checkpoint, including early startup.
-    if (FILE* log = std::fopen("sdmc:/switch/paperboat/switch-startup.log", "a")) {
-        std::fprintf(log, "%s\n", message);
-        std::fclose(log);
-    }
-}
-
 bool SwitchPlatform::Prepare() {
 #ifdef PAPERBOAT_NXVK_ZINK
     // The custom SDL build also contains generic backends. Pin the native
@@ -53,11 +45,8 @@ bool SwitchPlatform::Prepare() {
     setenv("SDL_VIDEODRIVER", "Switch", 1);
     setenv("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", "1", 1);
     setenv("GALLIUM_DRIVER", "zink", 1);
-    Trace("=== NXVK / Zink experimental build ===");
 #endif
-    Trace("=== PaperBoat startup: OpenGL core diagnostics ===");
     const auto type = appletGetAppletType();
-    Trace(type == AppletType_Application ? "Applet type: application" : "Applet type: other");
     if (type != AppletType_Application && type != AppletType_SystemApplication) {
         ShowError("Launch hbmenu in application mode (hold R while starting a game).\n"
                   "Album/applet mode does not provide enough memory.");
@@ -72,7 +61,6 @@ bool SwitchPlatform::Prepare() {
                   "Generate pm64.o2r using the matching desktop version and your own ROM.");
         return false;
     }
-    Trace("SD directory and archives found");
     return true;
 }
 
