@@ -1,6 +1,8 @@
 #include "mac_01.h"
 #include "model.h"
 #include "nu/nusys.h"
+#include "port/Engine.h"
+#include "port/patches/Patches.h"
 
 s32 N(CrystallBallRenderCounter) = 0;
 s32 N(UnusedCrystalBallField) = 0;
@@ -36,6 +38,8 @@ void N(gfx_build_inside_crystal_ball)(void) {
     f32 f20, f22;
     f32 f0, f2;
     s32 ulx, uly;
+    s32 visWidth;
+    u16* mirror;
     Camera* camera = &gCameras[gCurrentCameraID];
     Model* model = get_model_from_list_index(get_model_list_index_from_tree_index(MODEL_tama));
 
@@ -84,7 +88,19 @@ void N(gfx_build_inside_crystal_ball)(void) {
     f20 += camera->viewportStartX;
     f22 += camera->viewportStartY;
 
-    // TODO: Framebuffer readback
+    // The N64 effect samples the current color framebuffer directly. On the
+    // port, nuGfxCfb_ptr is only a sentinel for the main framebuffer, so using
+    // it as CPU texture data makes Fast3D dereference a small invalid address.
+    // Capture the scene into the registered GPU mirror instead.
+    mirror = port_getSceneMirrorSentinel();
+    visWidth = OTRGetRectDimensionFromRightEdge(0) - OTRGetRectDimensionFromLeftEdge(0);
+    if (visWidth < 1) {
+        visWidth = SCREEN_WIDTH;
+    }
+
+    gDPPipeSync(gMainGfxPos++);
+    port_emitSceneMirrorCapture(&gMainGfxPos);
+
     gDPSetCycleType(gMainGfxPos++, G_CYC_1CYCLE);
     gDPSetRenderMode(gMainGfxPos++, Z_CMP | CVG_DST_CLAMP | ZMODE_OPA | FORCE_BL | G_RM_PASS, Z_CMP | CVG_DST_CLAMP | ZMODE_OPA | FORCE_BL | GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1));
     gDPSetColorImage(gMainGfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical(nuGfxZBuffer));
@@ -108,12 +124,17 @@ void N(gfx_build_inside_crystal_ball)(void) {
     ulx = f20 / 32.0f * 32.0f - 8.0f;
     uly = f22 / 32.0f * 32.0f - 8.0f;
     if (ulx >= 0 && uly >= 0 && ulx + 40 < SCREEN_WIDTH && uly + 40 < SCREEN_HEIGHT) {
-        gDPLoadTextureTile(gMainGfxPos++, osVirtualToPhysical(nuGfxCfb_ptr), G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                           SCREEN_WIDTH, SCREEN_HEIGHT, ulx, uly, ulx + 31, uly + 31, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+        // Registered framebuffer textures must describe the complete image.
+        // Preserve the original sub-tile sampling by moving its local S/T
+        // coordinates into absolute screen space.
+        gDPLoadTextureTile(gMainGfxPos++, osVirtualToPhysical(mirror), G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                           SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 0,
+                           G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPSetCombineMode(gMainGfxPos++, PM_CC_0E, PM_CC_0E);
         gSPScisTextureRectangle(gMainGfxPos++, (ulx - 8) * 4, (uly - 8) * 4, (ulx + 24) * 4, (uly + 24) * 4,
-                                G_TX_RENDERTILE, (ulx & 0x1F) << 5, (uly & 0x1F) << 5, 700, 700);
+                                G_TX_RENDERTILE, port_fbMirrorS(ulx + (ulx & 0x1F)),
+                                (uly + (uly & 0x1F)) << 5, 700 * SCREEN_WIDTH / visWidth, 700);
     }
 
     gDPPipeSync(gMainGfxPos++);
