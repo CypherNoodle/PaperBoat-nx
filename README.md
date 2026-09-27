@@ -1,5 +1,20 @@
 # PaperBoat
-*Port of Paper Mario 64 for Nintendo Switch*
+*Harbour Masters port of Paper Mario 64*
+
+*Nintendo Switch port maintained in this branch*
+
+Developers:
+* Bass3l
+* JeodC
+* KiritoDv
+* Caladius
+
+## Website & Discord
+Official Website: https://www.harbourmasters.org/
+
+Official Discord: https://discord.gg/harbourmasters
+
+*If you're having any trouble after reading through this `README`, feel free ask for help in the PaperBoat text channels. Please keep in mind that we do not condone piracy.*
 
 # Quick Start
 
@@ -65,3 +80,7 @@ This wouldn't have been possible without your amazing work:
 
 * [The Paper Mario decomp team](https://github.com/pmret/papermario)
 * [The Paper Mario DX team](https://github.com/bates64/papermario-dx)
+
+# AI Disclosure
+
+PaperBoat accepts pull requests that use AI, within policy guidelines. For more information please see the HarbourMasters [AI Policy](https://github.com/HarbourMasters/code-of-conduct/blob/main/AI_POLICY.md).
