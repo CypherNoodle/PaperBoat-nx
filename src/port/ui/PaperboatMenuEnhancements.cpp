@@ -53,6 +53,10 @@ void PaperboatMenu::AddMenuEnhancements() {
             )
         );
 
+    AddWidget(path, "2x Star Points and Coins", WIDGET_CVAR_CHECKBOX)
+        .CVar(CVAR_CHEAT("DoubleRewards"))
+        .Options(CheckboxOptions().Tooltip("Defeated enemies give twice the Star Points and coins."));
+
     // Enhancements > Gameplay
     path = { "Enhancements", "Gameplay", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", path.sidebarName, 2);
