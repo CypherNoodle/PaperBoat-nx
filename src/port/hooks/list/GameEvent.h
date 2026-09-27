@@ -53,6 +53,11 @@ DEFINE_EVENT(OnActionCommandDifficulty,
     int32_t* difficultyLevel;
 );
 
+DEFINE_EVENT(OnPowerBounceChance,
+    int32_t* hitChance;
+    int32_t targetChance;
+);
+
 // World
 DEFINE_EVENT(OnMapLoad,
     const char* mapName;
