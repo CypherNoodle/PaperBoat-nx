@@ -1,7 +1,6 @@
 #include "sprite.h"
 #include "sprite/player.h"
 #include "port/Engine.h"
-#include "port/hooks/Events.h"
 
 // perhaps extend to 0x200 and change animID fields for dx from SSSSPPAA --> SSSPPAAA
 #define MAX_SPRITE_ID 0xFF
@@ -375,9 +374,6 @@ void spr_appendGfx_component(
         }
     }
 
-    u32 imgfxFlags = IMGFX_FLAG_80000;
-    CALL_EVENT(SpriteComponentPreDraw, &imgfxFlags);
-
     width = cache->width;
     height = cache->height;
     quadIndex = cache->quadCacheIndex;
@@ -397,7 +393,7 @@ void spr_appendGfx_component(
         ifxImg.xOffset = -(width / 2);
         ifxImg.yOffset = height;
         ifxImg.alpha = opacity;
-        if (imgfx_appendGfx_component((u8) CurSpriteImgFX, &ifxImg, imgfxFlags, mtxTransform) == 1) {
+        if (imgfx_appendGfx_component((u8) CurSpriteImgFX, &ifxImg, IMGFX_FLAG_80000, mtxTransform) == 1) {
             CurSpriteImgFX &= ~SPR_IMGFX_FLAG_ALL;
         }
     }
