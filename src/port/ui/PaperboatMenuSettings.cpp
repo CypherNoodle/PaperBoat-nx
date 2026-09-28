@@ -464,13 +464,6 @@ void PaperboatMenu::AddMenuSettings() {
         .RaceDisable(false)
         .Options(ComboboxOptions().Tooltip("Sets the applied Texture Filtering.").ComboMap(textureFilteringMap));
 
-    AddWidget(path, "Dialogue Text Filter", WIDGET_CVAR_COMBOBOX)
-        .CVar(CVAR_DIALOGUE_TEXT_FILTER)
-        .RaceDisable(false)
-        .Options(
-            ComboboxOptions().Tooltip("Sets texture filtering for dialogue text.").ComboMap(texture2DFilteringMap)
-        );
-
     path.column = SECTION_COLUMN_2;
     AddWidget(path, "Advanced Graphics Options", WIDGET_SEPARATOR_TEXT);
     // Settings > Input Viewer
