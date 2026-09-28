@@ -272,11 +272,7 @@ void GameEngine::FinishInit() {
     spdlog::flush_on(spdlog::level::warn);
 #endif
 
-#ifdef __SWITCH__
-    Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 3200 });
-#else
     Ship::Context::GetRawInstance()->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 1680 });
-#endif
 
     // Opt in to texture path memoization.
     if (gsFast3dWindow != nullptr) {
