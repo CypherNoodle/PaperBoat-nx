@@ -344,6 +344,14 @@ void PaperboatMenu::AddMenuSettings() {
     path.column = SECTION_COLUMN_1;
     AddSidebarEntry("Settings", "Graphics", 2);
     AddWidget(path, "Graphics Options", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Show FPS", WIDGET_CVAR_CHECKBOX)
+        .CVar(CVAR_SETTING("ShowFPS"))
+        .RaceDisable(false)
+        .Options(
+            CheckboxOptions().Tooltip(
+                "Shows measured presentation FPS and average frame time, including interpolated frames."
+            )
+        );
     AddWidget(path, "Toggle Fullscreen", WIDGET_BUTTON)
         .RaceDisable(false)
         .Callback([](WidgetInfo& info) { Ship::Context::GetRawInstance()->GetWindow()->ToggleFullscreen(); })
